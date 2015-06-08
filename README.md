@@ -4,7 +4,9 @@ Tools using GoodData Ruby SDK
 
 ## Prerequisites
 
-1. Install GoodData Ruby SDK by executing "gem install gooddata" in your command line.  
+1. Install [GoodData Ruby SDK](https://github.com/gooddata/gooddata-ruby) by executing "gem install gooddata" in your command line.  
+
+## Use Cases
 
 ##1-prepare-release.rb 
 
@@ -17,7 +19,7 @@ Helps you to evaluate updated objects since the last release date in your Master
 
 ##2-release-changes.rb 
 
-This will export all dashboards, reports and metrics that has been updated since last release date from the Master and Import them to all child projects specified in the project.csv file (see the -f parameter below)
+This exports all dashboards, reports and metrics that has been updated since last release date from the Master and Import them to all child projects specified in the project.csv file (see the -f parameter below)
 
 ### Parameters
 
