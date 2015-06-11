@@ -15,10 +15,10 @@ OptionParser.new do |opts|
   
 end.parse!
 
-username = ''
-password = ''
-#username = options[:username]
-#password = options[:password]
+#username = ''
+#password = ''
+username = options[:username]
+password = options[:password]
 
 ignore_tags = ['qa','poc']
 last_release_date = Date.parse(options[:date],'%e %b %Y')
