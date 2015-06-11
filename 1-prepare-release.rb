@@ -15,10 +15,10 @@ OptionParser.new do |opts|
   
 end.parse!
 
-#username = ''
-#password = ''
-username = options[:username]
-password = options[:password]
+username = ''
+password = ''
+#username = options[:username]
+#password = options[:password]
 
 ignore_tags = ['qa','poc']
 last_release_date = Date.parse(options[:date],'%e %b %Y')
@@ -29,24 +29,32 @@ puts 'Connecting to GoodData...'
 puts 'Listing objects updated after ' + last_release_date.to_s + '.'
 
 GoodData.with_connection(username, password) do |client|
+    
+    #GoodData.logging_on
+    #GoodData.logger.level = Logger::DEBUG
+    
     GoodData.with_project(master) do |project|
 
-      reports_to_migrate = project.reports.select { |report| report.updated > last_release_date && !(ignore_tags.any? { |tag| report.tags.include?(tag)}) }
+reports_to_migrate = project.reports.select { |report| report.updated > last_release_date && !(ignore_tags.any? { |tag| report.tags.include?(tag)}) }
 
       puts 'Check reports to be released...'
 
       reports_to_migrate.each do |report|
 	    if !(report.locked?) then unlocked = ' | UNLOCKED!'  else unlocked = '' end
-        puts 'https://secure.gooddata.com' + report.uri + ' | ' + report.title + unlocked
+        if (report.summary == '') then missing_desc = ' | MISSING DESCRIPTION' else missing_desc = '' end
+        #  if (report.unlisted == 1) then unlisted = ' | UNLISTED!' else unlisted = '' end
+        puts 'https://secure.gooddata.com' + report.uri + ' | ' + report.title + unlocked + missing_desc
       end
       
-      dashboards_to_migrate = project.dashboards.select { |dashboard| dashboard.updated > last_release_date && !(ignore_tags.any? { |tag| dashboard.tags.include?(tag)})  }
+     dashboards_to_migrate = project.dashboards.select { |dashboard| dashboard.updated > last_release_date && !(ignore_tags.any? { |tag| dashboard.tags.include?(tag)})  }
 
-      puts 'Check dashboards to be released...'
+     puts 'Check dashboards to be released...'
 
       dashboards_to_migrate.each do |dashboard|
    	    if !(dashboard.locked?) then unlocked = ' | UNLOCKED!'  else unlocked = '' end
-        puts 'https://secure.gooddata.com' + dashboard.uri + ' | ' + dashboard.title + unlocked
+        if (dashboard.summary == '') then missing_desc = ' | MISSING DESCRIPTION' else missing_desc = '' end
+        # if (dashboard.unlisted == 1) then unlisted = ' | UNLISTED!' else unlisted = '' end
+        puts 'https://secure.gooddata.com' + dashboard.uri + ' | ' + dashboard.title + unlocked + missing_desc
 	  end
 	  
       metrics_to_migrate = project.metrics.select { |metric| metric.updated > last_release_date && !(ignore_tags.any? { |tag| metric.tags.include?(tag)})  }
@@ -55,7 +63,9 @@ GoodData.with_connection(username, password) do |client|
 
       metrics_to_migrate.each do |metric|
    	    if !(metric.locked?) then unlocked = ' | UNLOCKED!'  else unlocked = '' end
-        puts 'https://secure.gooddata.com' + metric.uri + ' | ' + metric.title + unlocked
+        if (metric.summary == '') then missing_desc = ' | MISSING DESCRIPTION' else missing_desc = '' end
+        #if (metric.unlisted == 1) then unlisted = ' | UNLISTED!' else unlisted = '' end
+        puts 'https://secure.gooddata.com' + metric.uri + ' | ' + metric.title + unlocked + missing_desc
 	  end
 
     end

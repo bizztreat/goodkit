@@ -30,36 +30,28 @@ puts 'Objects updated after ' + last_release_date.to_s + ' will be updated.'
 
 csv = CSV.read(options[:file], :headers => true)
 target_projects = csv['project-id']
+objects_to_migrate = Array.new
 
 GoodData.with_connection(username, password) do |client|
     GoodData.with_project(master) do |project|
 
       reports_to_migrate = project.reports.select { |report| report.updated > last_release_date && !(ignore_tags.any? { |tag| report.tags.include?(tag)}) }
 
-
-        puts 'Exporting following reports from master...'
+      puts 'Exporting following reports from master...'
 
       reports_to_migrate.each do |report|
 
         puts report.title
-        
-       		target_projects.each do |target|
-	    		project.partial_md_export(report, :project => target)
-	    		puts 'Project ' + target + 'has been updated with report ' + report.title
-			end
+        objects_to_migrate.push(report)
+
       end
       
 	  dashboards_to_migrate = project.dashboards.select { |dashboard| dashboard.updated > last_release_date && !(ignore_tags.any? { |tag| dashboard.tags.include?(tag)})  }
       puts 'Exporting following dashboards from master...'
 
       dashboards_to_migrate.each do |dashboard|
-        puts dashboard.title 
-	    
-		    target_projects.each do |target|
-	    		project.partial_md_export(dashboard, :project => target)
-	    		puts 'Project ' + target + 'has been updated with dashboard ' + dashboard.title
-
-			end
+        puts dashboard.title
+        objects_to_migrate.push(dashboard)
 	    
       end
       
@@ -69,17 +61,20 @@ GoodData.with_connection(username, password) do |client|
 
       metrics_to_migrate.each do |metric|
         puts metric.title
+        objects_to_migrate.push(metric)
         
-        	 target_projects.each do |target|
-	    		project.partial_md_export(metric, :project => target)
-	    		puts 'Project ' + target + 'has been updated with metric ' + metric.title
-			end
-	  end
-
+      end
+      
+      puts 'Importing objects to destination...'
+      
+      target_projects.each do |target|
+          project.partial_md_export(objects_to_migrate, :project => target)
+          puts 'Project ' + target + 'has been updated.'
+      end
 
     end
 end
 
 puts 'All objects has been released'
-puts 'Disconnecting ...'
+puts 'Disconnecting...'
 GoodData.disconnect
