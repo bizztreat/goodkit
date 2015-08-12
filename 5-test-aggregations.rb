@@ -39,10 +39,9 @@ GoodData.with_connection(username, password) do |client|
                     metric = fact.create_metric(:title => "VALIDATION - #{aggr} of [#{fact.identifier}]", :type => aggr)
                     res = metric.execute
                     $start_results[metric.title] = res
-                    puts res
                 end
             end
-            puts $start_results
+            #    puts $start_results
     end
     
     GoodData.with_project(devel) do |project|
@@ -54,11 +53,10 @@ GoodData.with_connection(username, password) do |client|
                 metric = fact.create_metric(:title => "VALIDATION - #{aggr} of [#{fact.identifier}]", :type => aggr)
                 res = metric.execute
                 $devel_fact_results[metric.title] = res
-                puts res
             end
         end
         
-        puts $devel_fact_results
+        #        puts $devel_fact_results
     end
     
     $start_results.each do |key, value| 
