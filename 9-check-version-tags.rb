@@ -20,54 +20,44 @@ username = options[:username]
 password = options[:password]
 
 start = options[:start]
-devel = options[:devel]
+#devel = options[:devel]
 #start = 'x1c6gsmxhr84usnhww03s6ecx3625279'
 #devel = 't3m4hv0v5vrysctjqax88t2q2346t6vd'
 
 #testing master project ID = y672cuxov5x6swn64tlaz5jwcrez0wid
 
 puts 'Connecting to GoodData...'
-puts 'Checking for missing reports and metrics.'
+puts 'Checking missing version tag'
 
 GoodData.with_connection(username, password) do |client|
     
-    start_reports = []
-    devel_reports = []
-    start_metrics = []
-    devel_metrics = []
-    
-    GoodData.with_project(devel) do |project|
-        
-        project.reports.each do |report|
-                devel_reports.push(report.title)
-        end
-        
-        project.metrics.each do |metric|
-                devel_metrics.push(metric.title)
-        end
-        
-    end
-    
     GoodData.with_project(start) do |project|
         
+        puts "Printing reports without version tag..."
+        
         project.reports.each do |report|
-            start_reports.push(report.title)
+            
+                tags = report.tags.gsub(/\s+/m, ' ').strip.split(" ")
+                if
+                !tags.any? { |tag| /^\s*[+-]?((\d+_?)*\d+(\.(\d+_?)*\d+)?|\.(\d+_?)*\d+)(\s*|([eE][+-]?(\d+_?)*\d+)\s*)$/.match(tag) }
+                then puts 'https://secure.gooddata.com' + report.uri
+                end
+
         end
         
+        puts "Printing metrics without version tag..."
+        
         project.metrics.each do |metric|
-            start_metrics.push(metric.title)
+        
+            tags = metric.tags.gsub(/\s+/m, ' ').strip.split(" ")
+            if
+                !tags.any? { |tag| /^\s*[+-]?((\d+_?)*\d+(\.(\d+_?)*\d+)?|\.(\d+_?)*\d+)(\s*|([eE][+-]?(\d+_?)*\d+)\s*)$/.match(tag) }
+                then puts 'https://secure.gooddata.com' + metric.uri
+            end
+        
         end
         
     end
-    
-    puts 'Metrics missing in Start Project:'
-    metrics_diff = devel_metrics - start_metrics
-    if metrics_diff.empty? then puts 'NOTHING IS MISSING' else puts metrics_diff end
-    
-    puts 'Reports missing in Start Project:'
-    
-    reports_diff = devel_reports - start_reports
-    if reports_diff.empty? then puts 'NOTHING IS MISSING' else puts reports_diff end
     
 end
 
