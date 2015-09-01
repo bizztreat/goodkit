@@ -19,24 +19,28 @@ end.parse!
 username = options[:username]
 password = options[:password]
 
-tag = 'qa'
-
-start = options[:start]
-devel = options[:devel]
-#start = 'x1c6gsmxhr84usnhww03s6ecx3625279'
-#devel = 't3m4hv0v5vrysctjqax88t2q2346t6vd'
-
-#testing master project ID = y672cuxov5x6swn64tlaz5jwcrez0wid
+# change the tags to check here
+tag = ['qa','test']
 
 puts 'Connecting to GoodData...'
 puts 'Testing Report results between Start and Devel projects.'
 
 GoodData.with_connection(username, password) do |client|
     
+    
+       start = client.projects(options[:start])
+       devel = client.projects(options[:devel])
+       #start = client.projects('x1c6gsmxhr84usnhww03s6ecx3625279')
+       #devel = client.projects('t3m4hv0v5vrysctjqax88t2q2346t6vd')
+    
        # We assume that reports have unique name inside a project
-       orig_reports = GoodData::Report.find_by_tag(tag, client: client, project: devel).sort_by(&:title)
-       new_reports = GoodData::Report.find_by_tag(tag, client: client, project: start).sort_by(&:title)
+
+       tag.each do |tag|
        
+       orig_reports = devel.reports.select {|r| r.tag_set.include?(tag)}.sort_by(&:title)
+       
+       new_reports = start.reports.select {|r| r.tag_set.include?(tag)}.sort_by(&:title)
+
        results = orig_reports.zip(new_reports).pmap do |reports|
            # compute both reports and add the report at the end for being able to print a report later
            reports.map(&:execute) + [reports.last]
@@ -45,6 +49,8 @@ GoodData.with_connection(username, password) do |client|
        results.map do |res|
            orig_result, new_result, new_report = res
            puts "#{new_report.title}, #{orig_result == new_result}"
+       end
+       
        end
 
 end
