@@ -60,6 +60,12 @@ GoodData.with_connection(username, password) do |client|
             
             
             puts '--- --- --- --- '
+            puts 'Metrics that are PREVIEW but not in specific folder:'
+            folders = met.content["folders"]
+            obj = GoodData::get(folders[0])
+            
+            #puts obj['folder']['meta']['title']
+            if obj['folder']['meta']['title'].include? "ZOOM Preview" then else puts "https://secure.gooddata.com#{met.meta['uri']}" end
           
     end
     
