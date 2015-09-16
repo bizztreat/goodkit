@@ -34,19 +34,16 @@ GoodData.with_connection(username, password) do |client|
     
     # We assume that reports have unique name inside a project
     
+    puts '--- --- --- --- '
+    puts 'Reports that contains PREVIEW metrics and are not tagged PREVIEW:'
+    
         metrics = devel.metrics.select {|m| m.tag_set.include?(tag)}.sort_by(&:title)
         
-        puts '--- --- --- --- '
-        puts 'Reports that contains PREVIEW metrics and are not tagged PREVIEW:'
-        
         metrics.each do |met|
-
-
-            reports = met.usedby
             
-            #puts reports
-            puts met.title + ' (https://secure.gooddata.com' + met.uri + ')'
-            puts "- Used in following reports:"
+            reports = met.usedby
+        
+        #puts 'Metric: ' + met.title + ' (https://secure.gooddata.com' + met.uri + ')'
             
             reports.select  {|report| report["category"] == 'report'}.each { |r|
                     # get only report objects and extract tags
@@ -58,19 +55,24 @@ GoodData.with_connection(username, password) do |client|
                         puts "-- https://secure.gooddata.com#{obj['report']['meta']['uri']}"
                     end
                 }
-            
-            
-            puts '--- --- --- --- '
-            puts 'Metrics that are PREVIEW but not in specific folder:'
-            folder = met.content["folders"]
+        end
         
-            if folder.nil? then
-                                puts "No folders"
-                            else
-                                obj = GoodData::get(folder[0])
-                                #puts obj['folder']['meta']['title']
-                                if !obj['folder']['meta']['title'].include? "ZOOM Preview" then puts "https://secure.gooddata.com#{met.uri}" end
-            end
+        puts '--- --- --- --- '
+        puts 'Metrics that are PREVIEW but not in specific folder:'
+        
+        
+        metrics.each do |met|
+        
+        folder = met.content["folders"]
+        
+        if folder.nil? then
+                        puts 'Metric: ' + met.title + ' (https://secure.gooddata.com' + met.uri + ')'
+                       else
+                        obj = GoodData::get(folder[0])
+                        #puts obj['folder']['meta']['title']
+                            if !obj['folder']['meta']['title'].include? "ZOOM Preview" then puts 'Metric: ' + met.title + ' (https://secure.gooddata.com' + met.uri + ')' end
+        end
+        
         end
         
         reports = devel.reports.select {|m| m.tag_set.include?(tag)}.sort_by(&:title)
@@ -80,34 +82,43 @@ GoodData.with_connection(username, password) do |client|
 
         reports.each do |rep|
             
-            #puts '--- --- --- --- '
+
             folders = rep.content["domains"]
-            obj = GoodData::get(folders[0])
-            
-            # puts obj['domain']['meta']['title']
-            if !obj['domain']['meta']['title'].include? "ZOOM Preview" then puts "https://secure.gooddata.com#{rep.uri}" end
+        
+            if folders.nil? then
+                puts 'Report: ' + rep.title + ' (https://secure.gooddata.com' + rep.uri + ')'
+            else
+                    obj = GoodData::get(folders[0])
+                    # puts obj['domain']['meta']['title']
+                    if !obj['domain']['meta']['title'].include? "ZOOM Preview" then puts puts 'Report: ' + rep.title + ' (https://secure.gooddata.com' + rep.uri + ')'
+                    end
+            end
         end
-            
-            # using_reports = rep.usedby
-            
-            # puts '--- --- --- --- '
-            #puts 'Reports that are tagged preview and are on not PREVIEW dashboards:'
-            #puts reports
-            
-            #using_reports.select  {|report| report["category"] == 'projectDashboard'}.each { |r|
-                # get only report objects and extract tags
-                #   obj = GoodData::get(r["link"])
-                
-                # check whether reports include preview tag
-                # puts obj['projectDashboard']['meta']['title']
-                
-                # if !obj['projectDashboard']['meta']['tags'].include? "preview" then
-                #   puts "https://secure.gooddata.com#{r['report']['meta']['uri']}"
-                #end
-                #}
-            
-            # end
+        
+        puts '--- --- --- --- '
+        puts 'Reports that are tagged preview and are on not Zoom PREVIEW dashboards:'
     
+        reports.each do |rep|
+        
+        using_reports = rep.usedby
+        
+        #puts reports
+        
+        using_reports.select  {|dash| dash["category"] == 'projectDashboard'}.each { |d|
+            # get only report objects and extract tags
+            obj = GoodData::get(d["link"])
+            
+            # check whether reports include preview tag
+            #puts obj['projectDashboard']['meta']['title']
+            
+            if !obj['projectDashboard']['meta']['title'].include? "Zoom preview" then
+                puts "https://secure.gooddata.com#{rep.uri}"
+            end
+            
+        }
+
+        end
+
 end
 
 puts 'Disconnecting...'
