@@ -59,7 +59,7 @@ GoodData.with_connection(username, password) do |client|
         #        puts $devel_fact_results
     end
     
-    $start_results.each do |key, value| 
+    $devel_fact_results.each do |key, value|
         if $start_results[key] != $devel_fact_results[key] then puts key.to_s + ' - NOT MATCH' else puts key.to_s + ' - CORRECT' end
     end
 end

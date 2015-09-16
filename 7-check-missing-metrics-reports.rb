@@ -60,13 +60,13 @@ GoodData.with_connection(username, password) do |client|
         
     end
     
-    puts 'Metrics missing in Start Project:'
-    metrics_diff = devel_metrics - start_metrics
+    puts 'Metrics missing in Devel Project:'
+    metrics_diff = start_metrics - devel_metrics
     if metrics_diff.empty? then puts 'NOTHING IS MISSING' else puts metrics_diff end
     
-    puts 'Reports missing in Start Project:'
+    puts 'Reports missing in Devel Project:'
     
-    reports_diff = devel_reports - start_reports
+    reports_diff = start_reports - devel_reports
     if reports_diff.empty? then puts 'NOTHING IS MISSING' else puts reports_diff end
     
 end

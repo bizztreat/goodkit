@@ -19,7 +19,7 @@ end.parse!
 username = options[:username]
 password = options[:password]
 
-start = options[:start]
+#start = options[:start]
 devel = options[:devel]
 #start = 'x1c6gsmxhr84usnhww03s6ecx3625279'
 #devel = 't3m4hv0v5vrysctjqax88t2q2346t6vd'
@@ -32,7 +32,7 @@ puts 'Printing out empty datasets:'
 
 GoodData.with_connection(username, password) do |client|
    
-   GoodData.with_project(start) do |project|
+   GoodData.with_project(devel) do |project|
            blueprint = project.blueprint
            blueprint.datasets.each do |dataset|
                count = dataset.count(project)

@@ -37,9 +37,9 @@ GoodData.with_connection(username, password) do |client|
 
        tag.each do |tag|
        
-       orig_reports = devel.reports.select {|r| r.tag_set.include?(tag)}.sort_by(&:title)
+       orig_reports = start.reports.select {|r| r.tag_set.include?(tag)}.sort_by(&:title)
        
-       new_reports = start.reports.select {|r| r.tag_set.include?(tag)}.sort_by(&:title)
+       new_reports = devel.reports.select {|r| r.tag_set.include?(tag)}.sort_by(&:title)
 
        results = orig_reports.zip(new_reports).pmap do |reports|
            # compute both reports and add the report at the end for being able to print a report later
