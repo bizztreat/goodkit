@@ -21,7 +21,7 @@ username = options[:username]
 password = options[:password]
 
 ignore_tags = ['qa','poc']
-last_release_date = Date.parse(options[:date],'%e %b %Y')
+last_release_date = Time.parse(options[:date],'%e %b %Y')
 master = options[:master]
 # testing master project ID = y672cuxov5x6swn64tlaz5jwcrez0wid
 

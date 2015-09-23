@@ -21,7 +21,7 @@ username = options[:username]
 password = options[:password]
 
 ignore_tags = ['qa','poc']
-last_release_date = Date.parse(options[:date],'%e %b %Y')
+last_release_date = Time.parse(options[:date],'%e %b %Y')
 master = options[:master]
 # testing master project ID = y672cuxov5x6swn64tlaz5jwcrez0wid
 
@@ -34,6 +34,19 @@ objects_to_migrate = Array.new
 
 GoodData.with_connection(username, password) do |client|
     GoodData.with_project(master) do |project|
+        
+      dashboards_to_migrate = project.dashboards.select { |dashboard| dashboard.updated > last_release_date && !(ignore_tags.any? { |tag| dashboard.tags.include?(tag)})  }
+      
+      puts 'Exporting following dashboards from master...'
+        
+      dashboards_to_migrate.each do |dashboard|
+      
+            puts dashboard.title
+            objects_to_migrate.push(dashboard)
+            
+      end
+      
+      puts 'Dashboards exported.'
 
       reports_to_migrate = project.reports.select { |report| report.updated > last_release_date && !(ignore_tags.any? { |tag| report.tags.include?(tag)}) }
 
@@ -46,14 +59,7 @@ GoodData.with_connection(username, password) do |client|
 
       end
       
-	  dashboards_to_migrate = project.dashboards.select { |dashboard| dashboard.updated > last_release_date && !(ignore_tags.any? { |tag| dashboard.tags.include?(tag)})  }
-      puts 'Exporting following dashboards from master...'
-
-      dashboards_to_migrate.each do |dashboard|
-        puts dashboard.title
-        objects_to_migrate.push(dashboard)
-	    
-      end
+      puts 'Reports exported.'
       
       metrics_to_migrate = project.metrics.select { |metric| metric.updated > last_release_date && !(ignore_tags.any? { |tag| metric.tags.include?(tag)})  }
 
@@ -65,6 +71,7 @@ GoodData.with_connection(username, password) do |client|
         
       end
       
+      puts 'Metrics exported.'
       puts 'Importing objects to destination...'
       
       target_projects.each do |target|

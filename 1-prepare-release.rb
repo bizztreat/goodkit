@@ -21,7 +21,7 @@ username = options[:username]
 password = options[:password]
 
 ignore_tags = ['qa','poc']
-last_release_date = Date.parse(options[:date],'%e %b %Y')
+last_release_date = Time.parse(options[:date],'%e %b %Y')
 master = options[:master]
 # testing master project ID = y672cuxov5x6swn64tlaz5jwcrez0wid
 
@@ -35,9 +35,9 @@ GoodData.with_connection(username, password) do |client|
     
     GoodData.with_project(master) do |project|
 
-     dashboards_to_migrate = project.dashboards.select { |dashboard| dashboard.updated > last_release_date && !(ignore_tags.any? { |tag| dashboard.tags.include?(tag)})  }
+    dashboards_to_migrate = project.dashboards.select { |dashboard| dashboard.updated > last_release_date && !(ignore_tags.any? { |tag| dashboard.tags.include?(tag)})  }
 
-     puts 'Check dashboards to be released...'
+    puts 'Check dashboards to be released...'
 
       dashboards_to_migrate.each do |dashboard|
    	    if !(dashboard.locked?) then unlocked = ' | UNLOCKED!'  else unlocked = '' end
