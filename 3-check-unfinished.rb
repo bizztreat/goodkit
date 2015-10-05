@@ -45,7 +45,7 @@ GoodData.with_connection(username, password) do |client|
         if (dashboard.meta['unlisted'] == 1) then unlisted = ' | UNLISTED!' else unlisted = '' end
         if (unlocked != '' || missing_desc != '' || unlisted != '')
             then
-        puts 'https://secure.gooddata.com' + dashboard.uri + ' | ' + dashboard.title + unlocked + missing_desc + unlisted
+        puts 'https://secure.gooddata.com#s=/gdc/projects/' + master + '|projectDashboardPage|' + dashboard.uri + ' | ' + dashboard.title + unlocked + missing_desc + unlisted
             end
 	  end
       
@@ -59,7 +59,7 @@ GoodData.with_connection(username, password) do |client|
           if (report.meta['unlisted'] == 1) then unlisted = ' | UNLISTED!' else unlisted = '' end
           if (unlocked != '' || missing_desc != '' || unlisted != '')
               then
-          puts 'https://secure.gooddata.com' + report.uri + ' | ' + report.title + unlocked + missing_desc + unlisted
+          puts 'https://secure.gooddata.com#s=/gdc/projects/' + master + '|analysisPage|head|' + report.uri + ' | ' + report.title + unlocked + missing_desc + unlisted
               end
           end
     
@@ -74,7 +74,7 @@ GoodData.with_connection(username, password) do |client|
         if (metric.meta['unlisted'] == 1) then unlisted = ' | UNLISTED!' else unlisted = '' end
         if (unlocked != '' || missing_desc != '' || unlisted != '')
             then
-        puts 'https://secure.gooddata.com' + metric.uri + ' | ' + metric.title + unlocked + missing_desc + unlisted
+        puts 'https://secure.gooddata.com#s=/gdc/projects/' + master + '|objectPage|' + metric.uri + ' | ' + metric.title + unlocked + missing_desc + unlisted
             end
     end
 

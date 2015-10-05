@@ -40,7 +40,7 @@ GoodData.with_connection(username, password) do |client|
                 tags = report.tags.gsub(/\s+/m, ' ').strip.split(" ")
                 if
                 !tags.any? { |tag| /^\s*[+-]?((\d+_?)*\d+(\.(\d+_?)*\d+)?|\.(\d+_?)*\d+)(\s*|([eE][+-]?(\d+_?)*\d+)\s*)$/.match(tag) }
-                then puts 'https://secure.gooddata.com' + report.uri
+                then puts 'https://secure.gooddata.com#s=/gdc/projects/' + devel + '|analysisPage|head|' + report.uri
                 end
 
         end
@@ -52,7 +52,7 @@ GoodData.with_connection(username, password) do |client|
             tags = metric.tags.gsub(/\s+/m, ' ').strip.split(" ")
             if
                 !tags.any? { |tag| /^\s*[+-]?((\d+_?)*\d+(\.(\d+_?)*\d+)?|\.(\d+_?)*\d+)(\s*|([eE][+-]?(\d+_?)*\d+)\s*)$/.match(tag) }
-                then puts 'https://secure.gooddata.com' + metric.uri
+                then puts 'https://secure.gooddata.com#s=/gdc/projects/' + devel + '|objectPage|' + metric.uri
             end
         
         end

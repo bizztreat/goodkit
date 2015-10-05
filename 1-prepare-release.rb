@@ -44,7 +44,8 @@ GoodData.with_connection(username, password) do |client|
         if (dashboard.summary == '') then missing_desc = ' | MISSING DESCRIPTION' else missing_desc = '' end
         if (dashboard.meta['unlisted'] == 1) then unlisted = ' | UNLISTED!' else unlisted = '' end
         
-        puts 'https://secure.gooddata.com' + dashboard.uri + ' | ' + dashboard.title + unlocked + missing_desc + unlisted
+        puts 'https://secure.gooddata.com#s=/gdc/projects/' + master + '|projectDashboardPage|' + dashboard.uri + ' | ' + dashboard.title + unlocked + missing_desc + unlisted
+        
 	  end
       
       reports_to_migrate = project.reports.select { |report| report.updated > last_release_date && !(ignore_tags.any? { |tag| report.tags.include?(tag)}) }
@@ -55,7 +56,7 @@ GoodData.with_connection(username, password) do |client|
           if !(report.locked?) then unlocked = ' | UNLOCKED!'  else unlocked = '' end
           if (report.summary == '') then missing_desc = ' | MISSING DESCRIPTION' else missing_desc = '' end
           if (report.meta['unlisted'] == 1) then unlisted = ' | UNLISTED!' else unlisted = '' end
-          puts 'https://secure.gooddata.com' + report.uri + ' | ' + report.title + unlocked + missing_desc + unlisted
+          puts 'https://secure.gooddata.com#s=/gdc/projects/' + master + '|analysisPage|head|' + report.uri + ' | ' + report.title + unlocked + missing_desc + unlisted
       end
     
     
@@ -67,7 +68,7 @@ GoodData.with_connection(username, password) do |client|
    	    if !(metric.locked?) then unlocked = ' | UNLOCKED!'  else unlocked = '' end
         if (metric.summary == '') then missing_desc = ' | MISSING DESCRIPTION' else missing_desc = '' end
         if (metric.meta['unlisted'] == 1) then unlisted = ' | UNLISTED!' else unlisted = '' end
-        puts 'https://secure.gooddata.com' + metric.uri + ' | ' + metric.title + unlocked + missing_desc + unlisted
+        puts 'https://secure.gooddata.com#s=/gdc/projects/' + master + '|objectPage|' + metric.uri + ' | ' + metric.title + unlocked + missing_desc + unlisted
 	  end
 
     end
