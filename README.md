@@ -1,12 +1,28 @@
 # GoodKit
 
-Tools using GoodData Ruby SDK
+Toolkit that helps you to automate specific tasks in GoodData. It covers two main areas:
+
+- Project Lifecycle Management (i.e. checking which reports has been added to the new version of the project or releasing those changes to the new version)  
+- Testing (specific checks that helps you to automate tasks like "all metrics have version tags" etc.)  
+
 
 ## Prerequisites
 
-1. Install [GoodData Ruby SDK](https://github.com/gooddata/gooddata-ruby) by executing "gem install gooddata" in your command line.  
+1. Ruby installed on your local environment 
+2. Install [GoodData Ruby SDK](https://github.com/gooddata/gooddata-ruby) by executing "gem install gooddata" in your command line.  
+3. Admin access to GoodData projects that you want to use with this tool
 
-## Use Cases
+## Example usage
+
+1. Open your terminal and run following command:
+
+ruby 1-prepare-release.rb -u 'username@company.com' -p 'password' -m 'my-master-project-id' -d '10 Apr 2015'
+
+2. See the output.
+
+# Use Cases
+
+## Lifecycle
 
 ##1-prepare-release.rb 
 
@@ -46,8 +62,6 @@ Helps you to evaluate updated objects since the last release date in your Master
 
 ##4-merge-models.rb 
 
-**Supported only with pre-release candidate Ruby SDK**
-
 This propagates LDM changes from master to all client Projects listed in the file specified as parameter. See available parameters below.
 
 ### Parameters
@@ -59,11 +73,75 @@ This propagates LDM changes from master to all client Projects listed in the fil
 -f 'PATH-TO-FILE-WITH-CUSTOMER-PROJECT' 
 
 
-## Note:
+### Note:
 
 You can select objects that won't be released by tagging them. You have to listed those tags in the script. See the _ignore_tags_ variable in both scripts ~ row #20.
 
-## Example usage
 
-ruby 1-prepare-release.rb -u 'username@company.com' -p 'password' -m 'my-master-project-id' -d '10 Apr 2015'
+## Testing
 
+Following scripts provide you with several tasks that make your life easier when testing new version of the Analytical app / Project.
+
+
+### Parameters  
+
+Following parameters can be used to run it successfully. `username`,`password` and `devel-project-id` is always mandatory, `start-project-id` is mandatory only for scripts that compare last version with the new version which is not always necessary. See available parameters:
+
+-d 'DEVEL-PROJECT-ID'  
+-s 'START-PROJECT-ID'  
+-u 'GD-USERNAME'  
+-p 'GD-PASSWORD'  
+
+###Use Cases
+
+###5-tests-aggregations.rb
+
+This computes all available aggregations of all facts in Devel project and compare results with Start project. You provide credentials to GD and project id for projects you want to compare.
+
+Returns list of aggregations and result: **CORRECT** / **NOT MATCHED**
+
+###6-test-report-results.rb
+
+Compares same reports accross Devel and Start project and gives you overview of the results.
+
+###7-check-missing-metrics-reports.rb
+
+Gives you list of missing metrics and reports comparing Devel and Start projects.
+
+###8-check-datasets-empty.rb
+
+Prints out datasets that are empty for given project.
+
+###9-check-version-tags.rb
+
+Checks if all metrics and reports have version tags. Prints out objects without the tag.
+
+###10-check-data-from-yesterday.rb
+
+- Not released yet  
+Check if there is a data from yesterday. Prints `OK` / `WRONG` status
+
+###11-preview-checks.rb
+
+This checks if all:
+
+- Preview Reports are in Preview folder and used only on Preview Dashboards   
+- Metrics tagged "preview" are used only in Preview Reports  
+
+Output: Links to objects that have wrong setup. 
+
+###12-check-metrics-def-change.rb
+
+Checks if there was some change in metric definition (not metadata but expression itself) accross Devel and Start project. Prints out list of metrics that have been changed.
+
+###13-check-reports-computable.rb
+
+Checks if all reports are computable and gives you links to non computable reports as output.
+
+###14-check-ga-code.rb
+
+Checks if all dashboards contains Google Analytics tracking code. Prints link to dashboard tabs that don't have the tracking code embedded.
+
+###15-check-not-used-objects.rb
+
+Prints out all attributes and facts that are not used in any metric or report. Prints out links to 
