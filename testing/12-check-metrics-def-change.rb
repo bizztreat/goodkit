@@ -14,27 +14,24 @@ OptionParser.new do |opts|
     
 end.parse!
 
-#username = ''
-#password = ''
+# get credentials and project ids
 username = options[:username]
 password = options[:password]
-
 start = options[:start]
 devel = options[:devel]
-#start = 'x1c6gsmxhr84usnhww03s6ecx3625279'
-#devel = 't3m4hv0v5vrysctjqax88t2q2346t6vd'
-
-#testing master project ID = y672cuxov5x6swn64tlaz5jwcrez0wid
 
 puts 'Connecting to GoodData...'
 puts 'Checking for updated metrics...'
 
+# connect to gooddata
 GoodData.with_connection(username, password) do |client|
     
+    # initiate two hashes to compare metrics and array for result
     $devel_metrics = Hash.new
     $start_metrics = Hash.new
     $updated_metrics = []
     
+    # connect to devel project and get metric expression
     GoodData.with_project(devel) do |project|
         
         project.metrics.each do |metric|
@@ -44,6 +41,7 @@ GoodData.with_connection(username, password) do |client|
         
     end
     
+    # connect to staart project and get metric expression
     GoodData.with_project(start) do |project|
         
         project.metrics.each do |metric|
@@ -53,7 +51,7 @@ GoodData.with_connection(username, password) do |client|
         
     end
 
-    #puts 'UPDATED METRICS'
+    # print updated metrics that have been changed
     $devel_metrics.each_key { |key|
       
       if $start_metrics[key] != $devel_metrics[key] then $updated_metrics.push(key.gsub("pid",devel)) end
@@ -63,6 +61,7 @@ GoodData.with_connection(username, password) do |client|
     
     project = client.projects(devel)
     
+    # print all affected dashboards and reports for changed metric
     $updated_metrics.each do |met|
         puts '------'
         metric = project.metrics(met)

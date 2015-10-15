@@ -14,27 +14,22 @@ OptionParser.new do |opts|
     
 end.parse!
 
-#username = ''
-#password = ''
+# collect parameters for connection and for project variable
 username = options[:username]
 password = options[:password]
-
-#start = options[:start]
 devel = options[:devel]
-#start = 'x1c6gsmxhr84usnhww03s6ecx3625279'
-#devel = 't3m4hv0v5vrysctjqax88t2q2346t6vd'
-
-#testing master project ID = y672cuxov5x6swn64tlaz5jwcrez0wid
 
 puts 'Connecting to GoodData...'
 puts 'Checking missing version tag'
 
 GoodData.with_connection(username, password) do |client|
-    
+
+    # connect to project
     GoodData.with_project(devel) do |project|
         
         puts "Printing reports without version tag..."
         
+        # check all reports for missing tags
         project.reports.each do |report|
             
                 tags = report.tags.gsub(/\s+/m, ' ').strip.split(" ")
@@ -47,6 +42,7 @@ GoodData.with_connection(username, password) do |client|
         
         puts "Printing metrics without version tag..."
         
+        # check all metrics for missing tags
         project.metrics.each do |metric|
         
             tags = metric.tags.gsub(/\s+/m, ' ').strip.split(" ")

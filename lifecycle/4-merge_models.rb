@@ -4,6 +4,7 @@ require 'csv'
 require 'optparse'
 require 'yaml'
 
+# set all options
 options = {}
 OptionParser.new do |opts|
     
@@ -15,22 +16,25 @@ OptionParser.new do |opts|
     
 end.parse!
 
+# assign credentials for script from user input and master project id
 username = options[:username]
 password = options[:password]
-
 master = options[:master]
-# testing master project ID = xm48hhfem089uzqhnthuo9nd8svwiiym
 
 puts 'Connecting to GoodData...'
 
+# read all project ids we will be pushing changes to
 csv = CSV.read(options[:file], :headers => true)
 target_projects = csv['project-id']
 
+# connect to GoodData
 GoodData.with_connection(username, password) do |client|
     GoodData.with_project(master) do |master|
         
+        # get master project blueprint (model)
         master_model = master.blueprint
         
+        # for each customer project merge models
         target_projects.each do |project|
             
             GoodData.with_project(project) do |child|

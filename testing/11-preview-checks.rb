@@ -4,6 +4,7 @@ require 'csv'
 require 'optparse'
 require 'yaml'
 
+# prepare all parameters options
 options = {}
 OptionParser.new do |opts|
     
@@ -14,8 +15,7 @@ OptionParser.new do |opts|
     
 end.parse!
 
-#username = ''
-#password = ''
+# get credentials from user parameters
 username = options[:username]
 password = options[:password]
 
@@ -26,31 +26,26 @@ puts 'Connecting to GoodData...'
 
 GoodData.with_connection(username, password) do |client|
     
-    
-    #start = client.projects(options[:start])
+    # get the devel project context
     devel = client.projects(options[:devel])
-    #devel = client.projects('x1c6gsmxhr84usnhww03s6ecx3625279')
-    #start = client.projects('t3m4hv0v5vrysctjqax88t2q2346t6vd')
     
-    # We assume that reports have unique name inside a project
     
     puts '--- --- --- --- '
     puts 'Reports that contains PREVIEW metrics and are not tagged PREVIEW:'
     
+        # get all metrics for given tag
         metrics = devel.metrics.select {|m| m.tag_set.include?(tag)}.sort_by(&:title)
         
+        # for each metric
         metrics.each do |met|
             
             reports = met.usedby
         
-        #puts 'Metric: ' + met.title + ' (https://secure.gooddata.com' + met.uri + ')'
-            
             reports.select  {|report| report["category"] == 'report'}.each { |r|
                     # get only report objects and extract tags
                     obj = GoodData::get(r["link"])
                     
                     # check whether reports include preview tag
-                    # puts obj['report']['meta']['title']
                     if !obj['report']['meta']['tags'].include? "preview" then
                         puts "-- https://secure.gooddata.com#{obj['report']['meta']['uri']}"
                     end
@@ -60,11 +55,13 @@ GoodData.with_connection(username, password) do |client|
         puts '--- --- --- --- '
         puts 'Metrics that are PREVIEW but not in specific folder:'
         
-        
+        # get all metrics
         metrics.each do |met|
         
+        # get folder part of the metric metadata
         folder = met.content["folders"]
         
+        # check for the correct folder or if folder is not set print the metric
         if folder.nil? then
                         puts 'Metric: ' + met.title + ' (https://secure.gooddata.com' + met.uri + ')'
                        else
@@ -75,16 +72,19 @@ GoodData.with_connection(username, password) do |client|
         
         end
         
+        # get all reports for given tag
         reports = devel.reports.select {|m| m.tag_set.include?(tag)}.sort_by(&:title)
 
         puts '--- --- --- --- '
         puts 'Reports that are PREVIEW but not in specific folder:'
 
+        # for each report
         reports.each do |rep|
             
-
+            # get foler/domain part of the metadata
             folders = rep.content["domains"]
         
+            # check if report is in preview folder/domain
             if folders.nil? then
                 puts 'Report: ' + rep.title + ' (https://secure.gooddata.com' + rep.uri + ')'
             else
@@ -98,19 +98,18 @@ GoodData.with_connection(username, password) do |client|
         puts '--- --- --- --- '
         puts 'Reports that are tagged preview and are on not Zoom PREVIEW dashboards:'
     
+    
         reports.each do |rep|
         
+        # get all objects that use report
         using_reports = rep.usedby
         
-        #puts reports
-        
+        # select only dashboards from objects that used report
         using_reports.select  {|dash| dash["category"] == 'projectDashboard'}.each { |d|
             # get only report objects and extract tags
             obj = GoodData::get(d["link"])
             
             # check whether reports include preview tag
-            #puts obj['projectDashboard']['meta']['title']
-            
             if !obj['projectDashboard']['meta']['title'].include? "Zoom preview" then
                 puts "https://secure.gooddata.com#{rep.uri}"
             end

@@ -4,6 +4,7 @@ require 'csv'
 require 'optparse'
 require 'yaml'
 
+# collect all parameters from user
 options = {}
 OptionParser.new do |opts|
     
@@ -14,24 +15,17 @@ OptionParser.new do |opts|
     
 end.parse!
 
-#username = ''
-#password = ''
+# get parameters from input for conection and for project id
 username = options[:username]
 password = options[:password]
-
-#start = options[:start]
 devel = options[:devel]
-#start = 'x1c6gsmxhr84usnhww03s6ecx3625279'
-#devel = 't3m4hv0v5vrysctjqax88t2q2346t6vd'
-#empty = 'iko3rc16lh5te1qe94v1ocl95t0lwez1'
-
-#testing master project ID = y672cuxov5x6swn64tlaz5jwcrez0wid
 
 puts 'Connecting to GoodData...'
 puts 'Printing out empty datasets:'
 
 GoodData.with_connection(username, password) do |client|
-   
+
+   # check if any datasets is empty -> print the dataset name
    GoodData.with_project(devel) do |project|
            blueprint = project.blueprint
            blueprint.datasets.each do |dataset|

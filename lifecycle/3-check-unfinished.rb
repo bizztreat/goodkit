@@ -4,6 +4,7 @@ require 'csv'
 require 'optparse'
 require 'yaml'
 
+# get all options for user input
 options = {}
 OptionParser.new do |opts|
 
@@ -15,23 +16,24 @@ OptionParser.new do |opts|
   
 end.parse!
 
-#username = ''
-#password = ''
+# assign credentials from user input
 username = options[:username]
 password = options[:password]
 
+# set ignore tags
 ignore_tags = ['qa','poc']
+
+# set date from which we will check unfinished objects
 last_release_date = Time.parse(options[:date],'%e %b %Y')
+
+# assign master project to variable
 master = options[:master]
-# testing master project ID = y672cuxov5x6swn64tlaz5jwcrez0wid
 
 puts 'Connecting to GoodData...'
 puts 'Listing objects updated after ' + last_release_date.to_s + '.'
 
+# connect to GoodData and check all objects for specific setup
 GoodData.with_connection(username, password) do |client|
-    
-    #GoodData.logging_on
-    #GoodData.logger.level = Logger::DEBUG
     
     GoodData.with_project(master) do |project|
 
@@ -39,6 +41,7 @@ GoodData.with_connection(username, password) do |client|
 
      puts 'Check unfinished dashboards...'
 
+      # print all dashboards with unfinished setup
       dashboards_to_migrate.each do |dashboard|
    	    if !(dashboard.locked?) then unlocked = ' | UNLOCKED!'  else unlocked = '' end
         if (dashboard.summary == '') then missing_desc = ' | MISSING DESCRIPTION' else missing_desc = '' end
@@ -53,6 +56,7 @@ GoodData.with_connection(username, password) do |client|
       
       puts 'Check unfinished reports...'
       
+      # print all reports with unfinished setup
       reports_to_migrate.each do |report|
           if !(report.locked?) then unlocked = ' | UNLOCKED!'  else unlocked = '' end
           if (report.summary == '') then missing_desc = ' | MISSING DESCRIPTION' else missing_desc = '' end
@@ -68,6 +72,7 @@ GoodData.with_connection(username, password) do |client|
 
 	  puts 'Check unfinished metrics...'
 
+      # print all metrics with unfinished setup
       metrics_to_migrate.each do |metric|
    	    if !(metric.locked?) then unlocked = ' | UNLOCKED!'  else unlocked = '' end
         if (metric.summary == '') then missing_desc = ' | MISSING DESCRIPTION' else missing_desc = '' end

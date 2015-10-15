@@ -4,6 +4,7 @@ require 'csv'
 require 'optparse'
 require 'yaml'
 
+# create parameters for user input
 options = {}
 OptionParser.new do |opts|
     
@@ -14,8 +15,7 @@ OptionParser.new do |opts|
     
 end.parse!
 
-#username = ''
-#password = ''
+# get credentials from user parameters
 username = options[:username]
 password = options[:password]
 
@@ -25,27 +25,29 @@ tag = ['qa','test']
 puts 'Connecting to GoodData...'
 puts 'Testing Metric results between Start and Devel projects.'
 
+# connect to gooddata project
 GoodData.with_connection(username, password) do |client|
     
     
        start = client.projects(options[:start])
        devel = client.projects(options[:devel])
-       #start = client.projects('ol6phugquhhn91o1ea5bwqeh9hgwwjsd')
-       #devel = client.projects('x1c6gsmxhr84usnhww03s6ecx3625279')
-    
-       # We assume that metrics have unique name inside a project
-
+       
+       # for each tag
        tag.each do |tag|
        
+       # get metric from start project
        orig_metrics = start.metrics.select {|r| r.tag_set.include?(tag)}.sort_by(&:uri)
        
+       # get metrics from devel project
        new_metrics = devel.metrics.select {|r| r.tag_set.include?(tag)}.sort_by(&:uri)
 
+       # compare results
        results = orig_metrics.zip(new_metrics).pmap do |metrics|
-           # compute both reports and add the report at the end for being able to print a report later
+           # compute both metrics and add the metrics at the end for being able to print a metric later
            metrics.map(&:execute) + [metrics.last]
        end
        
+       # print results for both metrics from start and devel
        results.map do |res|
            orig_result, new_result, new_metrics = res
            puts "#{new_metrics.title}, #{orig_result == new_result}"

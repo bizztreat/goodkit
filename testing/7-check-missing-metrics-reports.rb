@@ -4,6 +4,7 @@ require 'csv'
 require 'optparse'
 require 'yaml'
 
+# get all parameters
 options = {}
 OptionParser.new do |opts|
     
@@ -14,21 +15,16 @@ OptionParser.new do |opts|
     
 end.parse!
 
-#username = ''
-#password = ''
+# get parameters from the user input
 username = options[:username]
 password = options[:password]
-
 start = options[:start]
 devel = options[:devel]
-#start = 'x1c6gsmxhr84usnhww03s6ecx3625279'
-#devel = 't3m4hv0v5vrysctjqax88t2q2346t6vd'
-
-#testing master project ID = y672cuxov5x6swn64tlaz5jwcrez0wid
 
 puts 'Connecting to GoodData...'
 puts 'Checking for missing reports and metrics.'
 
+# connect to gooddata and check missing reports and metrics between projects
 GoodData.with_connection(username, password) do |client|
     
     start_reports = []
@@ -36,6 +32,7 @@ GoodData.with_connection(username, password) do |client|
     start_metrics = []
     devel_metrics = []
     
+    # get all reports and metrics from devel project
     GoodData.with_project(devel) do |project|
         
         project.reports.each do |report|
@@ -48,6 +45,7 @@ GoodData.with_connection(username, password) do |client|
         
     end
     
+    # get all reports and metrics from start project
     GoodData.with_project(start) do |project|
         
         project.reports.each do |report|
@@ -60,12 +58,14 @@ GoodData.with_connection(username, password) do |client|
         
     end
     
+    # print the diff for metrics
     puts 'Metrics missing in Devel Project:'
     metrics_diff = start_metrics - devel_metrics
     if metrics_diff.empty? then puts 'NOTHING IS MISSING' else puts metrics_diff end
     
     puts 'Reports missing in Devel Project:'
     
+    # print the diff for reports
     reports_diff = start_reports - devel_reports
     if reports_diff.empty? then puts 'NOTHING IS MISSING' else puts reports_diff end
     

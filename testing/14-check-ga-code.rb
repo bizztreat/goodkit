@@ -14,36 +14,34 @@ OptionParser.new do |opts|
     
 end.parse!
 
-#username = ''
-#password = ''
+# get all parameters - username, password and project id
 username = options[:username]
 password = options[:password]
-
-#start = options[:start]
 devel = options[:devel]
-#start = 'x1c6gsmxhr84usnhww03s6ecx3625279'
-#devel = 'wjvvna1eukc92gechtxlm7blcv22gsow'
-
-#testing master project ID = y672cuxov5x6swn64tlaz5jwcrez0wid
 
 puts 'Connecting to GoodData...'
 puts 'Checking dashboard tabs with missing Google Analytics'
 
+# connect to gooddata
 GoodData.with_connection(username, password) do |client|
     
+    # connect to project
     GoodData.with_project(devel) do |project|
         
         puts "Printing Dashboard tabs without GA tracking code..."
         
+        # we will count all dashboards and tabs
         count_dshb = 0
         count_tabs = 0
         
+        # for each dashboard and tab check for the URL including GA tracking code
         project.dashboards.each do |dshb|
                 count_dshb += 1
                 dshb.tabs.each do |tab|
                     
                         count_tabs += 1
                         
+                        # check the GA tracking code
                         if
                         !tab.items.to_s.include? "https://demo.zoomint.com/stat/%CURRENT_DASHBOARD_URI%/%CURRENT_DASHBOARD_TAB_URI%"
                         then
@@ -56,6 +54,7 @@ GoodData.with_connection(username, password) do |client|
 
         end
         
+        # print number of tabs, dashboards that we have checked
         puts "Totally checked #{count_tabs} Tabs on #{count_dshb} Dashboards."
         
     end

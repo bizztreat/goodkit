@@ -4,6 +4,7 @@ require 'csv'
 require 'optparse'
 require 'yaml'
 
+# get setup for user input parameters
 options = {}
 OptionParser.new do |opts|
     
@@ -14,25 +15,25 @@ OptionParser.new do |opts|
     
 end.parse!
 
-#username = ''
-#password = ''
+# get credentials and project ids from parameters
 username = options[:username]
 password = options[:password]
-
 start = options[:start]
 devel = options[:devel]
+
+# specify aggregations to check
 aggregations = [:sum,:avg,:median,:min,:max]
 #aggregations = [:sum]
 
-
-# testing master project ID = y672cuxov5x6swn64tlaz5jwcrez0wid
-
 puts 'Connecting to GoodData...'
 puts 'Testing fact aggregations between Start and Devel projects.'
+puts 'It might took a while...please wait'
 
+# connect to GoodData
 GoodData.with_connection(username, password) do |client|
     GoodData.with_project(start) do |project|
         
+        # compute the aggregations for all fact in start project
         $start_results = {}
             project.facts.each do |fact|
                 aggregations.each do |aggr|
@@ -46,6 +47,7 @@ GoodData.with_connection(username, password) do |client|
     
     GoodData.with_project(devel) do |project|
         
+        # compute the aggregations for all fact in devel project
         $devel_fact_results = {}
         project.facts.each do |fact|
             
@@ -59,6 +61,7 @@ GoodData.with_connection(username, password) do |client|
         #        puts $devel_fact_results
     end
     
+    # compare results between projects
     $devel_fact_results.each do |key, value|
         if $start_results[key] != $devel_fact_results[key] then puts key.to_s + ' - NOT MATCH' else puts key.to_s + ' - CORRECT' end
     end

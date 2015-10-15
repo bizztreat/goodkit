@@ -4,6 +4,7 @@ require 'csv'
 require 'optparse'
 require 'yaml'
 
+# setup all parameters for user input
 options = {}
 OptionParser.new do |opts|
     
@@ -14,12 +15,11 @@ OptionParser.new do |opts|
     
 end.parse!
 
-#username = ''
-#password = ''
+# assign to username
 username = options[:username]
 password = options[:password]
 
-# change the tags to check here
+# specify the tags to check here
 tag = ['qa','test']
 
 puts 'Connecting to GoodData...'
@@ -27,14 +27,11 @@ puts 'Testing Report results between Start and Devel projects.'
 
 GoodData.with_connection(username, password) do |client|
     
-    
+       # get project context for both start and devel
        start = client.projects(options[:start])
        devel = client.projects(options[:devel])
-       #start = client.projects('x1c6gsmxhr84usnhww03s6ecx3625279')
-       #devel = client.projects('t3m4hv0v5vrysctjqax88t2q2346t6vd')
-    
-       # We assume that reports have unique name inside a project
-
+       
+       # for each tag select reports, order them and compare results
        tag.each do |tag|
        
        orig_reports = start.reports.select {|r| r.tag_set.include?(tag)}.sort_by(&:title)
@@ -46,6 +43,7 @@ GoodData.with_connection(username, password) do |client|
            reports.map(&:execute) + [reports.last]
        end
        
+       # print report name and result true/false if the result is complete
        results.map do |res|
            orig_result, new_result, new_report = res
            puts "#{new_report.title}, #{orig_result == new_result}"

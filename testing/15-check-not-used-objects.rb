@@ -4,6 +4,7 @@ require 'csv'
 require 'optparse'
 require 'yaml'
 
+# initiate parameters for user input
 options = {}
 OptionParser.new do |opts|
     
@@ -14,47 +15,45 @@ OptionParser.new do |opts|
     
 end.parse!
 
-#username = ''
-#password = ''
+# check all parameters
 username = options[:username]
 password = options[:password]
-
 start = options[:start]
 devel = options[:devel]
-#start = 'x1c6gsmxhr84usnhww03s6ecx3625279'
-#devel = 'wjvvna1eukc92gechtxlm7blcv22gsow'
-
-#testing master project ID = y672cuxov5x6swn64tlaz5jwcrez0wid
 
 puts 'Connecting to GoodData...'
 puts 'Checking for non-used facts and attributes...'
 
+# connect to GoodData
 GoodData.with_connection(username, password) do |client|
     
+    # prepare hashes and arrays for results
     $devel_metrics = Hash.new
     $start_metrics = Hash.new
     unused_attr = []
     unused_facts = []
     
+    # connect to project context
     project = client.projects(devel)
     
     puts '--- Printing unused Attributes:'
     
+    # for each attribute
     project.attributes.each do |attr|
         
         num_objects = 0
         objects = attr.usedby
         objects.select  {|attribute| attribute["category"] == 'metric'}.each { |r|
-            # get only report objects and extract tags
+            # get only metric objects
             num_objects += 1
         }
         
         objects.select  {|attribute| attribute["category"] == 'report'}.each { |r|
-            # get only report objects and extract tags
+            # get only report objects
             num_objects += 1
         }
         
-        #puts objects
+        # print the result if there is ZERO objects using that are using the attribute
         if num_objects == 0
             then puts attr.title + '  -  ' + 'https://secure.gooddata.com/#s=/gdc/projects/' + devel + '|objectPage|' + attr.uri
             
@@ -65,21 +64,22 @@ GoodData.with_connection(username, password) do |client|
     puts '--- Printing unused Facts:'
     puts '---'
     
+    # for each fact do the check
     project.facts.each do |fact|
         
         num_objects = 0
         objects = fact.usedby
         objects.select  {|fact| fact["category"] == 'metric'}.each { |r|
-            # get only report objects and extract tags
+            # get only metric objects
             num_objects += 1
         }
         
         objects.select  {|fact| fact["category"] == 'report'}.each { |r|
-            # get only report objects and extract tags
+            # get only report objects
             num_objects += 1
         }
         
-        #puts objects
+        # print the result if there is ZERO objects using that are using the attribute
         if num_objects == 0
             then puts fact.title + '  -  ' + 'https://secure.gooddata.com/#s=/gdc/projects/' + devel + '|objectPage|' + fact.uri
             
