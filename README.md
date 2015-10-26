@@ -33,7 +33,9 @@ Helps you to evaluate updated objects since the last release date in your Master
 -p 'GoodData password'  
 -d 'LAST-RELEASE-DATE'  
 
-##2-release-changes.rb 
+##2-release-changes.rb
+
+**WARNING:** Migth brake your projects. Run only on project you are sure this can be used. 
 
 This exports all dashboards, reports and metrics that has been updated since last release date from the Master and Import them to all child projects specified in the project.csv file (see the -f parameter below)
 
@@ -61,6 +63,8 @@ Helps you to evaluate updated objects since the last release date in your Master
 -d 'LAST-RELEASE-DATE'  
 
 ##4-merge-models.rb 
+
+**WARNING:** Migth brake your projects. Run only on project you are sure this can be used.
 
 This propagates LDM changes from master to all client Projects listed in the file specified as parameter. See available parameters below.
 
