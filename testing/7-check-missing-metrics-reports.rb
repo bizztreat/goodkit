@@ -36,11 +36,11 @@ GoodData.with_connection(username, password) do |client|
     GoodData.with_project(devel) do |project|
         
         project.reports.each do |report|
-                devel_reports.push(report.title)
+                devel_reports.push(report.uri.gsub(devel,"pid"))
         end
         
         project.metrics.each do |metric|
-                devel_metrics.push(metric.title)
+                devel_metrics.push(metric.uri.gsub(devel,"pid"))
         end
         
     end
@@ -49,11 +49,11 @@ GoodData.with_connection(username, password) do |client|
     GoodData.with_project(start) do |project|
         
         project.reports.each do |report|
-            start_reports.push(report.title)
+            start_reports.push(report.uri.gsub(start,"pid"))
         end
         
         project.metrics.each do |metric|
-            start_metrics.push(metric.title)
+            start_metrics.push(metric.uri.gsub(start,"pid"))
         end
         
     end
@@ -61,13 +61,31 @@ GoodData.with_connection(username, password) do |client|
     # print the diff for metrics
     puts 'Metrics missing in Devel Project:'
     metrics_diff = start_metrics - devel_metrics
+    
+    
+    # prepare output array for complete links reports
+    met = []
+    
+    metrics_diff.each do |m|
+        
+        met.push("https://secure.gooddata.com/#s=/gdc/projects/" + start + '|objectPage|' + m.gsub!("pid",start))
+        
+    end
+    
     if metrics_diff.empty? then puts 'NOTHING IS MISSING' else puts metrics_diff end
     
     puts 'Reports missing in Devel Project:'
     
     # print the diff for reports
     reports_diff = start_reports - devel_reports
-    if reports_diff.empty? then puts 'NOTHING IS MISSING' else puts reports_diff end
+    
+    # prepare output array for complete links reports
+    rep = []
+    reports_diff.each do |r|
+        rep.push("https://secure.gooddata.com/#s=/gdc/projects/" + start + "%7CanalysisPage%7Chead%7C" + r.gsub!("pid",start))
+    end
+    
+    if reports_diff.empty? then puts 'NOTHING IS MISSING' else puts rep end
     
 end
 
