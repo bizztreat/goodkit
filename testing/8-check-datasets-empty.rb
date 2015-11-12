@@ -12,13 +12,18 @@ OptionParser.new do |opts|
     opts.on('-p', '--password PASS', 'Password') { |v| options[:password] = v }
     opts.on('-s', '--startproject NAME', 'Start Project') { |v| options[:start] = v }
     opts.on('-d', '--develproject NAME', 'Development Project') { |v| options[:devel] = v }
-    
+    opts.on('-h', '--hostname NAME', 'Hostname') { |v| options[:server] = v }
+
 end.parse!
 
 # get parameters from input for conection and for project id
 username = options[:username]
 password = options[:password]
 devel = options[:devel]
+server = options[:server]
+
+# if whitelabel is not specified set to default domain
+if server.to_s.empty? then server = 'https://secure.gooddata.com' end
 
 puts 'Connecting to GoodData...'
 puts 'Printing out empty datasets:'

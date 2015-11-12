@@ -12,19 +12,24 @@ OptionParser.new do |opts|
     opts.on('-p', '--password PASS', 'Password') { |v| options[:password] = v }
     opts.on('-s', '--startproject NAME', 'Start Project') { |v| options[:start] = v }
     opts.on('-d', '--develproject NAME', 'Development Project') { |v| options[:devel] = v }
-    
+    opts.on('-h', '--hostname NAME', 'Hostname') { |v| options[:server] = v }
+
 end.parse!
 
 # get credentials from user parameters
 username = options[:username]
 password = options[:password]
+server = options[:server]
+
+# if whitelabel is not specified set to default domain
+if server.to_s.empty? then server = 'https://secure.gooddata.com' end
 
 # change the tags to check here
 tag = 'preview'
 
 puts 'Connecting to GoodData...'
 
-GoodData.with_connection(username, password) do |client|
+GoodData.with_connection(login: username, password: password, server: server) do |client|
     
     # get the devel project context
     devel = client.projects(options[:devel])
@@ -47,7 +52,7 @@ GoodData.with_connection(username, password) do |client|
                     
                     # check whether reports include preview tag
                     if !obj['report']['meta']['tags'].include? "preview" then
-                        puts "-- https://secure.gooddata.com#{obj['report']['meta']['uri']}"
+                        puts "-- " + server + "/#{obj['report']['meta']['uri']}"
                     end
                 }
         end
@@ -63,11 +68,11 @@ GoodData.with_connection(username, password) do |client|
         
         # check for the correct folder or if folder is not set print the metric
         if folder.nil? then
-                        puts 'Metric: ' + met.title + ' (https://secure.gooddata.com' + met.uri + ')'
+                        puts 'Metric: ' + met.title + ' (' + server + met.uri + ')'
                        else
                         obj = GoodData::get(folder[0])
                         #puts obj['folder']['meta']['title']
-                            if !obj['folder']['meta']['title'].include? "ZOOM Preview" then puts 'Metric: ' + met.title + ' (https://secure.gooddata.com' + met.uri + ')' end
+                            if !obj['folder']['meta']['title'].include? "ZOOM Preview" then puts 'Metric: ' + met.title + ' (' + server + met.uri + ')' end
         end
         
         end
@@ -86,11 +91,11 @@ GoodData.with_connection(username, password) do |client|
         
             # check if report is in preview folder/domain
             if folders.nil? then
-                puts 'Report: ' + rep.title + ' (https://secure.gooddata.com' + rep.uri + ')'
+                puts 'Report: ' + rep.title + ' (' + server + rep.uri + ')'
             else
                     obj = GoodData::get(folders[0])
                     # puts obj['domain']['meta']['title']
-                    if !obj['domain']['meta']['title'].include? "ZOOM Preview" then puts puts 'Report: ' + rep.title + ' (https://secure.gooddata.com' + rep.uri + ')'
+                    if !obj['domain']['meta']['title'].include? "ZOOM Preview" then puts puts 'Report: ' + rep.title + ' (' + server + rep.uri + ')'
                     end
             end
         end
@@ -111,7 +116,7 @@ GoodData.with_connection(username, password) do |client|
             
             # check whether reports include preview tag
             if !obj['projectDashboard']['meta']['title'].include? "Zoom preview" then
-                puts "https://secure.gooddata.com#{rep.uri}"
+                puts server + "#{rep.uri}"
             end
             
         }

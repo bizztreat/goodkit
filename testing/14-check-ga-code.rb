@@ -11,19 +11,24 @@ OptionParser.new do |opts|
     opts.on('-p', '--password PASS', 'Password') { |v| options[:password] = v }
     opts.on('-s', '--startproject NAME', 'Start Project') { |v| options[:start] = v }
     opts.on('-d', '--develproject NAME', 'Development Project') { |v| options[:devel] = v }
-    
+    opts.on('-h', '--hostname NAME', 'Hostname') { |v| options[:server] = v }
+
 end.parse!
 
 # get all parameters - username, password and project id
 username = options[:username]
 password = options[:password]
 devel = options[:devel]
+server = options[:server]
+
+# if whitelabel is not specified set to default domain
+if server.to_s.empty? then server = 'https://secure.gooddata.com' end
 
 puts 'Connecting to GoodData...'
 puts 'Checking dashboard tabs with missing Google Analytics'
 
 # connect to gooddata
-GoodData.with_connection(username, password) do |client|
+GoodData.with_connection(login: username, password: password, server: server) do |client|
     
     # connect to project
     GoodData.with_project(devel) do |project|
@@ -46,7 +51,7 @@ GoodData.with_connection(username, password) do |client|
                         !tab.items.to_s.include? "https://demo.zoomint.com/stat/%CURRENT_DASHBOARD_URI%/%CURRENT_DASHBOARD_TAB_URI%"
                         then
                         
-                        puts 'https://secure.gooddata.com/#s=/gdc/projects/' + devel + '|projectDashboardPage|' + dshb.uri + '|' + tab.identifier
+                        puts server + '/#s=/gdc/projects/' + devel + '|projectDashboardPage|' + dshb.uri + '|' + tab.identifier
 
                         end
                     

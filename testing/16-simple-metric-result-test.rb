@@ -11,12 +11,17 @@ OptionParser.new do |opts|
     opts.on('-u', '--username USER', 'Username') { |v| options[:username] = v }
     opts.on('-p', '--password PASS', 'Password') { |v| options[:password] = v }
     opts.on('-d', '--develproject NAME', 'Devel Project') { |v| options[:devel] = v }
-    
+    opts.on('-h', '--hostname NAME', 'Hostname') { |v| options[:server] = v }
+
 end.parse!
 
 # get credentials from input parameters
 username = options[:username]
 password = options[:password]
+server = options[:server]
+
+# if whitelabel is not specified set to default domain
+if server.to_s.empty? then server = 'https://secure.gooddata.com' end
 
 # change the tags to check here
 tag = ['qa','test']
@@ -25,7 +30,7 @@ puts 'Connecting to GoodData...'
 puts 'Testing Report results between Start and Devel projects.'
 
 # connect to GoodData
-GoodData.with_connection(username, password) do |client|
+GoodData.with_connection(login: username, password: password, server: server) do |client|
 
        # get the project context using Project ID from user input
        devel = client.projects(options[:devel])

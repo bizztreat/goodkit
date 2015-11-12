@@ -98,6 +98,7 @@ Following parameters can be used to run it successfully. `username`,`password` a
 -s 'START-PROJECT-ID'  
 -u 'GD-USERNAME'  
 -p 'GD-PASSWORD'
+-h 'hostname for whitelabeled projects'
   
 
 ###Use Cases

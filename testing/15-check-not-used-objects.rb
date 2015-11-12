@@ -12,7 +12,8 @@ OptionParser.new do |opts|
     opts.on('-p', '--password PASS', 'Password') { |v| options[:password] = v }
     opts.on('-s', '--startproject NAME', 'Start Project') { |v| options[:start] = v }
     opts.on('-d', '--develproject NAME', 'Development Project') { |v| options[:devel] = v }
-    
+    opts.on('-h', '--hostname NAME', 'Hostname') { |v| options[:server] = v }
+
 end.parse!
 
 # check all parameters
@@ -20,12 +21,16 @@ username = options[:username]
 password = options[:password]
 start = options[:start]
 devel = options[:devel]
+server = options[:server]
+
+# if whitelabel is not specified set to default domain
+if server.to_s.empty? then server = 'https://secure.gooddata.com' end
 
 puts 'Connecting to GoodData...'
 puts 'Checking for non-used facts and attributes...'
 
 # connect to GoodData
-GoodData.with_connection(username, password) do |client|
+GoodData.with_connection(login: username, password: password, server: server) do |client|
     
     # prepare hashes and arrays for results
     $devel_metrics = Hash.new
@@ -55,7 +60,7 @@ GoodData.with_connection(username, password) do |client|
         
         # print the result if there is ZERO objects using that are using the attribute
         if num_objects == 0
-            then puts attr.title + '  -  ' + 'https://secure.gooddata.com/#s=/gdc/projects/' + devel + '|objectPage|' + attr.uri
+            then puts attr.title + '  -  ' + server + '/#s=/gdc/projects/' + devel + '|objectPage|' + attr.uri
             
         end
     end
@@ -81,7 +86,7 @@ GoodData.with_connection(username, password) do |client|
         
         # print the result if there is ZERO objects using that are using the attribute
         if num_objects == 0
-            then puts fact.title + '  -  ' + 'https://secure.gooddata.com/#s=/gdc/projects/' + devel + '|objectPage|' + fact.uri
+            then puts fact.title + '  -  ' + server + '/#s=/gdc/projects/' + devel + '|objectPage|' + fact.uri
             
         end
     end

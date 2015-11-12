@@ -11,7 +11,8 @@ OptionParser.new do |opts|
     opts.on('-p', '--password PASS', 'Password') { |v| options[:password] = v }
     opts.on('-s', '--startproject NAME', 'Start Project') { |v| options[:start] = v }
     opts.on('-d', '--develproject NAME', 'Development Project') { |v| options[:devel] = v }
-    
+    opts.on('-h', '--hostname NAME', 'Hostname') { |v| options[:server] = v }
+
 end.parse!
 
 # get credentials and project ids
@@ -19,12 +20,16 @@ username = options[:username]
 password = options[:password]
 start = options[:start]
 devel = options[:devel]
+server = options[:server]
+
+# if whitelabel is not specified set to default domain
+if server.to_s.empty? then server = 'https://secure.gooddata.com' end
 
 puts 'Connecting to GoodData...'
 puts 'Checking for updated metrics...'
 
 # connect to gooddata
-GoodData.with_connection(username, password) do |client|
+GoodData.with_connection(login: username, password: password, server: server) do |client|
     
     # initiate two hashes to compare metrics and array for result
     $devel_metrics = Hash.new
@@ -66,7 +71,7 @@ GoodData.with_connection(username, password) do |client|
         puts '------'
         metric = project.metrics(met)
         puts 'Title: ' + metric.title
-        puts 'Link: http://secure.gooddata.com' + met
+        puts 'Link:' + server + met
         
         puts '- Used in following reports:'
         objects = metric.usedby
@@ -76,9 +81,8 @@ GoodData.with_connection(username, password) do |client|
             
             # check whether reports include preview tag
                 puts '-- Title: ' + obj['report']['meta']['title']
-                puts "https://secure.gooddata.com/#s=/gdc/projects/" + devel + "%7CanalysisPage%7Chead%7C" + obj['report']['meta']['uri']
-                # puts "-- Link: https://secure.gooddata.com#{obj['report']['meta']['uri']}"
-        }
+                puts server + "/#s=/gdc/projects/" + devel + "%7CanalysisPage%7Chead%7C" + obj['report']['meta']['uri']
+            }
         
         puts '- Used in following dashboards:'
         objects.select  {|dashboard| dashboard["category"] == 'projectDashboard'}.each { |r|
@@ -87,7 +91,7 @@ GoodData.with_connection(username, password) do |client|
             
             # check whether reports include preview tag
             puts '-- Title: ' + obj['projectDashboard']['meta']['title']
-            puts "https://secure.gooddata.com/#s=/gdc/projects/" + devel + "|projectDashboardPage|" + obj['projectDashboard']['meta']['uri']
+            puts server + "/#s=/gdc/projects/" + devel + "|projectDashboardPage|" + obj['projectDashboard']['meta']['uri']
             # puts "-- Link: https://secure.gooddata.com#{obj['projectDashboard']['meta']['uri']}"
         }
     end
