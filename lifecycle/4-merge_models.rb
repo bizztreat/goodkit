@@ -13,13 +13,18 @@ OptionParser.new do |opts|
     opts.on('-m', '--masterproject NAME', 'Master Project') { |v| options[:master] = v }
     opts.on('-d', '--releasedate DATE', 'Release Date') { |v| options[:date] = v }
     opts.on('-f', '--file FILE', 'Projects file') { |v| options[:file] = v }
-    
+    opts.on('-h', '--hostname NAME', 'Hostname') { |v| options[:server] = v }
+
 end.parse!
 
 # assign credentials for script from user input and master project id
 username = options[:username]
 password = options[:password]
 master = options[:master]
+server = options[:server]
+
+# if whitelabel is not specified set to default domain
+if server.to_s.empty? then server = 'https://secure.gooddata.com' end
 
 puts 'Connecting to GoodData...'
 
@@ -28,7 +33,7 @@ csv = CSV.read(options[:file], :headers => true)
 target_projects = csv['project-id']
 
 # connect to GoodData
-GoodData.with_connection(username, password) do |client|
+GoodData.with_connection(login: username, password: password, server: server) do |client|
     GoodData.with_project(master) do |master|
         
         # get master project blueprint (model)

@@ -13,12 +13,17 @@ OptionParser.new do |opts|
   opts.on('-m', '--masterproject NAME', 'Master Project') { |v| options[:master] = v }
   opts.on('-d', '--releasedate DATE', 'Release Date') { |v| options[:date] = v }
   opts.on('-f', '--file FILE', 'Projects file') { |v| options[:file] = v }
-  
+  opts.on('-h', '--hostname NAME', 'Hostname') { |v| options[:server] = v }
+
 end.parse!
 
 # assign credentials from user input
 username = options[:username]
 password = options[:password]
+server = options[:server]
+
+# if not whitelabeled set to default domain
+if server.to_s.empty? then server = 'https://secure.gooddata.com' end
 
 # set ignore tags
 ignore_tags = ['qa','poc']
@@ -33,7 +38,7 @@ puts 'Connecting to GoodData...'
 puts 'Listing objects updated after ' + last_release_date.to_s + '.'
 
 # connect to GoodData and check all objects for specific setup
-GoodData.with_connection(username, password) do |client|
+GoodData.with_connection(login: username, password: password, server: server) do |client|
     
     GoodData.with_project(master) do |project|
 
@@ -48,7 +53,7 @@ GoodData.with_connection(username, password) do |client|
         if (dashboard.meta['unlisted'] == 1) then unlisted = ' | UNLISTED!' else unlisted = '' end
         if (unlocked != '' || missing_desc != '' || unlisted != '')
             then
-        puts 'https://secure.gooddata.com#s=/gdc/projects/' + master + '|projectDashboardPage|' + dashboard.uri + ' | ' + dashboard.title + unlocked + missing_desc + unlisted
+        puts server + '#s=/gdc/projects/' + master + '|projectDashboardPage|' + dashboard.uri + ' | ' + dashboard.title + unlocked + missing_desc + unlisted
             end
 	  end
       
@@ -63,7 +68,7 @@ GoodData.with_connection(username, password) do |client|
           if (report.meta['unlisted'] == 1) then unlisted = ' | UNLISTED!' else unlisted = '' end
           if (unlocked != '' || missing_desc != '' || unlisted != '')
               then
-          puts 'https://secure.gooddata.com#s=/gdc/projects/' + master + '|analysisPage|head|' + report.uri + ' | ' + report.title + unlocked + missing_desc + unlisted
+          puts server + '#s=/gdc/projects/' + master + '|analysisPage|head|' + report.uri + ' | ' + report.title + unlocked + missing_desc + unlisted
               end
           end
     
@@ -79,7 +84,7 @@ GoodData.with_connection(username, password) do |client|
         if (metric.meta['unlisted'] == 1) then unlisted = ' | UNLISTED!' else unlisted = '' end
         if (unlocked != '' || missing_desc != '' || unlisted != '')
             then
-        puts 'https://secure.gooddata.com#s=/gdc/projects/' + master + '|objectPage|' + metric.uri + ' | ' + metric.title + unlocked + missing_desc + unlisted
+        puts server + '#s=/gdc/projects/' + master + '|objectPage|' + metric.uri + ' | ' + metric.title + unlocked + missing_desc + unlisted
             end
     end
 

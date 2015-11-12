@@ -13,12 +13,17 @@ OptionParser.new do |opts|
   opts.on('-m', '--masterproject NAME', 'Master Project') { |v| options[:master] = v }
   opts.on('-d', '--releasedate DATE', 'Release Date') { |v| options[:date] = v }
   opts.on('-f', '--file FILE', 'Projects file') { |v| options[:file] = v }
+  opts.on('-h', '--hostname NAME', 'Hostname') { |v| options[:server] = v }
   
 end.parse!
 
 #collecting username and password from parameters
 username = options[:username]
 password = options[:password]
+server = options[:server]
+
+# if whitelabel is not specified set to default domain
+if server.to_s.empty? then server = 'https://secure.gooddata.com' end
 
 # set other parameters like tags to ignore
 ignore_tags = ['qa','poc']
@@ -33,7 +38,7 @@ puts 'Connecting to GoodData...'
 puts 'Listing objects updated after ' + last_release_date.to_s + '.'
 
 # create GoodData connection
-GoodData.with_connection(username, password) do |client|
+GoodData.with_connection(login: username, password: password, server: server) do |client|
     
     # connect to specific GoodData project
     GoodData.with_project(master) do |project|
@@ -50,7 +55,7 @@ GoodData.with_connection(username, password) do |client|
         if (dashboard.meta['unlisted'] == 1) then unlisted = ' | UNLISTED!' else unlisted = '' end
         
         # print clickable ling to the dashboard
-        puts 'https://secure.gooddata.com#s=/gdc/projects/' + master + '|projectDashboardPage|' + dashboard.uri + ' | ' + dashboard.title + unlocked + missing_desc + unlisted
+        puts server + '#s=/gdc/projects/' + master + '|projectDashboardPage|' + dashboard.uri + ' | ' + dashboard.title + unlocked + missing_desc + unlisted
         
 	  end
       
@@ -64,7 +69,7 @@ GoodData.with_connection(username, password) do |client|
           if !(report.locked?) then unlocked = ' | UNLOCKED!'  else unlocked = '' end
           if (report.summary == '') then missing_desc = ' | MISSING DESCRIPTION' else missing_desc = '' end
           if (report.meta['unlisted'] == 1) then unlisted = ' | UNLISTED!' else unlisted = '' end
-          puts 'https://secure.gooddata.com#s=/gdc/projects/' + master + '|analysisPage|head|' + report.uri + ' | ' + report.title + unlocked + missing_desc + unlisted
+          puts server + '#s=/gdc/projects/' + master + '|analysisPage|head|' + report.uri + ' | ' + report.title + unlocked + missing_desc + unlisted
       end
     
       # get all metrics changed from specific date and not including specified tags
@@ -77,7 +82,7 @@ GoodData.with_connection(username, password) do |client|
    	    if !(metric.locked?) then unlocked = ' | UNLOCKED!'  else unlocked = '' end
         if (metric.summary == '') then missing_desc = ' | MISSING DESCRIPTION' else missing_desc = '' end
         if (metric.meta['unlisted'] == 1) then unlisted = ' | UNLISTED!' else unlisted = '' end
-        puts 'https://secure.gooddata.com#s=/gdc/projects/' + master + '|objectPage|' + metric.uri + ' | ' + metric.title + unlocked + missing_desc + unlisted
+        puts server + '#s=/gdc/projects/' + master + '|objectPage|' + metric.uri + ' | ' + metric.title + unlocked + missing_desc + unlisted
 	  end
 
     end

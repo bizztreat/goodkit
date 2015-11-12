@@ -32,6 +32,7 @@ Helps you to evaluate updated objects since the last release date in your Master
 -u 'GoodData username'  
 -p 'GoodData password'  
 -d 'LAST-RELEASE-DATE'  
+-h 'hostname for whitelabeled projects'
 
 ##2-release-changes.rb
 
@@ -45,7 +46,8 @@ This exports all dashboards, reports and metrics that has been updated since las
 -u 'GD-USERNAME'  
 -p 'GD-PASSWORD'  
 -d 'LAST-RELEASE-DATE'  
--f 'PATH-TO-FILE-WITH-CUSTOMER-PROJECT'  
+-f 'PATH-TO-FILE-WITH-CUSTOMER-PROJECT'
+-h 'hostname for whitelabeled projects'  
 
 The file(.csv) with customers project should follow the structure:
 
@@ -60,7 +62,8 @@ Helps you to evaluate updated objects since the last release date in your Master
 -m 'MASTER-PROJECT-ID'  
 -u 'GoodData username'  
 -p 'GoodData password'  
--d 'LAST-RELEASE-DATE'  
+-d 'LAST-RELEASE-DATE' 
+-h 'HOSTNAME-for-whitelabeled-projects' 
 
 ##4-merge-models.rb 
 
@@ -75,7 +78,7 @@ This propagates LDM changes from master to all client Projects listed in the fil
 -p 'GD-PASSWORD'  
 -d 'LAST-RELEASE-DATE'  
 -f 'PATH-TO-FILE-WITH-CUSTOMER-PROJECT' 
-
+-h 'HOSTNAME-for-whitelabeled-projects'
 
 ### Note:
 
@@ -94,7 +97,8 @@ Following parameters can be used to run it successfully. `username`,`password` a
 -d 'DEVEL-PROJECT-ID'  
 -s 'START-PROJECT-ID'  
 -u 'GD-USERNAME'  
--p 'GD-PASSWORD'  
+-p 'GD-PASSWORD'
+  
 
 ###Use Cases
 

@@ -13,12 +13,18 @@ OptionParser.new do |opts|
   opts.on('-m', '--masterproject NAME', 'Master Project') { |v| options[:master] = v }
   opts.on('-d', '--releasedate DATE', 'Release Date') { |v| options[:date] = v }
   opts.on('-f', '--file FILE', 'Projects file') { |v| options[:file] = v }
-  
+  opts.on('-h', '--hostname NAME', 'Hostname') { |v| options[:server] = v }
+
+
 end.parse!
 
 # assign username and password to variables
 username = options[:username]
 password = options[:password]
+server = options[:server]
+
+# if not specific whitelabeled server set to default
+if server.to_s.empty? then server = 'https://secure.gooddata.com' end
 
 # specify tags to ignore for releasing
 ignore_tags = ['qa','poc']
@@ -41,7 +47,7 @@ target_projects = csv['project-id']
 objects_to_migrate = Array.new
 
 # connect to master project, select dashboards, reports and metrics to migrate, filter those without tags
-GoodData.with_connection(username, password) do |client|
+GoodData.with_connection(login: username, password: password, server: server) do |client|
     GoodData.with_project(master) do |project|
         
       # get all dashboards
