@@ -28,7 +28,7 @@ if server.to_s.empty? then server = 'https://secure.gooddata.com' end
 puts 'Connecting to GoodData...'
 puts 'Printing out empty datasets:'
 
-GoodData.with_connection(username, password) do |client|
+GoodData.with_connection(login: username, password: password, server: server) do |client|
 
    # check if any datasets is empty -> print the dataset name
    GoodData.with_project(devel) do |project|
