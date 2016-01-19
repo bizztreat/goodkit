@@ -3,6 +3,7 @@ require 'gooddata'
 require 'csv'
 require 'optparse'
 require 'yaml'
+require 'json'
 
 options = {}
 OptionParser.new do |opts|
@@ -21,6 +22,11 @@ password = options[:password]
 devel = options[:devel]
 server = options[:server]
 
+counter_ok = 0
+counter_err = 0
+err_array = []
+result = []
+
 # if whitelabel is not specified set to default domain
 if server.to_s.empty? then server = 'https://secure.gooddata.com' end
 
@@ -33,20 +39,37 @@ GoodData.with_connection(login: username, password: password, server: server) do
     # connect to project
     GoodData.with_project(devel) do |project|
         
-        puts "Printing reports without version tag..."
-        
         # check all reports for missing tags
         project.reports.each do |report|
             
                 tags = report.tags.gsub(/\s+/m, ' ').strip.split(" ")
                 if
+                
                 !tags.any? { |tag| /^\s*[+-]?((\d+_?)*\d+(\.(\d+_?)*\d+)?|\.(\d+_?)*\d+)(\s*|([eE][+-]?(\d+_?)*\d+)\s*)$/.match(tag) }
-                then puts server + '#s=/gdc/projects/' + devel + '|analysisPage|head|' + report.uri
+                
+                then
+                
+                 # count errors and prepare details to the array
+                 counter_err += 1
+                 error_details = {
+                     :type => "ERROR",
+                     :url => server + '#s=/gdc/projects/' + devel + '|analysisPage|head|' + report.uri,
+                     :api => server + report.uri,
+                     :message => "Report does not have a version tag."
+                 }
+                 
+                 # save detail to the array
+                 err_array.push(JSON.generate(error_details))
+                
+                # count OK objects
+                else counter_ok += 1
+                
                 end
 
         end
         
-        puts "Printing metrics without version tag..."
+        # prepare part of the results
+        result.push({:section => 'Reports without version tags', :OK => counter_ok, :ERROR => counter_err, :output => err_array})
         
         # check all metrics for missing tags
         project.metrics.each do |metric|
@@ -54,10 +77,29 @@ GoodData.with_connection(login: username, password: password, server: server) do
             tags = metric.tags.gsub(/\s+/m, ' ').strip.split(" ")
             if
                 !tags.any? { |tag| /^\s*[+-]?((\d+_?)*\d+(\.(\d+_?)*\d+)?|\.(\d+_?)*\d+)(\s*|([eE][+-]?(\d+_?)*\d+)\s*)$/.match(tag) }
-                then puts server + '#s=/gdc/projects/' + devel + '|objectPage|' + metric.uri
+    
+                then
+                # count errors and prepare details to the array
+                counter_err += 1
+                error_details = {
+                    :type => "ERROR",
+                    :url => server + '#s=/gdc/projects/' + devel + '|objectPage|' + metric.uri,
+                    :api => server + metric.uri,
+                    :message => "Metric does not have a version tag."
+                }
+                
+                # save detail to the array
+                err_array.push(JSON.generate(error_details))
+                
+                # count OK objects
+                else counter_ok += 1
             end
         
         end
+        
+        result.push({:section => 'Metrics without version tags', :OK => counter_ok, :ERROR => counter_err, :output => err_array})
+        
+        puts result.to_json
         
     end
     
