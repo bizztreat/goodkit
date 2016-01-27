@@ -30,9 +30,7 @@ result = []
 # if whitelabel is not specified set to default domain
 if server.to_s.empty? then server = 'https://secure.gooddata.com' end
 
-
-puts 'Connecting to GoodData...'
-puts 'Checking missing version tag'
+GoodData.logging_off
 
 GoodData.with_connection(login: username, password: password, server: server) do |client|
 
@@ -104,6 +102,4 @@ GoodData.with_connection(login: username, password: password, server: server) do
     end
     
 end
-
-puts 'Disconnecting...'
 GoodData.disconnect
