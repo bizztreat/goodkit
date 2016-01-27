@@ -24,34 +24,50 @@ server = options[:server]
 # if whitelabel is not specified set to default domain
 if server.to_s.empty? then server = 'https://secure.gooddata.com' end
 
-puts 'Connecting to GoodData...'
-puts 'Checking dashboard tabs with missing Google Analytics'
+# variables for standard output
+counter_ok = 0
+counter_err = 0
+err_array = []
+result = []
+
+# turn off logging for clear output
+GoodData.logging_off
 
 # connect to gooddata
 GoodData.with_connection(login: username, password: password, server: server) do |client|
     
     # connect to project
     GoodData.with_project(devel) do |project|
-        
-        puts "Printing Dashboard tabs without GA tracking code..."
-        
+                
         # we will count all dashboards and tabs
         count_dshb = 0
         count_tabs = 0
         
         # for each dashboard and tab check for the URL including GA tracking code
         project.dashboards.each do |dshb|
-                count_dshb += 1
                 dshb.tabs.each do |tab|
                     
-                        count_tabs += 1
-                        
+                    
                         # check the GA tracking code
                         if
                         !tab.items.to_s.include? "https://demo.zoomint.com/stat/%CURRENT_DASHBOARD_URI%/%CURRENT_DASHBOARD_TAB_URI%"
+                        
                         then
                         
-                        puts server + '/#s=/gdc/projects/' + devel + '|projectDashboardPage|' + dshb.uri + '|' + tab.identifier
+                        # count errors and prepare details to the array
+                        counter_err += 1
+                        error_details = {
+                            :type => "ERROR",
+                            :url => server + '/#s=/gdc/projects/' + devel + '|projectDashboardPage|' + dshb.uri + '|' + tab.identifier,
+                            :api => server + dshb.uri,
+                            :message => "GA script is missing."
+                        }
+                        
+                        # save detail to the array
+                        err_array.push(JSON.generate(error_details))
+                        
+                        # count OK objects
+                        else counter_ok += 1
 
                         end
                     
@@ -59,12 +75,13 @@ GoodData.with_connection(login: username, password: password, server: server) do
 
         end
         
-        # print number of tabs, dashboards that we have checked
-        puts "Totally checked #{count_tabs} Tabs on #{count_dshb} Dashboards."
+        # prepare part of the results
+        result.push({:section => 'Missing GA code check.', :OK => counter_ok, :ERROR => counter_err, :output => err_array})
+        
+        puts result.to_json
         
     end
     
 end
 
-puts 'Disconnecting...'
 GoodData.disconnect
