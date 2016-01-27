@@ -21,14 +21,20 @@ username = options[:username]
 password = options[:password]
 server = options[:server]
 
+# variables for standard output
+counter_ok = 0
+counter_err = 0
+err_array = []
+result = []
+
+# turn off logging for clear output
+GoodData.logging_off
+
 # if whitelabel is not specified set to default domain
 if server.to_s.empty? then server = 'https://secure.gooddata.com' end
 
 # specify the tags to check here
 tag = ['qa','test']
-
-puts 'Connecting to GoodData...'
-puts 'Testing Report results between Start and Devel projects.'
 
 GoodData.with_connection(login: username, password: password, server: server) do |client|
     
@@ -51,12 +57,38 @@ GoodData.with_connection(login: username, password: password, server: server) do
        # print report name and result true/false if the result is complete
        results.map do |res|
            orig_result, new_result, new_report = res
-           puts "#{new_report.title}, #{orig_result == new_result}"
+           
+           if orig_result != new_result
+
+           then
+
+           counter_err += 1
+           error_details = {
+               :type => "ERROR",
+               :url => server + '#s=/gdc/projects/' + devel.pid + '|analysisPage|head|' + new_report.uri,
+               :api => server + new_report.uri,
+               :message => "New report result is different."
+           }
+           
+           # save detail to the array
+           err_array.push(JSON.generate(error_details))
+           
+           # count OK objects
+           else
+           
+           counter_ok += 1
+           
+           end
+           
        end
        
-       end
+    end
+
+  # prepare part of the results
+  result.push({:section => 'Compare report results', :OK => counter_ok, :ERROR => counter_err, :output => err_array})
+
+  puts result.to_json
 
 end
 
-puts 'Disconnecting...'
 GoodData.disconnect
