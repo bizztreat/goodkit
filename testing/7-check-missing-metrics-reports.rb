@@ -23,11 +23,18 @@ start = options[:start]
 devel = options[:devel]
 server = options[:server]
 
+# counters and arrays for results
+counter_ok = 0
+counter_err = 0
+err_array_1 = []
+err_array_2 = []
+result = []
+
+# turn off logging for clear output
+GoodData.logging_off
+
 # if whitelabel is not specified set to default domain
 if server.to_s.empty? then server = 'https://secure.gooddata.com' end
-
-puts 'Connecting to GoodData...'
-puts 'Checking for missing reports and metrics.'
 
 # connect to gooddata and check missing reports and metrics between projects
 GoodData.with_connection(login: username, password: password, server: server) do |client|
@@ -63,36 +70,60 @@ GoodData.with_connection(login: username, password: password, server: server) do
         
     end
     
-    # print the diff for metrics
-    puts 'Metrics missing in Devel Project:'
-    metrics_diff = start_metrics - devel_metrics
-    
-    
-    # prepare output array for complete links reports
-    met = []
-    
+   metrics_diff = start_metrics - devel_metrics
+   
+   if (metrics_diff.count > 0) then
+   
     metrics_diff.each do |m|
         
-        met.push(server + "/#s=/gdc/projects/" + start + '|objectPage|' + m.gsub!("pid",start))
+        error_details = {
+            :type => "ERROR",
+            :url => server + '#s=/gdc/projects/' + start + '|objectPage|' + m.gsub!("pid",start),
+            :api => server + m,
+            :message => "Metric is missing in Devel project"
+        }
         
+        # save detail to the array
+        err_array_1.push(JSON.generate(error_details))
+            end
     end
     
-    if metrics_diff.empty? then puts 'NOTHING IS MISSING' else puts metrics_diff end
+    # count errors and prepare details to the array
+    counter_err = metrics_diff.count
+    counter_ok = start_metrics.count - counter_err
     
-    puts 'Reports missing in Devel Project:'
+    result.push({:section => 'Metrics missing in Devel project', :OK => counter_ok, :ERROR => counter_err, :output => err_array_1})
     
     # print the diff for reports
     reports_diff = start_reports - devel_reports
-    
-    # prepare output array for complete links reports
-    rep = []
+ 
+    if (reports_diff.count > 0) then
+        
     reports_diff.each do |r|
-        rep.push(server + "/#s=/gdc/projects/" + start + "%7CanalysisPage%7Chead%7C" + r.gsub!("pid",start))
+
+        error_details = {
+            :type => "ERROR",
+            :url => server + '#s=/gdc/projects/' + start + '%7CanalysisPage%7Chead%7C' + r.gsub!("pid",start),
+            :api => server + r,
+            :message => "Report is missing in Devel project"
+        }
+    
+        # save detail to the array
+        err_array_2.push(JSON.generate(error_details))
+        end
     end
     
-    if reports_diff.empty? then puts 'NOTHING IS MISSING' else puts rep end
+    # count errors and prepare details to the array
+    counter_err = reports_diff.count
+    counter_ok = start_reports.count - counter_err
     
+    result.push({:section => 'Reports missing in Devel project', :OK => counter_ok, :ERROR => counter_err, :output => err_array_2})
+        
+    puts result.to_json
+
 end
 
-puts 'Disconnecting...'
 GoodData.disconnect
+
+
+
