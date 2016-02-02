@@ -34,7 +34,7 @@ GoodData.logging_off
 # if whitelabel is not specified set to default domain
 if server.to_s.empty? then server = 'https://secure.gooddata.com' end
 
-GoodData.with_connection(username, password) do |client|
+GoodData.with_connection(username, password, server) do |client|
 
    # check if any datasets is empty -> print the dataset name
    GoodData.with_project(devel) do |project|
