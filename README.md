@@ -90,11 +90,10 @@ This is testing the possibility of merging two models. Doesn't brake anything, j
 
 ### Parameters
 
--m 'MASTER-PROJECT-ID'
--c 'CHILD-PROJECT'
+-d 'DEVEL-PROJECT-ID'
+-s 'START-PROJECT'
 -u 'GD-USERNAME'
 -p 'GD-PASSWORD'
--d 'LAST-RELEASE-DATE'
 -f 'PATH-TO-FILE-WITH-CUSTOMER-PROJECT'
 -h 'HOSTNAME-for-whitelabeled-projects'
 

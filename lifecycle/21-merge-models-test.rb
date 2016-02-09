@@ -10,9 +10,8 @@ OptionParser.new do |opts|
     
     opts.on('-u', '--username USER', 'Username') { |v| options[:username] = v }
     opts.on('-p', '--password PASS', 'Password') { |v| options[:password] = v }
-    opts.on('-m', '--masterproject NAME', 'Master Project') { |v| options[:master] = v }
-    opts.on('-c', '--childproject NAME', 'Child Project') { |v| options[:child] = v }
-    opts.on('-d', '--releasedate DATE', 'Release Date') { |v| options[:date] = v }
+    opts.on('-d', '--develproject NAME', 'Devel Project') { |v| options[:master] = v }
+    opts.on('-s', '--startproject NAME', 'Devel Project') { |v| options[:child] = v }
     opts.on('-f', '--file FILE', 'Projects file') { |v| options[:file] = v }
     opts.on('-h', '--hostname NAME', 'Hostname') { |v| options[:server] = v }
 
@@ -37,9 +36,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
         
         # get master project blueprint (model)
         master_model = master.blueprint
-        
-        # for each customer project merge models
-        
+                
             GoodData.with_project(child) do |child|
 
             customer_model = child.blueprint
@@ -62,9 +59,6 @@ GoodData.with_connection(login: username, password: password, server: server) do
                 puts "Models have been merged successfully"
             end
         
-            #puts new_model.to_s
-            #child.update_from_blueprint(new_model)
-
         end
     end
 end
