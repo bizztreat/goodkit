@@ -84,6 +84,19 @@ This propagates LDM changes from master to all client Projects listed in the fil
 
 You can select objects that won't be released by tagging them. You have to listed those tags in the script. See the _ignore_tags_ variable in both scripts ~ row #20.
 
+##21-merge-models-test.rb
+
+This is testing the possibility of merging two models. Doesn't brake anything, just do the test and print results.
+
+### Parameters
+
+-d 'DEVEL-PROJECT-ID'
+-s 'START-PROJECT'
+-u 'GD-USERNAME'
+-p 'GD-PASSWORD'
+-f 'PATH-TO-FILE-WITH-CUSTOMER-PROJECT'
+-h 'HOSTNAME-for-whitelabeled-projects'
+
 
 ## Testing
 
