@@ -24,7 +24,7 @@ server = options[:server]
 
 # if whitelabel is not specified set to default domain
 if server.to_s.empty? then server = 'https://secure.gooddata.com' end
-  
+
 
 # variable for a wanted character
 special = /%/

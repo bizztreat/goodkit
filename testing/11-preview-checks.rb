@@ -80,6 +80,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
         # get all reports for given tag
         reports = devel.reports.select {|m| m.tag_set.include?(tag)}.sort_by(&:title)
 
+
         puts '--- --- --- --- '
         puts 'Reports that are PREVIEW but not in specific folder:'
 
