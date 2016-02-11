@@ -40,7 +40,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
       :auth_token => options[:token]
   )
 
-  ERRORS = 1
+  ERRORS = 0
 
   clone_details = {
       :type => 'OK',
