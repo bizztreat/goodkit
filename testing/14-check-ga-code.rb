@@ -28,7 +28,7 @@ if server.to_s.empty? then server = 'https://secure.gooddata.com' end
 counter_ok = 0
 counter_err = 0
 err_array = []
-result = []
+$result = []
 
 # turn off logging for clear output
 GoodData.logging_off
@@ -76,9 +76,9 @@ GoodData.with_connection(login: username, password: password, server: server) do
         end
         
         # prepare part of the results
-        result.push({:section => 'Missing GA code check.', :OK => counter_ok, :ERROR => counter_err, :output => err_array})
+        $result.push({:section => 'Missing GA code check.', :OK => counter_ok, :ERROR => counter_err, :output => err_array})
         
-        puts result.to_json
+        puts $result.to_json
         
     end
     

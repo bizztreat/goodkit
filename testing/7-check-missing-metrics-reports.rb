@@ -28,7 +28,7 @@ counter_ok = 0
 counter_err = 0
 err_array_1 = []
 err_array_2 = []
-result = []
+$result = []
 
 # turn off logging for clear output
 GoodData.logging_off
@@ -92,7 +92,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
     counter_err = metrics_diff.count
     counter_ok = start_metrics.count - counter_err
     
-    result.push({:section => 'Metrics missing in Devel project', :OK => counter_ok, :ERROR => counter_err, :output => err_array_1})
+    $result.push({:section => 'Metrics missing in Devel project', :OK => counter_ok, :ERROR => counter_err, :output => err_array_1})
     
     # print the diff for reports
     reports_diff = start_reports - devel_reports
@@ -117,9 +117,9 @@ GoodData.with_connection(login: username, password: password, server: server) do
     counter_err = reports_diff.count
     counter_ok = start_reports.count - counter_err
     
-    result.push({:section => 'Reports missing in Devel project', :OK => counter_ok, :ERROR => counter_err, :output => err_array_2})
+    $result.push({:section => 'Reports missing in Devel project', :OK => counter_ok, :ERROR => counter_err, :output => err_array_2})
         
-    puts result.to_json
+    puts $result.to_json
 
 end
 

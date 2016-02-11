@@ -46,13 +46,13 @@ GoodData.with_connection(login: username, password: password, server: server) do
                 
                 rescue Exception => msg
                 
-                error_details = {
+                $error_details = {
                     :type => "ERROR",
                     :detail => msg.to_s,
                     :message => "Merging two models is not possible."
                 }
                 
-                puts JSON.generate(error_details)
+                puts JSON.generate($error_details)
                 
                 else
                 

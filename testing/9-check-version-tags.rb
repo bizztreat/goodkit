@@ -25,7 +25,7 @@ server = options[:server]
 counter_ok = 0
 counter_err = 0
 err_array = []
-result = []
+$result = []
 
 # if whitelabel is not specified set to default domain
 if server.to_s.empty? then server = 'https://secure.gooddata.com' end
@@ -67,7 +67,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
         end
         
         # prepare part of the results
-        result.push({:section => 'Reports without version tags', :OK => counter_ok, :ERROR => counter_err, :output => err_array})
+        $result.push({:section => 'Reports without version tags', :OK => counter_ok, :ERROR => counter_err, :output => err_array})
         
         # check all metrics for missing tags
         project.metrics.each do |metric|
@@ -95,9 +95,9 @@ GoodData.with_connection(login: username, password: password, server: server) do
         
         end
         
-        result.push({:section => 'Metrics without version tags', :OK => counter_ok, :ERROR => counter_err, :output => err_array})
+        $result.push({:section => 'Metrics without version tags', :OK => counter_ok, :ERROR => counter_err, :output => err_array})
         
-        puts result.to_json
+        puts $result.to_json
         
     end
     
