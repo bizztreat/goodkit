@@ -24,7 +24,7 @@ server = options[:server]
 
 # if whitelabel is not specified set to default domain
 if server.to_s.empty? then server = 'https://secure.gooddata.com' end
-  
+
 
 # variable for a wanted character
 special = /%/
@@ -52,14 +52,17 @@ GoodData.with_connection(login: username, password: password, server: server) do
         
         # count errors and prepare details to the array
         counter_err += 1
+
+        error_details = {
+            :type => "ERROR",
+            :title => metric.title,
+            :url => server + '/#s=/gdc/projects/' + devel + '|objectPage|' + metric.uri ,
+            :api => server + metric.uri,
+            :message => "Suspicious metric formating detected."
+        }
+
         # save detail to the array
-        err_array.push({
-          :type => "ERROR",
-          :title => metric.title,
-          :url => server + '/#s=/gdc/projects/' + devel + '|objectPage|' + metric.uri ,
-          :api => server + metric.uri,
-          :message => "Suspicious metric formating detected."
-        })
+        err_array.push(JSON.generate(error_details))
 
       # count OK objects
       else counter_ok += 1
