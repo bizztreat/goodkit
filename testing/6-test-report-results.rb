@@ -63,15 +63,12 @@ GoodData.with_connection(login: username, password: password, server: server) do
            then
 
            counter_err += 1
-           error_details = {
+           err_array.push(error_details = {
                :type => "ERROR",
                :url => server + '#s=/gdc/projects/' + devel.pid + '|analysisPage|head|' + new_report.uri,
                :api => server + new_report.uri,
                :message => "New report result is different."
-           }
-           
-           # save detail to the array
-           err_array.push(JSON.generate(error_details))
+           })
            
            # count OK objects
            else

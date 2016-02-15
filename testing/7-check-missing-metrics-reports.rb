@@ -101,12 +101,12 @@ GoodData.with_connection(login: username, password: password, server: server) do
         
     reports_diff.each do |r|
 
-        error_details = {
+        err_array.push(error_details = {
             :type => "ERROR",
             :url => server + '#s=/gdc/projects/' + start + '%7CanalysisPage%7Chead%7C' + r.gsub!("pid",start),
             :api => server + r,
             :message => "Report is missing in Devel project"
-        }
+        })
     
         # save detail to the array
         err_array_2.push(JSON.generate(error_details))
