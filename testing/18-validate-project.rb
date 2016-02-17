@@ -23,6 +23,8 @@ password = options[:password]
 start = options[:start]
 server = options[:server]
 
+$result = []
+
 # turn off logging for clear output
 GoodData.logging_off
 
@@ -33,7 +35,12 @@ end
 
 GoodData.with_connection(login: username, password: password, server: server) do |client|
   GoodData.with_project(start) do |project|
-    puts project.validate().to_json
+    validation = project.validate().to_json
+
+    #TODO count of errors
+    $result.push({:section => 'Validate Project', :ERROR => 0, :output => validation})
+
+    puts $result.to_json
   end
 end
 
