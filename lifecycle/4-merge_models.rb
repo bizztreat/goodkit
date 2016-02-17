@@ -26,7 +26,14 @@ server = options[:server]
 # if whitelabel is not specified set to default domain
 if server.to_s.empty? then server = 'https://secure.gooddata.com' end
 
-puts 'Connecting to GoodData...'
+# variables for standard output
+counter_ok = 0
+counter_err = 0
+err_array = []
+$result = []
+
+# turn off logging for clear output
+GoodData.logging_off
 
 # read all project ids we will be pushing changes to
 csv = CSV.read(options[:file], :headers => true)
@@ -41,7 +48,8 @@ GoodData.with_connection(login: username, password: password, server: server) do
         
         # for each customer project merge models
         target_projects.each do |project|
-            
+            counter_ok += 1
+
             GoodData.with_project(project) do |child|
 
             customer_model = child.blueprint
@@ -49,14 +57,32 @@ GoodData.with_connection(login: username, password: password, server: server) do
             
             child.update_from_blueprint(new_model)
             
+            begin
+                new_model = customer_model.merge(master_model)
+                
+                rescue Exception => msg
+                
+                counter_err += 1
+                err_array.push(error_details = {
+                    :type => "ERROR",
+                    :detail => msg.to_s,
+                    :message => "Merging two models is not possible."
+                })
+                
+                else
+                
+                child.update_from_blueprint(new_model)
             end
-        end
+            
+         end
+      end
     end
+    
+    # prepare part of the results
+    $result.push({:section => 'Merging models', :OK => counter_ok, :ERROR => counter_err, :output => err_array})
+    
+    puts $result.to_json
+
 end
 
-GoodData.disconnect
-
-
-puts 'Model changes have been applied'
-puts 'Disconnecting...'
 GoodData.disconnect
