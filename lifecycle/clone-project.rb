@@ -26,6 +26,8 @@ if server.to_s.empty? then
   server = 'https://secure.gooddata.com'
 end
 
+$result = []
+
 # turn off logging for clear output
 GoodData.logging_off
 
@@ -40,14 +42,9 @@ GoodData.with_connection(login: username, password: password, server: server) do
       :auth_token => options[:token]
   )
 
-  ERRORS = 0
+  $result.push({:section => 'Clone Project', :ERROR => 0, :output => {:project_id => cloned_project.obj_id}})
 
-  clone_details = {
-      :type => 'OK',
-      :project_id => cloned_project.obj_id
-  }
-
-  puts JSON.generate(clone_details)
+  puts $result.to_json
 
 end
 
