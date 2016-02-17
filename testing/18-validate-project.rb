@@ -11,16 +11,15 @@ OptionParser.new do |opts|
 
   opts.on('-u', '--username USER', 'Username') { |v| options[:username] = v }
   opts.on('-p', '--password PASS', 'Password') { |v| options[:password] = v }
-  opts.on('-s', '--startproject NAME', 'Start Project') { |v| options[:start] = v }
-  opts.on('-d', '--develproject NAME', 'Development Project') { |v| options[:devel] = v }
   opts.on('-h', '--hostname NAME', 'Hostname') { |v| options[:server] = v }
+  opts.on('-d', '--develproject NAME', 'Development Project') { |v| options[:devel] = v }
 
 end.parse!
 
 # get credentials from user parameters
 username = options[:username]
 password = options[:password]
-start = options[:start]
+devel = options[:devel]
 server = options[:server]
 
 $result = []
@@ -34,7 +33,7 @@ if server.to_s.empty? then
 end
 
 GoodData.with_connection(login: username, password: password, server: server) do |client|
-  GoodData.with_project(start) do |project|
+  GoodData.with_project(devel) do |project|
     validation = project.validate().to_json
 
     #TODO count of errors
