@@ -24,19 +24,21 @@ server = options[:server]
 # if whitelabel is not specified set to default domain
 if server.to_s.empty? then server = 'https://secure.gooddata.com' end
 
+counter_ok = 0
+counter_err = 0
+err_array = []
+$result = []
+
+# turn off logging for clear output
+GoodData.logging_off
+
 # change the tags to check here
 tag = 'preview'
-
-puts 'Connecting to GoodData...'
 
 GoodData.with_connection(login: username, password: password, server: server) do |client|
     
     # get the devel project context
     devel = client.projects(options[:devel])
-    
-    
-    puts '--- --- --- --- '
-    puts 'Reports that contains PREVIEW metrics and are not tagged PREVIEW:'
     
         # get all metrics for given tag
         metrics = devel.metrics.select {|m| m.tag_set.include?(tag)}.sort_by(&:title)
@@ -53,13 +55,23 @@ GoodData.with_connection(login: username, password: password, server: server) do
                     # check whether reports include preview tag
                     if !obj['report']['meta']['tags'].include? "preview" then
                         puts "-- " + server + "/#{obj['report']['meta']['uri']}"
+                        
+                        counter_err += 1
+                        err_array.push(error_details = {
+                                       :type => "ERROR",
+                                       :url => server + '/#s=/gdc/projects/' + devel.pid + '|objectPage|' + "/#{obj['report']['meta']['uri']}",
+                                       :api => server + "/#{obj['report']['meta']['uri']}",
+                                       :message => "Report not tagged as preview."
+                                       })
                     end
                 }
         end
         
-        puts '--- --- --- --- '
-        puts 'Metrics that are PREVIEW but not in specific folder:'
+        # prepare part of the results
+        $result.push({:section => 'Reports contains preview metric, not tagged as Preview', :OK => devel.metrics.count - counter_err, :ERROR => counter_err, :output => err_array})
         
+        counter_err = 0
+
         # get all metrics
         metrics.each do |met|
         
@@ -68,21 +80,39 @@ GoodData.with_connection(login: username, password: password, server: server) do
         
         # check for the correct folder or if folder is not set print the metric
         if folder.nil? then
-                        puts 'Metric: ' + met.title + ' (' + server + met.uri + ')'
+                                counter_err += 1
+                                err_array.push(error_details = {
+                                               :type => "ERROR",
+                                               :url => server + '/#s=/gdc/projects/' + devel.pid + '|objectPage|' + met.uri,
+                                               :api => server + met.uri,
+                                               :message => "Metric is not in folder."
+                                               })
+                       
                        else
                         obj = GoodData::get(folder[0])
                         #puts obj['folder']['meta']['title']
-                            if !obj['folder']['meta']['title'].include? "ZOOM Preview" then puts 'Metric: ' + met.title + ' (' + server + met.uri + ')' end
-        end
+                            if !obj['folder']['meta']['title'].include? "ZOOM Preview" then
+                                
+                                counter_err += 1
+                                err_array.push(error_details = {
+                                                   :type => "ERROR",
+                                                   :url => server + '/#s=/gdc/projects/' + devel.pid + '|objectPage|' + met.uri,
+                                                   :api => server + met.uri,
+                                                   :message => "Metric is not in Zoom Preview folder."
+                                                   })
+                            end
+            end
         
         end
         
+        # push result to the result array
+        $result.push({:section => 'Metric is not in specific Zoom Preview folder or in any folder.', :OK => devel.metrics.count - counter_err, :ERROR => counter_err, :output => err_array})
+        
+        # reset counter
+        counter_err = 0
+
         # get all reports for given tag
         reports = devel.reports.select {|m| m.tag_set.include?(tag)}.sort_by(&:title)
-
-
-        puts '--- --- --- --- '
-        puts 'Reports that are PREVIEW but not in specific folder:'
 
         # for each report
         reports.each do |rep|
@@ -92,19 +122,37 @@ GoodData.with_connection(login: username, password: password, server: server) do
         
             # check if report is in preview folder/domain
             if folders.nil? then
-                puts 'Report: ' + rep.title + ' (' + server + rep.uri + ')'
+                
+                counter_err += 1
+                err_array.push(error_details = {
+                               :type => "ERROR",
+                               :url => server + '/#s=/gdc/projects/' + devel.pid + '|analysisPage|' + rep.uri,
+                               :api => server + rep.uri,
+                               :message => "Reports is not in any folder"
+                               })
+            
             else
                     obj = GoodData::get(folders[0])
                     # puts obj['domain']['meta']['title']
-                    if !obj['domain']['meta']['title'].include? "ZOOM Preview" then puts puts 'Report: ' + rep.title + ' (' + server + rep.uri + ')'
+                    if !obj['domain']['meta']['title'].include? "ZOOM Preview" then
+                        
+                            counter_err += 1
+                            err_array.push(error_details = {
+                                           :type => "ERROR",
+                                           :url => server + '/#s=/gdc/projects/' + devel.pid + '|analysisPage|' + rep.uri,
+                                           :api => server + rep.uri,
+                                           :message => "Reports is not in Zoom Preview folder"
+                                           })
                     end
             end
         end
         
-        puts '--- --- --- --- '
-        puts 'Reports that are tagged preview and are on not Zoom PREVIEW dashboards:'
-    
-    
+        # push result to the result array
+        $result.push({:section => 'Reports not in specific Zoom Preview folder or in any folder.', :OK => devel.reports.count - counter_err, :ERROR => counter_err, :output => err_array})
+        
+        # reset counter
+        counter_err = 0
+        
         reports.each do |rep|
         
         # get all objects that use report
@@ -117,14 +165,25 @@ GoodData.with_connection(login: username, password: password, server: server) do
             
             # check whether reports include preview tag
             if !obj['projectDashboard']['meta']['title'].include? "Zoom preview" then
-                puts server + "#{rep.uri}"
+                
+                counter_err += 1
+                err_array.push(error_details = {
+                               :type => "ERROR",
+                               :url => server + '/#s=/gdc/projects/' + devel.pid + '|analysisPage|' + rep.uri,
+                               :api => server + rep.uri,
+                               :message => "Reports is not on Preview dashboard"
+                               })
+                
             end
             
         }
 
         end
 
+        $result.push({:section => 'Reports tagged Preview not in Preview dashboard', :OK => devel.reports.count - counter_err, :ERROR => counter_err, :output => err_array})
+
+        puts $result.to_json
+
 end
 
-puts 'Disconnecting...'
 GoodData.disconnect
