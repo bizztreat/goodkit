@@ -24,6 +24,8 @@ if server.to_s.empty? then
   server = 'https://secure.gooddata.com'
 end
 
+$result = []
+
 # turn off logging for clear output
 GoodData.logging_off
 
@@ -33,13 +35,9 @@ GoodData.with_connection(login: username, password: password, server: server) do
   project = client.projects(options[:delete])
   project.delete
 
-  ERRORS = 0
+  $result.push({:section => 'Delete Project', :ERROR => 0})
 
-  delete_details = {
-      :type => 'OK'
-  }
-
-  puts JSON.generate(delete_details)
+  puts $result.to_json
 
 end
 
