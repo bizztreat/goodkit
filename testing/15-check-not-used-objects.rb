@@ -1,3 +1,4 @@
+#Checking for non-used facts and attributes
 require 'date'
 require 'gooddata'
 require 'csv'
@@ -26,8 +27,13 @@ server = options[:server]
 # if whitelabel is not specified set to default domain
 if server.to_s.empty? then server = 'https://secure.gooddata.com' end
 
-puts 'Connecting to GoodData...'
-puts 'Checking for non-used facts and attributes...'
+counter_ok = 0
+counter_err = 0
+err_array = []
+$result = []
+
+# turn off logging for clear output
+GoodData.logging_off
 
 # connect to GoodData
 GoodData.with_connection(login: username, password: password, server: server) do |client|
@@ -41,8 +47,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
     # connect to project context
     project = client.projects(devel)
     
-    puts '--- Printing unused Attributes:'
-    
+    # Find unused attributes
     # for each attribute
     project.attributes.each do |attr|
         
@@ -58,17 +63,31 @@ GoodData.with_connection(login: username, password: password, server: server) do
             num_objects += 1
         }
         
-        # print the result if there is ZERO objects using that are using the attribute
-        if num_objects == 0
-            then puts attr.title + '  -  ' + server + '/#s=/gdc/projects/' + devel + '|objectPage|' + attr.uri
+        # safe the result if there is ZERO objects that are using the attribute
+        if num_objects == 0 then 
+            err_array.push(error_details = {
+                               :type => "ERROR",
+                               :url => server + '/#s=/gdc/projects/' + devel + '|objectPage|' + attr.uri ,
+                               :api => server + attr.uri,
+                               :message => 'This attribute ('+ attr.title + ') is not used by any object'
+                               })
+            counter_err += 1
+          else
+            counter_ok  += 1
             
         end
+        
+        
     end
+    #save errors in the result variable
+    $result.push({:section => 'Attributes which have not been used in any object (metric or report).', :OK => counter_ok, :ERROR => counter_err, :output => err_array})
     
-    puts '---'
-    puts '--- Printing unused Facts:'
-    puts '---'
+    #reset variables for counting errors
+    err_array = [] 
+    counter_ok = 0
+    counter_err = 0
     
+    # Find unused facts
     # for each fact do the check
     project.facts.each do |fact|
         
@@ -84,15 +103,29 @@ GoodData.with_connection(login: username, password: password, server: server) do
             num_objects += 1
         }
         
-        # print the result if there is ZERO objects using that are using the attribute
-        if num_objects == 0
-            then puts fact.title + '  -  ' + server + '/#s=/gdc/projects/' + devel + '|objectPage|' + fact.uri
+        # safe the result if there is ZERO objects that are using the fact
+        if num_objects == 0 then
+          
+           err_array.push(error_details = {
+                               :type => "ERROR",
+                               :url => server + '/#s=/gdc/projects/' + devel + '|objectPage|' + fact.uri ,
+                               :api => server + fact.uri,
+                               :message => 'This fact ('+ fact.title + ') is not used by any object'
+                               })
+            counter_err += 1
+          else
+            counter_ok  += 1
             
         end
-    end
-    
+        
+        
+    end 
+     #save errors in the result variable
+    $result.push({:section => 'Facts which have not been used in any object (metric or report).', :OK => counter_ok, :ERROR => counter_err, :output => err_array})
     
 end
+#print out the result
+puts $result.to_json
 
-puts 'Disconnecting...'
+
 GoodData.disconnect
