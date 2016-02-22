@@ -17,7 +17,6 @@ OptionParser.new do |opts|
 
 end.parse!
 
-GoodData.logging_off
 
 # assign credentials for script from user input and master project id
 username = options[:username]
@@ -26,9 +25,15 @@ master = options[:master]
 child = options[:child]
 server = options[:server]
 
+# variables for script results
+result_array = []
+$result = []
 
 # if whitelabel is not specified set to default domain
 if server.to_s.empty? then server = 'https://secure.gooddata.com' end
+
+# turn off GoodData logging
+GoodData.logging_off
 
 # connect to GoodData
 GoodData.with_connection(login: username, password: password, server: server) do |client|
@@ -46,21 +51,31 @@ GoodData.with_connection(login: username, password: password, server: server) do
                 
                 rescue Exception => msg
                 
-                $error_details = {
-                    :type => "ERROR",
-                    :detail => msg.to_s,
-                    :message => "Merging two models is not possible."
-                }
-                
-                puts JSON.generate($error_details)
+                result_array.push(error_details = {
+                               :type => "ERROR",
+                               :url => "Merging two models is not possible." ,
+                               :api => "Merging two models is not possible.",
+                               :message => msg.to_s
+                               })
+                $result.push({:section => 'Merging two models is not possible.', :OK => 0, :ERROR => 1, :output => result_array})
+
                 
                 else
-                
-                puts "Models have been merged successfully"
+                result_array.push(error_details = {
+                               :type => "INFO",
+                               :url => "Models have been merged successfully" ,
+                               :api => "Models have been merged successfully",
+                               :message => "Models have been merged successfully"
+                               })
+                $result.push({:section => 'Models have been merged successfully', :OK => 1, :ERROR => 0, :output => result_array})
+
             end
         
         end
     end
 end
+
+#print out the result
+puts $result.to_json
 
 GoodData.disconnect
