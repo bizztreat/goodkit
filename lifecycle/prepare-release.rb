@@ -4,7 +4,7 @@ require 'csv'
 require 'optparse'
 require 'yaml'
 
-# setting up available options / parameters for the script
+# setting up available options  /  parameters for the script
 options = {}
 OptionParser.new do |opts|
 
@@ -14,6 +14,8 @@ OptionParser.new do |opts|
   opts.on('-d', '--releasedate DATE', 'Release Date') { |v| options[:date] = v }
   opts.on('-f', '--file FILE', 'Projects file') { |v| options[:file] = v }
   opts.on('-h', '--hostname NAME', 'Hostname') { |v| options[:server] = v }
+  # change the tags to ignore here. Use this format only!:['tag1','tag2'] for example:['qa','test'] 
+  opts.on('-t', '--tags TAGS', 'Tags') { |v| options[:tags] = v }
   
 end.parse!
 
@@ -21,21 +23,26 @@ end.parse!
 username = options[:username]
 password = options[:password]
 server = options[:server]
+ignore_tags = tags[:server]
+
+# variables for script results
+result_array = []
+$result = []
+counter_ok = 0
+counter_err = 0
 
 # if whitelabel is not specified set to default domain
 if server.to_s.empty? then server = 'https://secure.gooddata.com' end
 
-# set other parameters like tags to ignore
-ignore_tags = ['qa','poc']
+# turn off GoodData logging
+GoodData.logging_off
 
 # set last released date we want to check
 last_release_date = Time.parse(options[:date],'%e %b %Y')
 
+
 # get master project id from parameters
 master = options[:master]
-
-puts 'Connecting to GoodData...'
-puts 'Listing objects updated after ' + last_release_date.to_s + '.'
 
 # create GoodData connection
 GoodData.with_connection(login: username, password: password, server: server) do |client|
@@ -43,51 +50,79 @@ GoodData.with_connection(login: username, password: password, server: server) do
     # connect to specific GoodData project
     GoodData.with_project(master) do |project|
         
+    #-----------------------------DASHBOARDS------------------------------------
     # get all dashboards changed from specific date and not including specified tags
     dashboards_to_migrate = project.dashboards.select { |dashboard| dashboard.updated > last_release_date && !(ignore_tags.any? { |tag| dashboard.tags.include?(tag)})  }
 
-    puts 'Check dashboards to be released...'
-
-      # check dashboard setup and print the output with all notes
+      # check dashboard setup and save to result array
       dashboards_to_migrate.each do |dashboard|
    	    if !(dashboard.locked?) then unlocked = ' | UNLOCKED!'  else unlocked = '' end
         if (dashboard.summary == '') then missing_desc = ' | MISSING DESCRIPTION' else missing_desc = '' end
         if (dashboard.meta['unlisted'] == 1) then unlisted = ' | UNLISTED!' else unlisted = '' end
-        
-        # print clickable ling to the dashboard
-        puts server + '#s=/gdc/projects/' + master + '|projectDashboardPage|' + dashboard.uri + ' | ' + dashboard.title + unlocked + missing_desc + unlisted
-        
-	  end
+
+            counter_err += 1
+            result_array.push(error_details = {
+                               :type => "INFO",
+                               :url => server + '#s=/gdc/projects/' + master + '|projectDashboardPage|' + dashboard.uri ,
+                               :api => server + dashboard.uri ,
+                               :message => 'The dashboard ('+ dashboard.title + ') - errors: ' + unlocked + missing_desc + unlisted
+                               })
+       
+	    end
+      #save errors in the result variable
+      $result.push({:section => 'Dashboards updated after ' + last_release_date.to_s + '.', :OK => project.dashboards.count - counter_err, :ERROR => counter_err , :output => result_array})
+      #reset result variables
+      result_array = []
+      counter_err = 0
       
+      #-----------------------------REPORTS-----------------------------------     
       # get all reports changed from specific date and not including specified tags
       reports_to_migrate = project.reports.select { |report| report.updated > last_release_date && !(ignore_tags.any? { |tag| report.tags.include?(tag)}) }
-      
-      puts 'Check reports to be released...'
-      
-      # check reports setup and print the output with all notes
+            
+      # check reports setup and save to result array
       reports_to_migrate.each do |report|
           if !(report.locked?) then unlocked = ' | UNLOCKED!'  else unlocked = '' end
           if (report.summary == '') then missing_desc = ' | MISSING DESCRIPTION' else missing_desc = '' end
           if (report.meta['unlisted'] == 1) then unlisted = ' | UNLISTED!' else unlisted = '' end
-          puts server + '#s=/gdc/projects/' + master + '|analysisPage|head|' + report.uri + ' | ' + report.title + unlocked + missing_desc + unlisted
-      end
-    
+            
+            counter_err += 1
+            result_array.push(error_details = {
+                               :type => "INFO",
+                               :url => server + '#s=/gdc/projects/' + master + '|analysisPage|head|' + report.uri ,
+                               :api => server + report.uri  ,
+                               :message => 'The report ('+ report.title + ') - errors: ' + unlocked + missing_desc + unlisted
+                               })
+       end
+    #save errors in the result variable
+    $result.push({:section => 'Reports updated after ' + last_release_date.to_s + '.', :OK => project.reports.count - counter_err, :ERROR => counter_err , :output => result_array})
+    #reset result variables
+    result_array = []
+    counter_err = 0
+       
+      #-----------------------------METRICS-----------------------------------   
       # get all metrics changed from specific date and not including specified tags
       metrics_to_migrate = project.metrics.select { |metric| metric.updated > last_release_date && !(ignore_tags.any? { |tag| metric.tags.include?(tag)})  }
 
-	  puts 'Check metrics to be released...'
-
-      # check metric setup and print the output with all notes
+      # check metric setup and save to result array
       metrics_to_migrate.each do |metric|
    	    if !(metric.locked?) then unlocked = ' | UNLOCKED!'  else unlocked = '' end
         if (metric.summary == '') then missing_desc = ' | MISSING DESCRIPTION' else missing_desc = '' end
         if (metric.meta['unlisted'] == 1) then unlisted = ' | UNLISTED!' else unlisted = '' end
-        puts server + '#s=/gdc/projects/' + master + '|objectPage|' + metric.uri + ' | ' + metric.title + unlocked + missing_desc + unlisted
-	  end
+        counter_err += 1
+            result_array.push(error_details = {
+                               :type => "ERROR",
+                               :url => server + '#s=/gdc/projects/' + master + '|objectPage|' + metric.uri ,
+                               :api => server + metric.uri ,
+                               :message => 'The metric ('+ metric.title + ') - errors: ' + unlocked + missing_desc + unlisted
+                               })
+       end
+       
+       #save errors in the result variable
+    $result.push({:section => 'Metrics updated after ' + last_release_date.to_s + '.', :OK => project.metrics.count - counter_err, :ERROR => counter_err , :output => result_array})
 
     end
 end
+#print out the result
+puts $result.to_json
 
-# disconnect from GoodData
-puts 'Disconnecting ...'
 GoodData.disconnect
