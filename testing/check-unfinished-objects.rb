@@ -12,7 +12,6 @@ OptionParser.new do |opts|
   opts.on('-p', '--password PASS', 'Password') { |v| options[:password] = v }
   opts.on('-m', '--masterproject NAME', 'Master Project') { |v| options[:master] = v }
   opts.on('-d', '--releasedate DATE', 'Release Date') { |v| options[:date] = v }
-  opts.on('-f', '--file FILE', 'Projects file') { |v| options[:file] = v }
   opts.on('-h', '--hostname NAME', 'Hostname') { |v| options[:server] = v }
   # set tags to ingnore. Use this format only!:['tag1','tag2'] for example:['qa','test'] 
   opts.on('-t', '--tags TAGS', 'Tags') { |v| options[:tags] = v }
