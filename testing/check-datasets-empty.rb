@@ -10,7 +10,6 @@ OptionParser.new do |opts|
     
     opts.on('-u', '--username USER', 'Username') { |v| options[:username] = v }
     opts.on('-p', '--password PASS', 'Password') { |v| options[:password] = v }
-    opts.on('-s', '--startproject NAME', 'Start Project') { |v| options[:start] = v }
     opts.on('-d', '--develproject NAME', 'Development Project') { |v| options[:devel] = v }
     opts.on('-h', '--hostname NAME', 'Hostname') { |v| options[:server] = v }
 
