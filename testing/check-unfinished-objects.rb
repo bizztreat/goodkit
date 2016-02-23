@@ -13,7 +13,7 @@ OptionParser.new do |opts|
   opts.on('-m', '--masterproject NAME', 'Master Project') { |v| options[:master] = v }
   opts.on('-d', '--releasedate DATE', 'Release Date') { |v| options[:date] = v }
   opts.on('-h', '--hostname NAME', 'Hostname') { |v| options[:server] = v }
-  # set tags to ingnore. Use this format only!:['tag1','tag2'] for example:['qa','test'] 
+  # set tags to ingnore. Use this format only tag1,tag2 for example qa,test or for empty use ""
   opts.on('-t', '--tags TAGS', 'Tags') { |v| options[:tags] = v }
 
 end.parse!
@@ -22,14 +22,13 @@ end.parse!
 username = options[:username]
 password = options[:password]
 server = options[:server]
-ignore_tags = options[:tags]
+ignore_tags = options[:tags].split(',')
 
 # variables for script results
 result_array = []
 $result = []
 counter_ok = 0
 counter_err = 0
-
 
 
 # if not whitelabeled set to default domain
