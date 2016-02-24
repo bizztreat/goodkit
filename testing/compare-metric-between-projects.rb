@@ -62,14 +62,13 @@ GoodData.with_connection(login: username, password: password, server: server) do
        results.map do |res|
            orig_result, new_result, new_metrics = res           
            
-         result_array.push(error_details = {
-                               :type => "INFO",
-                               :url => server + '/#s=/gdc/projects/' + devel + '|objectPage|' + new_metrics.uri ,
-                               :api => server + new_metrics.uri,
-                               :message => 'Results of the metric ('+ new_metrics.title + ') are in both projects equal.'
-                               })
-           
-           
+         result_array.push({
+           :type => "INFO",
+           :url => server + '/#s=/gdc/projects/' + devel + '|objectPage|' + new_metrics.uri ,
+           :api => server + new_metrics.uri,
+           :message => 'Results of the metric ('+ new_metrics.title + ') are in both projects equal.'
+         })
+         
        end
        
        end
