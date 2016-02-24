@@ -14,7 +14,7 @@ OptionParser.new do |opts|
     opts.on('-s', '--startproject NAME', 'Start Project') { |v| options[:start] = v }
     opts.on('-d', '--develproject NAME', 'Development Project') { |v| options[:devel] = v }
     opts.on('-h', '--hostname NAME', 'Hostname') { |v| options[:server] = v }
-    # change the tags to check here. Use this format only!:['tag1','tag2'] for example:['qa','test'] 
+    # change the tags to check here. Use this format only!:['tag1','tag2'] for example:['qa','test']
     opts.on('-t', '--tags TAGS', 'Tags') { |v| options[:tags] = v }
 
 end.parse!
@@ -23,9 +23,9 @@ end.parse!
 username = options[:username]
 password = options[:password]
 server = options[:server]
-start = client.projects(options[:start])
-devel = client.projects(options[:devel])
-tag = client.projects(options[:tags])
+start = options[:start]
+devel = options[:devel]
+tag = options[:tags].split(',')
 
 # variables for script results
 result_array = []
