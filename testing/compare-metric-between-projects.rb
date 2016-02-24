@@ -68,7 +68,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
            :api => server + new_metrics.uri,
            :message => 'Results of the metric ('+ new_metrics.title + ') are in both projects equal.'
          })
-         
+
        end
        
        end
