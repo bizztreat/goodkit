@@ -79,8 +79,8 @@ GoodData.with_connection(login: username, password: password, server: server) do
             counter_err += 1
             err_array.push (error_details = {
                 :type => "ERROR",
-                :url => 'https://secure.gooddata.com/#s=/gdc/projects' + devel +'|objectPage|' + key.to_s,
-                :api => 'secure.gooddata.com' + key.to_s,
+                :url => server + '/#s=/gdc/projects' + devel +'|objectPage|' + key.to_s,
+                :api => server + key.to_s,
                 :message => "Aggregation is different"
             })
             
