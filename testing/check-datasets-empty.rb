@@ -39,14 +39,16 @@ GoodData.with_connection(login: username, password: password, server: server) do
    GoodData.with_project(devel) do |project|
            blueprint = project.blueprint
            blueprint.datasets.each do |dataset|
+
                count = dataset.count(project)
                if (count.to_i < 1) then
                    # count errors and prepare details to the array
                    counter_err += 1
+                   objectDataset = GoodData::Dataset[dataset.id, {:client => client, :project => project}]
                    error_details = {
                        :type => "ERROR",
-                       :url => server + '#s=/gdc/projects/' + devel + '|analysisPage|head|' + dataset.uri,
-                       :api => server + dataset.uri,
+                       :url => server + '/#s=/gdc/projects/' + devel + '|objectPage|' + objectDataset.uri,
+                       :api => server + objectDataset.uri,
                        :message => "Dataset it empty."
                    }
                    
