@@ -70,8 +70,8 @@ OptionParser.new do |opts|
   opts.on('-p', '--password PASS', 'Password') { |v| options[:password] = v }
   opts.on('-d', '--develproject NAME', 'Development Project') { |v| options[:devel] = v }
   opts.on('-h', '--hostname NAME', 'Hostname') { |v| options[:server] = v }
-  opts.on('-h', '--folders FOLDERS', 'Folders') { |v| options[:folders] = v } #  true/false delete empty folders
-  opts.on('-h', '--main MAIN', 'Main') { |v| options[:main] = v }  # string name of main Date Time dataset
+  opts.on('-f', '--folders FOLDERS', 'Folders') { |v| options[:folders] = v } #  true/false delete empty folders
+  opts.on('-m', '--main MAIN', 'Main') { |v| options[:main] = v }  # string name of main Date Time dataset
 end.parse!
 
 # get all parameters - username, password and project id
