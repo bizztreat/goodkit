@@ -22,16 +22,17 @@ def create_folder_name(title, main_dataset_identifier, main_date_time_identifier
   else
     name = title.sub('(', '')
     name = name.sub(')', '')
+    name = name.split(/(?=[A-Z])/).join(' ').upcase
+    name = name.split.map(&:capitalize).join(' ')
     name = name.sub('_ts', '')
     name = name.sub('_date', '')
     name = name.sub('_', '')
-
-    name = name.split(/(?=[A-Z])/).join(' ').upcase
-    name = name.split.map(&:capitalize).join(' ')
     name = name.sub('D D D', 'DDD')
+    name = name.sub('And', 'and')
+    name = name.sub('Of', 'of')
 
     if name.index('Time') == 0 then
-      name = name.sub('Time', 'Date And Time')
+      name = name.sub('Time', 'Date and Time')
     end
 
   end
@@ -105,7 +106,7 @@ def create_attribute_name(dataset_title, main_dataset_identifier, main_date_time
   if main_dataset_identifier == main_date_time_identifier then
     name = first_name
   else
-    name = first_name + ' ' + create_folder_name(dataset_title, main_dataset_identifier, main_date_time_identifier).sub('Date ', '').sub('And', '').sub('Time ', '')
+    name = first_name + ' ' + create_folder_name(dataset_title, main_dataset_identifier, main_date_time_identifier).sub('Date and Time', '').sub('Date ', '')
   end
 
   return name
