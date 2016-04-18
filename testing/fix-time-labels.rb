@@ -121,6 +121,8 @@ OptionParser.new do |opts|
   opts.on('-h', '--hostname NAME', 'Hostname') { |v| options[:server] = v }
   opts.on('-f', '--folders FOLDERS', 'Folders') { |v| options[:folders] = v } #  true/false delete empty folders
   opts.on('-m', '--main MAIN', 'Main') { |v| options[:main] = v } # string name of main Date Time dataset
+  opts.on('-i', '--include INCLUDE', 'Tag included') { |v| options[:incl] = v } #just objects with this tag will be check in the script
+  opts.on('-e', '--exclude EXCLUDE', 'Tag excluded') { |v| options[:excl] = v } #objects with this tag will be exclude from the checking
 end.parse!
 
 # get all parameters - username, password and project id
@@ -130,6 +132,8 @@ devel = options[:devel]
 server = options[:server]
 folders_delete = options[:folders]
 main_date_time_identifier = options[:main]
+incl = options[:incl]
+excl = options[:excl]
 
 # if whitelabel is not specified set to default domain
 if server.to_s.empty? then
@@ -173,7 +177,9 @@ GoodData.with_connection(login: username, password: password, server: server) do
       if ['.dataset.dt', 'dataset.time.'].any? { |word| d.identifier.include?(word) } then
         # Let's start with ATTRIBUTES
         d.attributes.each do |a|
-
+          # check exclude/include tag conditions
+          if incl.to_s == '' || (a.tags.include? incl.to_s) then
+            if excl.to_s == '' || (!a.tags.include? excl.to_s) then
           a.title = create_attribute_name(d.title, main_dataset_identifier, main_date_time_identifier, a.identifier)
           a.title
           a.save
@@ -219,11 +225,12 @@ GoodData.with_connection(login: username, password: password, server: server) do
               a.save
             end
 
+            end
+            end
           end
         end
       end
     end
-
     #save info into the result variable
     $result.push({:section => 'The Time attributes folders changes.', :OK => counter_ok, :ERROR => counter_err, :output => result_array})
 
