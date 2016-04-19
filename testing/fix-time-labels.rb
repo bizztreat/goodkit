@@ -135,6 +135,15 @@ main_date_time_identifier = options[:main]
 incl = options[:incl]
 excl = options[:excl]
 
+# make arrays from incl and excl parameters
+if incl.to_s != ''
+incl = incl.split(",")
+end
+
+if excl.to_s != ''
+excl = excl.split(",")
+end
+
 # if whitelabel is not specified set to default domain
 if server.to_s.empty? then
   server = 'https://secure.gooddata.com'
@@ -178,8 +187,9 @@ GoodData.with_connection(login: username, password: password, server: server) do
         # Let's start with ATTRIBUTES
         d.attributes.each do |a|
           # check exclude/include tag conditions
-          if incl.to_s == '' || (a.tags.include? incl.to_s) then
-            if excl.to_s == '' || (!a.tags.include? excl.to_s) then
+          if incl.to_s == '' || !(a.tag_set & incl).empty? then
+            if excl.to_s == '' || (a.tag_set & excl).empty? then
+              puts a.title
           a.title = create_attribute_name(d.title, main_dataset_identifier, main_date_time_identifier, a.identifier)
           a.title
           a.save
