@@ -8,13 +8,13 @@ require 'yaml'
 # define options for script configuration
 options = {}
 OptionParser.new do |opts|
-    
+
     opts.on('-u', '--username USER', 'Username') { |v| options[:username] = v }
     opts.on('-p', '--password PASS', 'Password') { |v| options[:password] = v }
     opts.on('-d', '--develproject NAME', 'Devel Project') { |v| options[:devel] = v }
     opts.on('-h', '--hostname NAME', 'Hostname') { |v| options[:server] = v }
-    # change the tags to check here. Use this format only!:['tag1','tag2'] for example:['qa','test'] 
-    opts.on('-t', '--tags TAGS', 'Tags') { |v| options[:tags] = v }
+    opts.on('-i', '--include INCLUDE', 'Tag included') { |v| options[:incl] = v }
+    opts.on('-e', '--exclude EXCLUDE', 'Tag excluded') { |v| options[:excl] = v }
 end.parse!
 
 # get credentials from input parameters
@@ -22,7 +22,17 @@ username = options[:username]
 password = options[:password]
 devel = options[:devel]
 server = options[:server]
-tag = tags[:server]
+incl = options[:incl]
+excl = options[:excl]
+
+# make arrays from incl and excl parameters
+if incl.to_s != ''
+incl = incl.split(",")
+end
+
+if excl.to_s != ''
+excl = excl.split(",")
+end
 
 # variables for script results
 result_array = []
@@ -39,25 +49,24 @@ GoodData.with_connection(login: username, password: password, server: server) do
 
        # get the project context using Project ID from user input
        devel_project = client.projects(devel)
-       
-       # for each tag
-       tag.each do |tag|
-       
-       # get metrics that include specific tag
-       metrics = devel_project.metrics.select {|r| r.tag_set.include?(tag)}
-       
-       # print metric result
-       metrics.each { |m|  
-       
+
+       # check all metrics according to tag's rules
+       devel_project.metrics.each do |m|
+
+         if incl.to_s == '' || !(m.tag_set & incl).empty? then
+           if excl.to_s == '' || (m.tag_set & excl).empty? then
+
+       # push the result to result_array
        result_array.push(error_details = {
                                :type => "INFO",
                                :url => server + '/#s=/gdc/projects/' + devel + '|objectPage|' + m.uri ,
                                :api => server + m.uri,
                                :message => 'Results of the metric ('+ m.title + ') is: ' +  m.execute.to_s
                                })
-      }                         
-           
-    
+
+
+            end
+          end
        end
     #save errors in the result variable
     $result.push({:section => 'Metric results between Start and Devel projects.', :OK => 0, :ERROR => 0, :output => result_array})
