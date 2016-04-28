@@ -189,7 +189,6 @@ GoodData.with_connection(login: username, password: password, server: server) do
           # check exclude/include tag conditions
           if incl.to_s == '' || !(a.tag_set & incl).empty? then
             if excl.to_s == '' || (a.tag_set & excl).empty? then
-              puts a.title
           a.title = create_attribute_name(d.title, main_dataset_identifier, main_date_time_identifier, a.identifier)
           a.title
           a.save
