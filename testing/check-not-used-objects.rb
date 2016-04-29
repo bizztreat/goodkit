@@ -13,6 +13,8 @@ OptionParser.new do |opts|
   opts.on('-p', '--password PASS', 'Password') { |v| options[:password] = v }
   opts.on('-d', '--develproject NAME', 'Development Project') { |v| options[:devel] = v }
   opts.on('-h', '--hostname NAME', 'Hostname') { |v| options[:server] = v }
+  opts.on('-i', '--include INCLUDE', 'Tag included') { |v| options[:incl] = v }
+  opts.on('-e', '--exclude EXCLUDE', 'Tag excluded') { |v| options[:excl] = v }
 
 end.parse!
 
@@ -21,6 +23,17 @@ username = options[:username]
 password = options[:password]
 devel = options[:devel]
 server = options[:server]
+incl = options[:incl]
+excl = options[:excl]
+
+# make arrays from incl and excl parameters
+if incl.to_s != ''
+incl = incl.split(",")
+end
+
+if excl.to_s != ''
+excl = excl.split(",")
+end
 
 # if whitelabel is not specified set to default domain
 if server.to_s.empty? then
@@ -49,6 +62,10 @@ GoodData.with_connection(login: username, password: password, server: server) do
   # for each attribute
   project.attributes.each do |attr|
 
+    #check incl and excl tags first
+    if incl.to_s == '' || !(attr.tag_set & incl).empty? then
+      if excl.to_s == '' || (attr.tag_set & excl).empty? then
+
     num_objects = 0
     objects = attr.usedby
     objects.select { |attribute| attribute["category"] == 'metric' }.each { |r|
@@ -75,6 +92,9 @@ GoodData.with_connection(login: username, password: password, server: server) do
       counter_ok += 1
     end
   end
+end
+end
+
 
   #save errors in the result variable
   $result.push({:section => 'Attributes which have not been used in any object (metric or report).', :OK => counter_ok, :ERROR => counter_err, :output => err_array})
@@ -87,6 +107,10 @@ GoodData.with_connection(login: username, password: password, server: server) do
   # Find unused facts
   # for each fact do the check
   project.facts.each do |fact|
+
+    #check incl and excl tags first
+    if incl.to_s == '' || !(fact.tag_set & incl).empty? then
+      if excl.to_s == '' || (fact.tag_set & excl).empty? then
 
     num_objects = 0
     objects = fact.usedby
@@ -117,7 +141,8 @@ GoodData.with_connection(login: username, password: password, server: server) do
   end
   #save errors in the result variable
   $result.push({:section => 'Facts which have not been used in any object (metric or report).', :OK => counter_ok, :ERROR => counter_err, :output => err_array})
-
+end
+end
 end
 #print out the result
 puts $result.to_json
