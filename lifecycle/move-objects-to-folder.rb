@@ -12,6 +12,8 @@ OptionParser.new do |opts|
   opts.on('-p', '--password PASS', 'Password') { |v| options[:password] = v }
   opts.on('-d', '--develproject NAME', 'Development Project') { |v| options[:devel] = v }
   opts.on('-h', '--hostname NAME', 'Hostname') { |v| options[:server] = v }
+  opts.on('-i', '--include INCLUDE', 'Tag included') { |v| options[:incl] = v }
+  opts.on('-e', '--exclude EXCLUDE', 'Tag excluded') { |v| options[:excl] = v }
 
 end.parse!
 
@@ -20,6 +22,17 @@ end.parse!
  password = options[:password]
  devel = options[:devel]
  server = options[:server]
+ incl = options[:incl]
+ excl = options[:excl]
+
+ # make arrays from incl and excl parameters
+ if incl.to_s != ''
+ incl = incl.split(",")
+ end
+
+ if excl.to_s != ''
+ excl = excl.split(",")
+ end
 
 # if whitelabel is not specified set to default domain
 if server.to_s.empty? then server = 'https://secure.gooddata.com' end
@@ -59,7 +72,6 @@ end
 
 # turn off logging for clear output
 GoodData.logging_off
-#GoodData.logging_http_on
 
 # connect to gooddata
 GoodData.with_connection(login: username, password: password, server: server) do |client|
@@ -76,13 +88,15 @@ client.get("#{project.md['query']}/facts")['query']['entries'].map do |i|
      all_folders.[]=(i['title'],i['link'])
  end
 all_folders.values.uniq
-# start with datasets
+# start with datasets and check incl and excl tags
 project.datasets.each do |dataset|
-dataset.attributes.each do |a|
+  if incl.to_s == '' || !(dataset.tag_set & incl).empty? then
+    if excl.to_s == '' || (dataset.tag_set & excl).empty? then
+  dataset.attributes.each do |a|
 
-folder_uri = a.content['dimension']
-# Pull folder from cache and compare the titles
-if folder_cache.key?(folder_uri) && folder_cache[folder_uri].title  == dataset.title && !folder_cache[folder_uri].deprecated
+  folder_uri = a.content['dimension']
+  # Pull folder from cache and compare the titles
+  if folder_cache.key?(folder_uri) && folder_cache[folder_uri].title  == dataset.title && !folder_cache[folder_uri].deprecated
    #push info detail to result array
     result_array.push(error_details = {
                          :type => "INFO",
@@ -93,7 +107,7 @@ if folder_cache.key?(folder_uri) && folder_cache[folder_uri].title  == dataset.t
       # count objects
       counter_ok += 1
 
-else
+  else
     #push info detail to result array
     result_array.push(error_details = {
                          :type => "ERROR",
@@ -132,7 +146,8 @@ end
 result_array = []
 counter_ok = 0
 counter_err = 0
-
+end
+end
 end
 
     # -----------FACTS----------------
@@ -148,8 +163,10 @@ end
               all_folders_facts.[]=(i['title'],i['link'])
           end
        all_folders_facts.values.uniq
-      # Go datasets
+      # start with datasets and check incl and excl tags
       project.datasets.each do |dataset|
+        if incl.to_s == '' || !(dataset.tag_set & incl).empty? then
+          if excl.to_s == '' || (dataset.tag_set & excl).empty? then
        # Go facts
        dataset.facts.each do |f|
          # Pull folder from cache and compare the titles
@@ -210,9 +227,9 @@ end
        counter_ok = 0
        counter_err = 0
        end
-
-
-
+    end
+  end
+  
 end
 end
 #print out the result
