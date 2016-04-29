@@ -81,7 +81,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
                 :type => "ERROR",
                 :url => server + '/#s=/gdc/projects/' + devel.pid + '|objectPage|' + "/#{obj['report']['meta']['uri']}",
                 :api => server + "/#{obj['report']['meta']['uri']}",
-                :title => '',
+                :title => r['title'],
                 :description => "Report not tagged as preview."
             })
           end
@@ -111,7 +111,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
               :type => "ERROR",
               :url => server + '/#s=/gdc/projects/' + devel.pid + '|objectPage|' + met.uri,
               :api => server + met.uri,
-              :title => '',
+              :title => met.title,
               :message => "Metric is not in folder."
           })
 
@@ -125,7 +125,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
                 :type => "ERROR",
                 :url => server + '/#s=/gdc/projects/' + devel.pid + '|objectPage|' + met.uri,
                 :api => server + met.uri,
-                :title => '',
+                :title => met.title,
                 :description => "Metric is not in Zoom Preview folder."
             })
           end
@@ -157,7 +157,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
               :type => "ERROR",
               :url => server + '/#s=/gdc/projects/' + devel.pid + '|analysisPage|' + rep.uri,
               :api => server + rep.uri,
-              :title => '',
+              :title => rep.title,
               :description => "Reports is not in any folder"
           })
 
@@ -170,7 +170,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
                 :type => "ERROR",
                 :url => server + '/#s=/gdc/projects/' + devel.pid + '|analysisPage|' + rep.uri,
                 :api => server + rep.uri,
-                :title => '',
+                :title => rep.title,
                 :description => "Reports is not in Zoom Preview folder"
             })
           end
@@ -204,7 +204,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
                 :type => "ERROR",
                 :url => server + '/#s=/gdc/projects/' + devel.pid + '|analysisPage|' + rep.uri,
                 :api => server + rep.uri,
-                :title => '',
+                :title => rep.title,
                 :description => "Reports is not on Preview dashboard"
             })
 
@@ -234,7 +234,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
                   :type => "ERROR",
                   :url => server + '/#s=/gdc/projects/' + devel.pid + '|objectPage|' + var.uri,
                   :api => server + var.uri,
-                  :title => '',
+                  :title => var.title,
                   :description => "The variable is missing the 'preview' as a tag."
               })
             end
@@ -247,7 +247,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
                   :type => "ERROR",
                   :url => server + '/#s=/gdc/projects/' + devel.pid + '|objectPage|' + var.uri,
                   :api => server + var.uri,
-                  :title => '',
+                  :title => var.title,
                   :description => "The variable with the 'preview' as a tag is missing 'ZOOM Preview - ' in the title."
               })
             end
