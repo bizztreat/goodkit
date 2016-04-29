@@ -13,6 +13,8 @@ OptionParser.new do |opts|
   opts.on('-s', '--startproject NAME', 'Start Project') { |v| options[:start] = v }
   opts.on('-d', '--develproject NAME', 'Development Project') { |v| options[:devel] = v }
   opts.on('-h', '--hostname NAME', 'Hostname') { |v| options[:server] = v }
+  opts.on('-i', '--include INCLUDE', 'Tag included') { |v| options[:incl] = v }
+  opts.on('-e', '--exclude EXCLUDE', 'Tag excluded') { |v| options[:excl] = v }
 
 end.parse!
 
@@ -22,6 +24,17 @@ password = options[:password]
 start = options[:start]
 devel = options[:devel]
 server = options[:server]
+incl = options[:incl]
+excl = options[:excl]
+
+# make arrays from incl and excl parameters
+if incl.to_s != ''
+incl = incl.split(",")
+end
+
+if excl.to_s != ''
+excl = excl.split(",")
+end
 
 # if whitelabel is not specified set to default domain
 if server.to_s.empty? then
@@ -57,8 +70,12 @@ GoodData.with_connection(login: username, password: password, server: server) do
 
     #get metric expression from devel project
     project.metrics.each do |metric|
+      if incl.to_s == '' || !(metric.tag_set & incl).empty? then
+        if excl.to_s == '' || (metric.tag_set & excl).empty? then
       $devel_metrics.store(metric.uri.gsub(devel, "pid"), metric.expression.gsub(devel, "pid"))
       #puts $devel_metrics.keys
+        end
+      end
     end
 
   end
@@ -67,8 +84,12 @@ GoodData.with_connection(login: username, password: password, server: server) do
   GoodData.with_project(start) do |project|
 
     project.metrics.each do |metric|
+      if incl.to_s == '' || !(metric.tag_set & incl).empty? then
+        if excl.to_s == '' || (metric.tag_set & excl).empty? then
       $start_metrics.store(metric.uri.gsub(start, "pid"), metric.expression.gsub(start, "pid"))
       # puts $start_metrics.keys
+        end
+      end
     end
   end
 
