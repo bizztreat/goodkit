@@ -46,9 +46,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
 
 
         # check the GA tracking code
-        if !tab.items.to_s.include? "https://demo.zoomint.com/stat/%CURRENT_DASHBOARD_URI%/%CURRENT_DASHBOARD_TAB_URI%"
-
-        then
+        if !tab.items.to_s.include? "https://demo.zoomint.com/stat/%CURRENT_DASHBOARD_URI%/%CURRENT_DASHBOARD_TAB_URI%" then
 
           # count errors and prepare details to the array
           counter_err += 1
@@ -63,11 +61,8 @@ GoodData.with_connection(login: username, password: password, server: server) do
           # count OK objects
         else
           counter_ok += 1
-
         end
-
       end
-
     end
 
     # prepare part of the results
