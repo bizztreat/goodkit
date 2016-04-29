@@ -54,7 +54,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
               :type => "ERROR",
               :url => server + '/#s=/gdc/projects/' + devel + '|projectDashboardPage|' + dshb.uri + '|' + tab.identifier,
               :api => server + dshb.uri,
-              :title =>  dshb.title + ' ' + tab.title,
+              :title =>  dshb.title + ' - ' + tab.title,
               :description => "GA script is missing."
           })
 

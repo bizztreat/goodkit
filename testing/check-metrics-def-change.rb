@@ -77,7 +77,6 @@ GoodData.with_connection(login: username, password: password, server: server) do
         end
       end
     end
-
   end
 
   # connect to start project and get metric expression
