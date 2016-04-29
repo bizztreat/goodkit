@@ -13,6 +13,8 @@ OptionParser.new do |opts|
   opts.on('-s', '--startproject NAME', 'Start Project') { |v| options[:start] = v }
   opts.on('-d', '--develproject NAME', 'Development Project') { |v| options[:devel] = v }
   opts.on('-h', '--hostname NAME', 'Hostname') { |v| options[:server] = v }
+  opts.on('-i', '--include INCLUDE', 'Tag included') { |v| options[:incl] = v }
+  opts.on('-e', '--exclude EXCLUDE', 'Tag excluded') { |v| options[:excl] = v }
 
 end.parse!
 
@@ -22,6 +24,17 @@ password = options[:password]
 start = options[:start]
 devel = options[:devel]
 server = options[:server]
+incl = options[:incl]
+excl = options[:excl]
+
+# make arrays from incl and excl parameters
+if incl.to_s != ''
+incl = incl.split(",")
+end
+
+if excl.to_s != ''
+excl = excl.split(",")
+end
 
 # counters and arrays for results
 counter_ok = 0
@@ -50,11 +63,19 @@ GoodData.with_connection(login: username, password: password, server: server) do
   GoodData.with_project(devel) do |project|
 
     project.reports.each do |report|
+      if incl.to_s == '' || !(report.tag_set & incl).empty? then
+        if excl.to_s == '' || (report.tag_set & excl).empty? then
       devel_reports.push(report.uri.gsub(devel, "pid"))
+        end
+      end
     end
 
     project.metrics.each do |metric|
+      if incl.to_s == '' || !(metric.tag_set & incl).empty? then
+        if excl.to_s == '' || (metric.tag_set & excl).empty? then
       devel_metrics.push(metric.uri.gsub(devel, "pid"))
+        end
+      end
     end
   end
 
@@ -62,15 +83,23 @@ GoodData.with_connection(login: username, password: password, server: server) do
   GoodData.with_project(start) do |project|
 
     project.reports.each do |report|
+      if incl.to_s == '' || !(report.tag_set & incl).empty? then
+        if excl.to_s == '' || (report.tag_set & excl).empty? then
       start_reports.push(report.uri.gsub(start, "pid"))
+          end
+        end
     end
 
     project.metrics.each do |metric|
+      if incl.to_s == '' || !(metric.tag_set & incl).empty? then
+        if excl.to_s == '' || (metric.tag_set & excl).empty? then
       start_metrics.push(metric.uri.gsub(start, "pid"))
+        end
+      end
     end
   end
 
-  
+
   metrics_diff = start_metrics - devel_metrics
 
   if (metrics_diff.count > 0) then
@@ -125,6 +154,3 @@ GoodData.with_connection(login: username, password: password, server: server) do
 end
 
 GoodData.disconnect
-
-
-
