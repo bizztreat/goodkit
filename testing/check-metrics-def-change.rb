@@ -29,11 +29,11 @@ excl = options[:excl]
 
 # make arrays from incl and excl parameters
 if incl.to_s != ''
-incl = incl.split(",")
+  incl = incl.split(",")
 end
 
 if excl.to_s != ''
-excl = excl.split(",")
+  excl = excl.split(",")
 end
 
 # if whitelabel is not specified set to default domain
@@ -72,8 +72,8 @@ GoodData.with_connection(login: username, password: password, server: server) do
     project.metrics.each do |metric|
       if incl.to_s == '' || !(metric.tag_set & incl).empty? then
         if excl.to_s == '' || (metric.tag_set & excl).empty? then
-      $devel_metrics.store(metric.uri.gsub(devel, "pid"), metric.expression.gsub(devel, "pid"))
-      #puts $devel_metrics.keys
+          $devel_metrics.store(metric.uri.gsub(devel, "pid"), metric.expression.gsub(devel, "pid"))
+          #puts $devel_metrics.keys
         end
       end
     end
@@ -85,8 +85,8 @@ GoodData.with_connection(login: username, password: password, server: server) do
     project.metrics.each do |metric|
       if incl.to_s == '' || !(metric.tag_set & incl).empty? then
         if excl.to_s == '' || (metric.tag_set & excl).empty? then
-      $start_metrics.store(metric.uri.gsub(start, "pid"), metric.expression.gsub(start, "pid"))
-      # puts $start_metrics.keys
+          $start_metrics.store(metric.uri.gsub(start, "pid"), metric.expression.gsub(start, "pid"))
+          # puts $start_metrics.keys
         end
       end
     end
@@ -126,7 +126,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
           :type => "ERROR",
           :url => server + "/#s=/gdc/projects/" + devel + "%7CanalysisPage%7Chead%7C" + obj['report']['meta']['uri'],
           :api => server + obj['report']['meta']['uri'],
-          :title => metric.title,
+          :title => obj['report']['meta']['title'],
           :description => 'Updated metric: ' + metric.title + ' has been used in this report: '+ obj['report']['meta']['title']
       })
       counter_err += 1
@@ -140,7 +140,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
             :type => "ERROR",
             :url => server + "/#s=/gdc/projects/" + devel + "|projectDashboardPage|" + obj['projectDashboard']['meta']['uri'],
             :api => server + obj['projectDashboard']['meta']['uri'],
-            :title => metric.title,
+            :title => obj['projectDashboard']['meta']['title'],
             :description => 'Updated metric: ' + metric.title + ' has been used in this dashboard: '+ obj['projectDashboard']['meta']['title']
         })
 
