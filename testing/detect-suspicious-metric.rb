@@ -26,19 +26,21 @@ excl = options[:excl]
 
 # make arrays from incl and excl parameters
 if incl.to_s != ''
-incl = incl.split(",")
+  incl = incl.split(",")
 end
 
 if excl.to_s != ''
-excl = excl.split(",")
+  excl = excl.split(",")
 end
 
 # if whitelabel is not specified set to default domain
-if server.to_s.empty? then server = 'https://secure.gooddata.com' end
+if server.to_s.empty? then
+  server = 'https://secure.gooddata.com'
+end
 
 # extra variables
 special = "()/\[]^+-"
-regex = /[#{special.gsub(/./){|char| "\\#{char}"}}]/
+regex = /[#{special.gsub(/./) { |char| "\\#{char}" }}]/
 
 # variables for standard output
 counter_ok = 0
@@ -54,36 +56,35 @@ GoodData.with_connection(login: username, password: password, server: server) do
 
 # connect to project
   GoodData.with_project(devel) do |project|
-  # go through all metrics in the project
+    # go through all metrics in the project
     project.metrics.pmap do |metric|
       if incl.to_s == '' || !(metric.tag_set & incl).empty? then
         if excl.to_s == '' || (metric.tag_set & excl).empty? then
-    # check if the metric contains speceial characters which mean it's not just SELECT and a constant
-      if not
-      metric.expression =~ regex
-        then
+          # check if the metric contains speceial characters which mean it's not just SELECT and a constant
+          if not
+          metric.expression =~ regex
+          then
 
-        # count errors and prepare details to the array
-        counter_err += 1
+            # count errors and prepare details to the array
+            counter_err += 1
 
-        err_array.push(error_details = {
-            :type => "ERROR",
-            :title => metric.title,
-            :url => server + '/#s=/gdc/projects/' + devel + '|objectPage|' + metric.uri ,
-            :api => server + metric.uri,
-            :message => "Suspicious metric detected."
-        })
+            err_array.push(error_details = {
+                :type => "ERROR",
+                :url => server + '/#s=/gdc/projects/' + devel + '|objectPage|' + metric.uri,
+                :api => server + metric.uri,
+                :title => metric.title,
+                :description => "Suspicious metric detected."
+            })
 
-      # count OK objects
-      else counter_ok += 1
-
+          else
+            # count OK objects
+            counter_ok += 1
+          end
+        end
       end
     end
-end
-end
     # prepare part of the results
     $result.push({:section => 'Suspicious metrics check.', :OK => counter_ok, :ERROR => counter_err, :output => err_array})
-
     puts $result.to_json
 
   end

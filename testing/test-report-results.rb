@@ -80,7 +80,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
             :type => "ERROR",
             :url => server + '#s=/gdc/projects/' + devel.pid + '|analysisPage|head|' + new_report.uri,
             :api => server + new_report.uri,
-            :title => '',
+            :title => '', #TODO
             :message => "New report result is different."
         })
 
