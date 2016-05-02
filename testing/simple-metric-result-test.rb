@@ -56,14 +56,14 @@ GoodData.with_connection(login: username, password: password, server: server) do
          if incl.to_s == '' || !(m.tag_set & incl).empty? then
            if excl.to_s == '' || (m.tag_set & excl).empty? then
 
-       # push the result to result_array
-       result_array.push(error_details = {
-                               :type => "INFO",
-                               :url => server + '/#s=/gdc/projects/' + devel + '|objectPage|' + m.uri ,
-                               :api => server + m.uri,
-                               :message => 'Results of the metric ('+ m.title + ') is: ' +  m.execute.to_s
-                               })
-
+             # push the result to result_array
+             result_array.push(error_details = {
+                 :type => "INFO",
+                 :url => server + '/#s=/gdc/projects/' + devel + '|objectPage|' + m.uri,
+                 :api => server + m.uri,
+                 :title => m.title,
+                 :description => 'Results of the metric ('+ m.title + ') is: ' + m.execute.to_s
+             })
 
             end
           end

@@ -257,7 +257,6 @@ GoodData.with_connection(login: username, password: password, server: server) do
     end
 
   end
-
   $result.push({:section => 'Variable tags and titles errors', :OK => 0, :ERROR => counter_err, :output => err_array_5})
 
 end
