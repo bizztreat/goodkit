@@ -27,11 +27,11 @@ excl = options[:excl]
 
 # make arrays from incl and excl parameters
 if incl.to_s != ''
-incl = incl.split(",")
+  incl = incl.split(",")
 end
 
 if excl.to_s != ''
-excl = excl.split(",")
+  excl = excl.split(",")
 end
 
 # if whitelabel is not specified set to default domain
@@ -55,7 +55,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
     #get metric expression from devel project
     project.reports.each do |report|
       #check incl and excl tags
-        if incl.to_s == '' || !(report.tag_set & incl).empty? then
+      if incl.to_s == '' || !(report.tag_set & incl).empty? then
         if excl.to_s == '' || (report.tag_set & excl).empty? then
 
           #cache metrics which are using on the report
@@ -64,32 +64,32 @@ GoodData.with_connection(login: username, password: password, server: server) do
           #go through them
           objects.select { |object| object["category"] == 'metric' }.each { |m|
 
-        obj = GoodData::get(m["link"])
-        #check if the metric is deleted  ['deprecated'] == "1"
-        if obj['metric']['meta']['deprecated'] == "1" then
+            obj = GoodData::get(m["link"])
+            #check if the metric is deleted  ['deprecated'] == "1"
+            if obj['metric']['meta']['deprecated'] == "1" then
 
-          #push errors to error array
-          counter_err += 1
-          err_array.push(error_details = {
-              :type => "ERROR",
-              :url => server + '/#s=/gdc/projects/' + devel + '|objectPage|' + m["link"],
-              :api => server + m["link"],
-              :title => obj['metric']['meta']['title'],
-              :description => "This report's metric has been deleted."
-          })
+              #push errors to error array
+              counter_err += 1
+              err_array.push(error_details = {
+                  :type => "ERROR",
+                  :url => server + '/#s=/gdc/projects/' + devel + '|objectPage|' + m["link"],
+                  :api => server + m["link"],
+                  :title => obj['metric']['meta']['title'],
+                  :description => "This report's metric has been deleted."
+              })
+            end
+          }
         end
-        }
-  end
-end
-    if counter_err != 0 then
-  # save error lists to array and prepare for a json creation
-  $result.push({:section => 'This report "' + report.title + '" contains deleted metrics', :OK => "0", :ERROR => counter_err, :output => err_array})
-  counter_err = 0
+      end
+      if counter_err != 0 then
+        # save error lists to array and prepare for a json creation
+        $result.push({:section => 'This report "' + report.title + '" contains deleted metrics', :OK => "0", :ERROR => counter_err, :output => err_array})
+        counter_err = 0
+      end
     end
-end
-end
+  end
   # result as json_file
   puts $result.to_json
-  
+
 end
 GoodData.disconnect
