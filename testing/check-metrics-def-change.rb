@@ -103,7 +103,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
           :type => "ERROR",
           :url => server + '/#s=/gdc/projects/' + devel + '|objectPage|' + key.gsub("pid", devel),
           :api => server + key.gsub("pid", devel),
-          :title => '', #TODO
+          :title => client.projects(devel).metrics(key.gsub("pid", devel)).title,
           :description => "This updated metric has been changed."
       })
       $updated_metrics.push(key.gsub("pid", devel))
