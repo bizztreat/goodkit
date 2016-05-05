@@ -54,9 +54,6 @@ GoodData.with_connection(login: username, password: password, server: server) do
   start = client.projects(options[:start])
   devel = client.projects(options[:devel])
 
-  # for each tag select reports, order them and compare results
-  tag.each do |tag|
-
     # select original reports include and exclude tags
     orig_reports = start.reports.select { |r| incl.to_s == '' || !(r.tag_set & incl).empty? }.sort_by(&:title)
     orig_reports = orig_reports.select { |r| excl.to_s == '' || (r.tag_set & excl).empty? }.sort_by(&:title)
@@ -80,7 +77,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
             :type => "ERROR",
             :url => server + '#s=/gdc/projects/' + devel.pid + '|analysisPage|head|' + new_report.uri,
             :api => server + new_report.uri,
-            :title => '', #TODO
+            :title => new_report.uri, 
             :message => "New report result is different."
         })
 
@@ -88,7 +85,6 @@ GoodData.with_connection(login: username, password: password, server: server) do
         # count OK objects
         counter_ok += 1
       end
-    end
   end
 
   # prepare part of the results
