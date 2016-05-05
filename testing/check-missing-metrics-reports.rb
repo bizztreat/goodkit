@@ -108,7 +108,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
           :type => "ERROR",
           :url => server + '#s=/gdc/projects/' + start + '|objectPage|' + m.gsub!("pid", start),
           :api => server + m,
-          :title => '', #TODO
+          :title => client.projects(start).metrics(m.gsub("pid", start)).title,
           :description => "Metric is missing in Devel project"
       }
 
@@ -134,7 +134,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
           :type => "ERROR",
           :url => server + '#s=/gdc/projects/' + start + '%7CanalysisPage%7Chead%7C' + r.gsub!("pid", start),
           :api => server + r,
-          :title => '', #TODO
+          :title => client.projects(start).reports(r.gsub("pid", start)).title,
           :description => "Report is missing in Devel project"
       }
 
