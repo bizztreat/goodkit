@@ -79,7 +79,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
           :type => "ERROR",
           :url => server + '/#s=/gdc/projects' + devel +'|objectPage|' + key.to_s,
           :api => server + key.to_s,
-          :title => '', #TODO
+          :title => client.projects(start).metrics(key.to_s).title,
           :description => "Aggregation is different"
       })
 
