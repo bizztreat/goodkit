@@ -79,7 +79,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
             counter_err += 1
             err_array_1.push(error_details = {
                 :type => "ERROR",
-                :url => server + '/#s=/gdc/projects/' + devel.pid + '|objectPage|' + "/#{obj['report']['meta']['uri']}",
+                :url => server + '/#s=/gdc/projects/' + devel.pid + '|analysisPage|head|' + "#{obj['report']['meta']['uri']}",
                 :api => server + "/#{obj['report']['meta']['uri']}",
                 :title => r['title'],
                 :description => "Report not tagged as preview."
