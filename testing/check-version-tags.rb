@@ -64,17 +64,13 @@ GoodData.with_connection(login: username, password: password, server: server) do
 
             # count errors and prepare details to the array
             counter_err += 1
-            error_details = {
+            err_array.push({
                 :type => "ERROR",
                 :url => server + '#s=/gdc/projects/' + devel + '|analysisPage|head|' + report.uri,
                 :api => server + report.uri,
                 :title => report.title,
                 :description => "Report does not have a version tag."
-            }
-
-            # save detail to the array
-            err_array.push(JSON.generate(error_details))
-
+            })
           else
             # count OK objects
             counter_ok += 1
@@ -97,7 +93,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
           then
             # count errors and prepare details to the array
             counter_err += 1
-            err_array.push(error_details = {
+            err_array.push({
                 :type => "ERROR",
                 :url => server + '#s=/gdc/projects/' + devel + '|objectPage|' + metric.uri,
                 :api => server + metric.uri,
@@ -117,6 +113,5 @@ GoodData.with_connection(login: username, password: password, server: server) do
     puts $result.to_json
 
   end
-
 end
 GoodData.disconnect
