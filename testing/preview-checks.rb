@@ -45,6 +45,7 @@ err_array_2 = []
 err_array_3 = []
 err_array_4 = []
 err_array_5 = []
+err_array_6 = []
 $result = []
 
 # turn off logging for clear output
