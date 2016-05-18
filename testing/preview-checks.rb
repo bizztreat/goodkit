@@ -259,8 +259,8 @@ GoodData.with_connection(login: username, password: password, server: server) do
 
   end
   $result.push({:section => 'Variable tags and titles errors', :OK => 0, :ERROR => counter_err, :output => err_array_5})
-# ------------ VARIABLES -----------
-#---  Check metrics that depend on variables tagged "preview" but are not preview
+  # ------------ VARIABLES -----------
+  #---  Check metrics that depend on variables tagged "preview" but are not preview
   # reset counter
   counter_err = 0
   GoodData.with_project(devel) do |project|
@@ -268,21 +268,21 @@ GoodData.with_connection(login: username, password: password, server: server) do
       # check exclude/include tag conditions
       if incl.to_s == '' || !(var.tag_set & incl).empty? then
         if excl.to_s == '' || (var.tag_set & excl).empty? then
-          if var.tag_set.include?(tag)  then
-              variables = var.usedby
-             variables.select { |v| v["category"] == 'metric' }.each { |m|
-               metric = GoodData::MdObject[m["link"]]
-               if !metric.tag_set.include?(tag) then
-                 counter_err += 1
-                 err_array_6.push(error_details = {
-                     :type => "ERROR",
-                     :url => server + '/#s=/gdc/projects/' + devel.pid + '|objectPage|' + metric.uri,
-                     :api => server + metric.uri,
-                     :title => metric.title,
-                     :description => "The metric is using 'preview' variables, but is not tagged."
-                 })
-               end
-               }
+          if var.tag_set.include?(tag) then
+            variables = var.usedby
+            variables.select { |v| v["category"] == 'metric' }.each { |m|
+              metric = GoodData::MdObject[m["link"]]
+              if !metric.tag_set.include?(tag) then
+                counter_err += 1
+                err_array_6.push(error_details = {
+                    :type => "ERROR",
+                    :url => server + '/#s=/gdc/projects/' + devel.pid + '|objectPage|' + metric.uri,
+                    :api => server + metric.uri,
+                    :title => metric.title,
+                    :description => "The metric is using 'preview' variables, but is not tagged."
+                })
+              end
+            }
           end
         end
       end
