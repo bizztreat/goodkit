@@ -36,6 +36,8 @@ end
 
 # variables for script results
 result_array = []
+count_ok = 0
+count_error = 0
 $result = []
 
 # if whitelabel is not specified set to default domain
@@ -56,6 +58,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
          if incl.to_s == '' || !(m.tag_set & incl).empty? then
            if excl.to_s == '' || (m.tag_set & excl).empty? then
 
+         begin
              # push the result to result_array
              result_array.push(error_details = {
                  :type => "INFO",
@@ -64,12 +67,24 @@ GoodData.with_connection(login: username, password: password, server: server) do
                  :title => m.title,
                  :description => 'Results of the metric ('+ m.title + ') is: ' + m.execute.to_s
              })
+             count_ok += 1
+           rescue
+             # push the result to result_array
+             result_array.push(error_details = {
+                 :type => "ERROR",
+                 :url => server + '/#s=/gdc/projects/' + devel + '|objectPage|' + m.uri,
+                 :api => server + m.uri,
+                 :title => m.title,
+                 :description => 'Results of the metric ('+ m.title + ') is uncomputable.'
+             })
+             count_error += 1
+           end
 
             end
           end
        end
     #save errors in the result variable
-    $result.push({:section => 'Metric results between Start and Devel projects.', :OK => 0, :ERROR => 0, :output => result_array})
+    $result.push({:section => 'Metric results between Start and Devel projects.', :OK => count_ok, :ERROR => count_error, :output => result_array})
   end
 
 #print out the result
