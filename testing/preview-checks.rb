@@ -14,6 +14,7 @@ OptionParser.new do |opts|
   opts.on('-h', '--hostname NAME', 'Hostname') { |v| options[:server] = v }
   opts.on('-i', '--include INCLUDE', 'Tag included') { |v| options[:incl] = v }
   opts.on('-e', '--exclude EXCLUDE', 'Tag excluded') { |v| options[:excl] = v }
+  opts.on('-m', '--move MOVE', 'Move metrics and reports to preview folders') { |v| options[:move] = v }
 
 end.parse!
 
@@ -24,6 +25,7 @@ devel = options[:devel]
 server = options[:server]
 incl = options[:incl]
 excl = options[:excl]
+move = options[:move]
 
 # make arrays from incl and excl parameters
 if incl.to_s != ''
@@ -46,6 +48,7 @@ err_array_3 = []
 err_array_4 = []
 err_array_5 = []
 err_array_6 = []
+err_array_7 = []
 $result = []
 
 # turn off logging for clear output
@@ -290,6 +293,51 @@ GoodData.with_connection(login: username, password: password, server: server) do
   end
 
   $result.push({:section => "Not tagged metrics using 'preview' variables.", :OK => 0, :ERROR => counter_err, :output => err_array_6})
+  counter_err = 0
+  counter_ok = 0
+  #----------Check metrics and reports that are in folder starting with "ZOOM Preview - " are also tagged "preview"
+  if move == 1 or move == "true" then
+    #prepare all folders first
+    all_folders={}
+    client.get("#{devel.md['query']}/folders")['query']['entries'].map do |i|
+      all_folders.[]=(i['title'], i['link'])
+    end
+    all_folders.values.uniq
+
+    # check all metrics
+  GoodData.with_project(devel) do |project|
+    project.metrics.peach do |met|
+      if  met.content["folders"].to_s != "" then
+        if all_folders.key(met.content["folders"].first.to_s).to_s.include?(name_starting) then
+          if !met.tag_set.include?(tag) then
+          counter_err += 1
+          err_array_7.push(error_details = {
+              :type => "ERROR",
+              :url => server + '/#s=/gdc/projects/' + devel.pid + '|objectPage|' + met.uri,
+              :api => server + met.uri,
+              :title => met.title,
+              :description => "The metric from preview folder is not tagged by the preview tag."
+          })
+        else
+          counter_ok += 1
+          err_array_7.push(error_details = {
+              :type => "OK",
+              :url => server + '/#s=/gdc/projects/' + devel.pid + '|objectPage|' + met.uri,
+              :api => server + met.uri,
+              :title => met.title,
+              :description => "The metric from preview folder is alredy tagged by the preview tag."
+          })
+
+        end
+
+        end
+      end
+    end
+  end
+ end
+ $result.push({:section => "Metrics from preview folder have been checked for the preview tag.", :OK => counter_ok, :ERROR => counter_err, :output => err_array_7})
+
+
 end
 
 puts $result.to_json
