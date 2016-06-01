@@ -45,7 +45,7 @@ $result = []
 # turn off logging for clear output
 GoodData.logging_off
 
-GoodData.with_connection(username, password) do |client|
+GoodData.with_connection(login: username, password: password, server: server) do |client|
 
         # connect to project and check if the report is computable checks if there is an error and then print the report with error
         GoodData.with_project(devel) do |project|
