@@ -61,7 +61,7 @@ text_in_title = options[:title]
 counter_ok = 0
 counter_err = 0
 err_array = []
-result = []
+$result = []
 
 # turn off logging for clear output
 GoodData.logging_off
@@ -100,8 +100,8 @@ GoodData.with_connection(login: username, password: password, server: server) do
     end
 
     # prepare part of the results
-    result.push({:section => 'Suspicious metric´s formating check.', :OK => counter_ok, :ERROR => counter_err, :output => err_array})
-    puts result.to_json
+    $result.push({:section => 'Suspicious metric´s formating check.', :OK => counter_ok, :ERROR => counter_err, :output => err_array})
+    puts $result.to_json
 
 
   end
