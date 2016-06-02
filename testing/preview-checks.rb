@@ -14,7 +14,6 @@ OptionParser.new do |opts|
   opts.on('-h', '--hostname NAME', 'Hostname') { |v| options[:server] = v }
   opts.on('-i', '--include INCLUDE', 'Tag included') { |v| options[:incl] = v }
   opts.on('-e', '--exclude EXCLUDE', 'Tag excluded') { |v| options[:excl] = v }
-  opts.on('-m', '--move MOVE', 'Move metrics and reports to preview folders') { |v| options[:move] = v }
 
 end.parse!
 
@@ -25,7 +24,6 @@ devel = options[:devel]
 server = options[:server]
 incl = options[:incl]
 excl = options[:excl]
-move = options[:move]
 
 # make arrays from incl and excl parameters
 if incl.to_s != ''
@@ -42,17 +40,10 @@ if server.to_s.empty? then
 end
 counter_ok = 0
 counter_err = 0
-err_array_1 = []
-err_array_2 = []
-err_array_3 = []
-err_array_4 = []
-err_array_5 = []
-err_array_6 = []
-err_array_7 = []
+err_array = []
 $result = []
 
 # turn off logging for clear output
-#GoodData.logging_off
 GoodData.logging_off
 
 # change the tag and the name to check here
@@ -81,7 +72,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
           if !obj['report']['meta']['tags'].include? "preview" then
 
             counter_err += 1
-            err_array_1.push(error_details = {
+            err_array.push(error_details = {
                 :type => "ERROR",
                 :url => server + '/#s=/gdc/projects/' + devel.pid + '|analysisPage|head|' + "#{obj['report']['meta']['uri']}",
                 :api => server + "/#{obj['report']['meta']['uri']}",
@@ -96,9 +87,11 @@ GoodData.with_connection(login: username, password: password, server: server) do
   end
 
   # prepare part of the results
-  $result.push({:section => 'Reports contains preview metric, not tagged as Preview', :OK => devel.metrics.count - counter_err, :ERROR => counter_err, :output => err_array_1})
-
+  $result.push({:section => 'Reports contains preview metric, not tagged as Preview', :OK => devel.metrics.count - counter_err, :ERROR => counter_err, :output => err_array})
+  #reset output variables
+  counter_ok = 0
   counter_err = 0
+  err_array = []
 
   # get all metrics
   metrics.each do |met|
@@ -111,7 +104,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
         # check for the correct folder or if folder is not set print the metric
         if folder.nil? then
           counter_err += 1
-          err_array_2.push(error_details = {
+          err_array.push(error_details = {
               :type => "ERROR",
               :url => server + '/#s=/gdc/projects/' + devel.pid + '|objectPage|' + met.uri,
               :api => server + met.uri,
@@ -125,7 +118,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
           if !obj['folder']['meta']['title'].include? "ZOOM Preview" then
 
             counter_err += 1
-            err_array_2.push(error_details = {
+            err_array.push(error_details = {
                 :type => "ERROR",
                 :url => server + '/#s=/gdc/projects/' + devel.pid + '|objectPage|' + met.uri,
                 :api => server + met.uri,
@@ -138,10 +131,11 @@ GoodData.with_connection(login: username, password: password, server: server) do
     end
   end
   # push result to the result array
-  $result.push({:section => 'Metric is not in specific Zoom Preview folder or in any folder.', :OK => devel.metrics.count - counter_err, :ERROR => counter_err, :output => err_array_2})
-
-  # reset counter
+  $result.push({:section => 'Metric is not in specific Zoom Preview folder or in any folder.', :OK => devel.metrics.count - counter_err, :ERROR => counter_err, :output => err_array})
+  #reset output variables
+  counter_ok = 0
   counter_err = 0
+  err_array = []
 
   # get all reports for given tag
   reports = devel.reports.select { |m| m.tag_set.include?(tag) }.sort_by(&:title)
@@ -157,7 +151,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
         # check if report is in preview folder/domain
         if (folders.to_s == '[]') || folders.nil? then
           counter_err += 1
-          err_array_3.push(error_details = {
+          err_array.push(error_details = {
               :type => "ERROR",
               :url => server + '/#s=/gdc/projects/' + devel.pid + '|analysisPage|' + rep.uri,
               :api => server + rep.uri,
@@ -183,10 +177,12 @@ GoodData.with_connection(login: username, password: password, server: server) do
     end
   end
   # push result to the result array
-  $result.push({:section => 'Reports not in specific Zoom Preview folder or in any folder.', :OK => devel.reports.count - counter_err, :ERROR => counter_err, :output => err_array_3})
+  $result.push({:section => 'Reports not in specific Zoom Preview folder or in any folder.', :OK => devel.reports.count - counter_err, :ERROR => counter_err, :output => err_array})
 
-  # reset counter
+  #reset output variables
+  counter_ok = 0
   counter_err = 0
+  err_array = []
 
   reports.each do |rep|
     # check exclude/include tag conditions
@@ -204,7 +200,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
           if !obj['projectDashboard']['meta']['title'].include? "Zoom preview" then
 
             counter_err += 1
-            err_array_4.push(error_details = {
+            err_array.push(error_details = {
                 :type => "ERROR",
                 :url => server + '/#s=/gdc/projects/' + devel.pid + '|analysisPage|' + rep.uri,
                 :api => server + rep.uri,
@@ -220,10 +216,13 @@ GoodData.with_connection(login: username, password: password, server: server) do
     end
   end
 
-  $result.push({:section => 'Reports tagged Preview not in Preview dashboard', :OK => devel.reports.count - counter_err, :ERROR => counter_err, :output => err_array_4})
+  $result.push({:section => 'Reports tagged Preview not in Preview dashboard', :OK => devel.reports.count - counter_err, :ERROR => counter_err, :output => err_array})
+  #reset output variables
+  counter_ok = 0
+  counter_err = 0
+  err_array = []
 
   # ------------ VARIABLES --------------
-  counter_err = 0
   GoodData.with_project(devel) do |project|
     project.variables.each do |var|
       # check exclude/include tag conditions
@@ -234,7 +233,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
             if var.tags.include?(tag) then
             else
               counter_err += 1
-              err_array_5.push(error_details = {
+              err_array.push(error_details = {
                   :type => "ERROR",
                   :url => server + '/#s=/gdc/projects/' + devel.pid + '|objectPage|' + var.uri,
                   :api => server + var.uri,
@@ -247,7 +246,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
             if var.title.include?(name_starting) then
             else
               counter_err += 1
-              err_array_5.push(error_details = {
+              err_array.push(error_details = {
                   :type => "ERROR",
                   :url => server + '/#s=/gdc/projects/' + devel.pid + '|objectPage|' + var.uri,
                   :api => server + var.uri,
@@ -261,7 +260,11 @@ GoodData.with_connection(login: username, password: password, server: server) do
     end
 
   end
-  $result.push({:section => 'Variable tags and titles errors', :OK => 0, :ERROR => counter_err, :output => err_array_5})
+  $result.push({:section => 'Variable tags and titles errors', :OK => 0, :ERROR => counter_err, :output => err_array})
+  #reset output variables
+  counter_ok = 0
+  counter_err = 0
+  err_array = []
   # ------------ VARIABLES -----------
   #---  Check metrics that depend on variables tagged "preview" but are not preview
   # reset counter
@@ -277,7 +280,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
               metric = GoodData::MdObject[m["link"]]
               if !metric.tag_set.include?(tag) then
                 counter_err += 1
-                err_array_6.push(error_details = {
+                err_array.push(error_details = {
                     :type => "ERROR",
                     :url => server + '/#s=/gdc/projects/' + devel.pid + '|objectPage|' + metric.uri,
                     :api => server + metric.uri,
@@ -292,11 +295,12 @@ GoodData.with_connection(login: username, password: password, server: server) do
     end
   end
 
-  $result.push({:section => "Not tagged metrics using 'preview' variables.", :OK => 0, :ERROR => counter_err, :output => err_array_6})
-  counter_err = 0
+  $result.push({:section => "Not tagged metrics using 'preview' variables.", :OK => 0, :ERROR => counter_err, :output => err_array})
+  #reset output variables
   counter_ok = 0
+  counter_err = 0
+  err_array = []
   #----------Check metrics and reports that are in folder starting with "ZOOM Preview - " are also tagged "preview"
-  if move == 1 or move == "true" then
     #prepare all folders first
     all_folders={}
     client.get("#{devel.md['query']}/folders")['query']['entries'].map do |i|
@@ -307,11 +311,14 @@ GoodData.with_connection(login: username, password: password, server: server) do
     # check all metrics
   GoodData.with_project(devel) do |project|
     project.metrics.peach do |met|
+      if incl.to_s == '' || !(met.tag_set & incl).empty? then
+        if excl.to_s == '' || (met.tag_set & excl).empty? then
+         if met.tag_set.include?(tag) then
       if  met.content["folders"].to_s != "" then
         if all_folders.key(met.content["folders"].first.to_s).to_s.include?(name_starting) then
           if !met.tag_set.include?(tag) then
           counter_err += 1
-          err_array_7.push(error_details = {
+          err_array.push(error_details = {
               :type => "ERROR",
               :url => server + '/#s=/gdc/projects/' + devel.pid + '|objectPage|' + met.uri,
               :api => server + met.uri,
@@ -320,7 +327,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
           })
         else
           counter_ok += 1
-          err_array_7.push(error_details = {
+          err_array.push(error_details = {
               :type => "OK",
               :url => server + '/#s=/gdc/projects/' + devel.pid + '|objectPage|' + met.uri,
               :api => server + met.uri,
@@ -328,15 +335,62 @@ GoodData.with_connection(login: username, password: password, server: server) do
               :description => "The metric from preview folder is alredy tagged by the preview tag."
           })
 
+          end
+          end
+          end
         end
-
         end
       end
     end
-  end
  end
- $result.push({:section => "Metrics from preview folder have been checked for the preview tag.", :OK => counter_ok, :ERROR => counter_err, :output => err_array_7})
+ $result.push({:section => "Metrics from preview folder have been checked for the preview tag.", :OK => counter_ok, :ERROR => counter_err, :output => err_array})
+ #reset output variables
+ counter_ok = 0
+ counter_err = 0
+ err_array = []
+ #----------check if metric depend on not preview variable
 
+   # check all metrics
+ GoodData.with_project(devel) do |project|
+   project.metrics.each do |met|
+     error = 0
+     if incl.to_s == '' || !(met.tag_set & incl).empty? then
+       if excl.to_s == '' || (met.tag_set & excl).empty? then
+          if met.tag_set.include?(tag) then
+         objects = met.using
+         objects.select { |object| object["category"] == 'attribute' }.each { |obj|
+                   obj = devel.attributes(obj["link"])
+                 if  !obj.tags.to_s.split(" ").include?(tag) then
+                  error = 1
+                 end
+                 }
+
+         if error == 1 then
+         counter_err += 1
+         err_array.push(error_details = {
+             :type => "ERROR",
+             :url => server + '/#s=/gdc/projects/' + devel.pid + '|objectPage|' + met.uri,
+             :api => server + met.uri,
+             :title => met.title,
+             :description => "The metric depends on not preview variable"
+         })
+       else
+         counter_ok += 1
+         err_array.push(error_details = {
+             :type => "OK",
+             :url => server + '/#s=/gdc/projects/' + devel.pid + '|objectPage|' + met.uri,
+             :api => server + met.uri,
+             :title => met.title,
+             :description => "The metric does not depend on not preview variable"
+         })
+
+       end
+       end
+       end
+       end
+       end
+     end
+$result.push({:section => "Check if metric depends on not preview variable.", :OK => counter_ok, :ERROR => counter_err, :output => err_array})
 
 end
 
