@@ -301,19 +301,15 @@ GoodData.with_connection(login: username, password: password, server: server) do
   counter_err = 0
   err_array = []
   #----------Check metrics and reports that are in folder starting with "ZOOM Preview - " are also tagged "preview"
-    #prepare all folders first
+    #prepare all folders for metrics first
     all_folders={}
     client.get("#{devel.md['query']}/folders")['query']['entries'].map do |i|
       all_folders.[]=(i['title'], i['link'])
     end
     all_folders.values.uniq
-
     # check all metrics
   GoodData.with_project(devel) do |project|
     project.metrics.peach do |met|
-      if incl.to_s == '' || !(met.tag_set & incl).empty? then
-        if excl.to_s == '' || (met.tag_set & excl).empty? then
-         if met.tag_set.include?(tag) then
       if  met.content["folders"].to_s != "" then
         if all_folders.key(met.content["folders"].first.to_s).to_s.include?(name_starting) then
           if !met.tag_set.include?(tag) then
@@ -337,19 +333,55 @@ GoodData.with_connection(login: username, password: password, server: server) do
 
           end
           end
-          end
-        end
         end
       end
-    end
  end
- $result.push({:section => "Metrics from preview folder have been checked for the preview tag.", :OK => counter_ok, :ERROR => counter_err, :output => err_array})
+ $result.push({:section => "Metrics from preview folders have been checked for the preview tag.", :OK => counter_ok, :ERROR => counter_err, :output => err_array})
  #reset output variables
  counter_ok = 0
  counter_err = 0
  err_array = []
- #----------check if metric depend on not preview variable
 
+  #prepare all folders for reports first because the folders are diferent
+ all_folders={}
+ client.get("#{devel.md['query']}/domains")['query']['entries'].map do |i|
+   all_folders.[]=(i['title'], i['link'])
+ end
+ all_folders.values.uniq
+      #check all reports
+GoodData.with_project(devel) do |project|
+project.reports.peach do |rep|
+if  rep.content["domains"].to_s != "" then
+  if all_folders.key(rep.content["domains"].first.to_s).to_s.include?(name_starting) then
+    if !rep.tag_set.include?(tag) then
+    counter_err += 1
+    err_array.push(error_details = {
+        :type => "ERROR",
+        :url => server + '/#s=/gdc/projects/' + devel.pid + '|analysisPage|head|' + rep.uri,
+        :api => server + rep.uri,
+        :title => rep.title,
+        :description => "The report from preview folder is not tagged by the preview tag."
+    })
+  else
+    counter_ok += 1
+    err_array.push(error_details = {
+        :type => "OK",
+        :url => server + '/#s=/gdc/projects/' + devel.pid + '|analysisPage|head|' + rep.uri,
+        :api => server + rep.uri,
+        :title => rep.title,
+        :description => "The report from preview folder is alredy tagged by the preview tag."
+    })
+    end
+    end
+  end
+end
+end
+$result.push({:section => "Reports from preview folders have been checked for the preview tag.", :OK => counter_ok, :ERROR => counter_err, :output => err_array})
+#reset output variables
+counter_ok = 0
+counter_err = 0
+err_array = []
+ #----------check if metric depend on not preview variable
    # check all metrics
  GoodData.with_project(devel) do |project|
    project.metrics.each do |met|
@@ -391,7 +423,6 @@ GoodData.with_connection(login: username, password: password, server: server) do
        end
      end
 $result.push({:section => "Check if metric depends on not preview variable.", :OK => counter_ok, :ERROR => counter_err, :output => err_array})
-
 end
 
 puts $result.to_json
