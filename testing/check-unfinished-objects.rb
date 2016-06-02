@@ -50,7 +50,7 @@ end
 GoodData.logging_off
 
 # set date from which we will check unfinished objects
-last_release_date = Time.parse(options[:date], '%e %b %Y')
+last_release_date = Time.strptime(options[:date], '%Y-%m-%d')
 
 # assign master project to variable
 master = options[:master]
