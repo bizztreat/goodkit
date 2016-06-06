@@ -91,7 +91,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
             :type => "ERROR",
             :url => server + '#s=/gdc/projects/' + master + '|projectDashboardPage|' + dashboard.uri,
             :api => server + dashboard.uri,
-            :title => '',
+            :title => dashboard.title,
             :description => 'The dashboard ('+ dashboard.title + ') - errors: ' + unlocked + missing_desc + unlisted
         })
       else
@@ -134,7 +134,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
             :type => "ERROR",
             :url => server + '#s=/gdc/projects/' + master + '|analysisPage|head|' + report.uri,
             :api => server + report.uri,
-            :title => '',
+            :title => report.title,
             :description => 'The report ('+ report.title + ') - errors: ' + unlocked + missing_desc + unlisted
         })
       else
@@ -178,7 +178,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
             :type => "ERROR",
             :url => server + '#s=/gdc/projects/' + master + '|objectPage|' + metric.uri,
             :api => server + metric.uri,
-            :title => '',
+            :title => metric.title,
             :description => 'The metric ('+ metric.title + ') - errors: ' + unlocked + missing_desc + unlisted
         })
       else

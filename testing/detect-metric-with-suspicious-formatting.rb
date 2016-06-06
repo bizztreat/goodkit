@@ -87,7 +87,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
                :type => "ERROR",
                :url => server + '/#s=/gdc/projects/' + devel + '|objectPage|' + metric.uri,
                :api => server + metric.uri,
-               :title => '',
+               :title => metric.title,
                :description => "Suspicious metric formating detected."
             })
 

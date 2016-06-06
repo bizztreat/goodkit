@@ -104,16 +104,13 @@ GoodData.with_connection(login: username, password: password, server: server) do
 
   if (metrics_diff.count > 0) then
     metrics_diff.each do |m|
-      error_details = {
+      err_array_1.push(error_details = {
           :type => "ERROR",
           :url => server + '#s=/gdc/projects/' + start + '|objectPage|' + m.gsub!("pid", start),
           :api => server + m,
           :title => client.projects(start).metrics(m.gsub("pid", start)).title,
           :description => "Metric is missing in Devel project"
-      }
-
-      # save detail to the array
-      err_array_1.push(JSON.generate(error_details))
+      })
     end
   end
 
@@ -130,16 +127,14 @@ GoodData.with_connection(login: username, password: password, server: server) do
 
     reports_diff.each do |r|
 
-      error_details = {
+      err_array_2.push(error_details = {
           :type => "ERROR",
           :url => server + '#s=/gdc/projects/' + start + '%7CanalysisPage%7Chead%7C' + r.gsub!("pid", start),
           :api => server + r,
           :title => client.projects(start).reports(r.gsub("pid", start)).title,
           :description => "Report is missing in Devel project"
-      }
+      })
 
-      # save detail to the array
-      err_array_2.push(JSON.generate(error_details))
     end
   end
 
