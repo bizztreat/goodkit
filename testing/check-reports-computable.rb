@@ -64,7 +64,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
                                   :url => server + '#s=/gdc/projects/' + devel + '|analysisPage|head|' + r.uri,
                                   :api => server + r.uri,
                                   :title => r.title,
-                                  :message => "This report is not computable."
+                                  :description => 'This report is not computable.'
                               })
                     end
                 end
