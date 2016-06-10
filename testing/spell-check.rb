@@ -58,7 +58,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
     #checking dashboards and tabs
     project.dashboards.each do |dashboard|
 
-      misspelled_words = check_misspelled(Spellchecker.check(dashboard.title))
+      misspelled_words = check_misspelled(Spellchecker.check(dashboard.title.gsub(' - ', ' ')))
       misspelled_words.each do |misspelled_word|
 
         counter_err += 1
@@ -73,7 +73,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
 
       dashboard.tabs.each do |tab|
 
-        misspelled_words = check_misspelled(Spellchecker.check(tab.title))
+        misspelled_words = check_misspelled(Spellchecker.check(tab.title.gsub(' - ', ' ')))
         misspelled_words.each do |misspelled_word|
 
           counter_err += 1
@@ -90,7 +90,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
 
     #checking metrics
     project.metrics.each do |metric|
-      misspelled_words = check_misspelled(Spellchecker.check(metric.title))
+      misspelled_words = check_misspelled(Spellchecker.check(metric.title.gsub(' - ', ' ')))
       misspelled_words.each do |misspelled_word|
 
         counter_err += 1
@@ -106,7 +106,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
 
     #checking reports
     project.reports.each do |report|
-      misspelled_words = check_misspelled(Spellchecker.check(report.title))
+      misspelled_words = check_misspelled(Spellchecker.check(report.title.gsub(' - ', ' ')))
       misspelled_words.each do |misspelled_word|
 
         counter_err += 1
@@ -122,7 +122,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
 
     # checking facts
     project.facts.each do |fact|
-      misspelled_words = check_misspelled(Spellchecker.check(fact.title))
+      misspelled_words = check_misspelled(Spellchecker.check(fact.title.gsub(' - ', ' ')))
       misspelled_words.each do |misspelled_word|
 
         counter_err += 1
@@ -138,7 +138,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
 
     # checking attributes
     project.attributes.each do |attribute|
-      misspelled_words = check_misspelled(Spellchecker.check(attribute.title))
+      misspelled_words = check_misspelled(Spellchecker.check(attribute.title.gsub(' - ', ' ')))
       misspelled_words.each do |misspelled_word|
 
         counter_err += 1
@@ -154,7 +154,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
 
     #checking datasets
     project.datasets.each do |dataset|
-      misspelled_words = check_misspelled(Spellchecker.check(dataset.title))
+      misspelled_words = check_misspelled(Spellchecker.check(dataset.title.gsub(' - ', ' ')))
       misspelled_words.each do |misspelled_word|
 
         counter_err += 1
