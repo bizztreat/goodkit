@@ -169,7 +169,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
     end
 
     # prepare part of the results
-    $result.push({:section => 'Spell Check.', :OK => counter_ok, :ERROR => counter_err, :output => err_array})
+    $result.push({:section => 'Spell Check in dashboards, tabs, metrics, reports, facts, attributes and datasets', :OK => counter_ok, :ERROR => counter_err, :output => err_array})
 
     puts $result.to_json
 
