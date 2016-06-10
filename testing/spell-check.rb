@@ -12,7 +12,7 @@ def check_misspelled(spell_checker_result)
   spell_checker_result.each do |result|
 
     unless result[:correct]
-      misspelled_words.push(error = {error: result[:original], suggestions: result[:suggestions].join(',')})
+      misspelled_words.push(error = {error: result[:original], suggestions: result[:suggestions].join(', ')})
     end
   end
 
