@@ -66,7 +66,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
             :type => 'ERROR',
             :url => server + '/#s=/gdc/projects/' + devel + '|projectDashboardPage|' + dashboard.uri,
             :api => server + dashboard.uri,
-            :title => misspelled_word[:error] +' in dashboards name '+ dashboard.title,
+            :title => '"misspelled_word[:error]"' +' in dashboards name '+ dashboard.title,
             :description => 'Suggestion: ' + misspelled_word[:suggestions]
         })
       end
@@ -81,7 +81,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
               :type => 'ERROR',
               :url => server + '/#s=/gdc/projects/' + devel + '|projectDashboardPage|' + dashboard.uri + '|' + tab.identifier,
               :api => server + dashboard.uri,
-              :title => misspelled_word[:error] + ' in tab name '+ dashboard.title + ' - ' + tab.title,
+              :title => '"misspelled_word[:error]"' + ' in tab name '+ dashboard.title + ' - ' + tab.title,
               :description => 'Suggestion: ' + misspelled_word[:suggestions]
           })
         end
@@ -98,7 +98,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
             :type => 'ERROR',
             :url => server + '#s=/gdc/projects/' + devel + '|objectPage|' + metric.uri,
             :api => server + metric.uri,
-            :title => misspelled_word[:error] + ' in metric name '+ metric.title,
+            :title => '"misspelled_word[:error]"' + ' in metric name '+ metric.title,
             :description => 'Suggestion: ' + misspelled_word[:suggestions]
         })
       end
@@ -114,7 +114,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
             :type => 'ERROR',
             :url => server + '#s=/gdc/projects/' + devel + '|analysisPage|head|' + report.uri,
             :api => server + report.uri,
-            :title => misspelled_word[:error] + ' in project name '+ report.title,
+            :title => '"misspelled_word[:error]"' + ' in project name '+ report.title,
             :description => 'Suggestion: ' + misspelled_word[:suggestions]
         })
       end
@@ -130,7 +130,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
             :type => 'ERROR',
             :url => server + '#s=/gdc/projects/' + devel + '|analysisPage|head|' + fact.uri,
             :api => server + fact.uri,
-            :title => misspelled_word[:error] + ' in fact name '+ fact.title,
+            :title => '"misspelled_word[:error]"' + ' in fact name '+ fact.title,
             :description => 'Suggestion: ' + misspelled_word[:suggestions]
         })
       end
@@ -146,7 +146,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
             :type => 'ERROR',
             :url => server + '#s=/gdc/projects/' + devel + '|analysisPage|head|' + attribute.uri,
             :api => server + attribute.uri,
-            :title => misspelled_word[:error] + ' in project name '+ attribute.title,
+            :title => '"misspelled_word[:error]"' + ' in project name '+ attribute.title,
             :description => 'Suggestion: ' + misspelled_word[:suggestions]
         })
       end
@@ -162,7 +162,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
             :type => 'ERROR',
             :url => server + '#s=/gdc/projects/' + devel + '|analysisPage|head|' + dataset.uri,
             :api => server + dataset.uri,
-            :title => misspelled_word[:error] + ' in dataset name '+ dataset.title,
+            :title => '"misspelled_word[:error]"' + ' in dataset name '+ dataset.title,
             :description => 'Suggestion: ' + misspelled_word[:suggestions]
         })
       end
