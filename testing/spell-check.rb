@@ -59,7 +59,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
     project.dashboards.each do |dashboard|
 
       # checking dashboards name
-      misspelled_words = check_misspelled(Spellchecker.check(dashboard.title.gsub('-', ' ').gsub('/', ' ').delete('()')))
+      misspelled_words = check_misspelled(Spellchecker.check(dashboard.title.gsub('-', ' ').gsub('/', ' ').delete(',()')))
       misspelled_words.each do |misspelled_word|
 
         counter_err += 1
@@ -73,7 +73,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
       end
 
       # checking dashboards description
-      misspelled_words = check_misspelled(Spellchecker.check(dashboard.summary.gsub('-', ' ').gsub('/', ' ').delete('()')))
+      misspelled_words = check_misspelled(Spellchecker.check(dashboard.summary.gsub('-', ' ').gsub('/', ' ').delete(',()')))
       misspelled_words.each do |misspelled_word|
 
         counter_err += 1
@@ -89,7 +89,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
       dashboard.tabs.each do |tab|
 
         # checking tab name
-        misspelled_words = check_misspelled(Spellchecker.check(tab.title.gsub('-', ' ').gsub('/', ' ').delete('()')))
+        misspelled_words = check_misspelled(Spellchecker.check(tab.title.gsub('-', ' ').gsub('/', ' ').delete(',()')))
         misspelled_words.each do |misspelled_word|
 
           counter_err += 1
@@ -106,7 +106,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
 
     # checking metrics name
     project.metrics.each do |metric|
-      misspelled_words = check_misspelled(Spellchecker.check(metric.title.gsub('-', ' ').gsub('/', ' ').delete('()')))
+      misspelled_words = check_misspelled(Spellchecker.check(metric.title.gsub('-', ' ').gsub('/', ' ').delete(',()')))
       misspelled_words.each do |misspelled_word|
 
         counter_err += 1
@@ -122,7 +122,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
 
     # checking metrics description
     project.metrics.each do |metric|
-      misspelled_words = check_misspelled(Spellchecker.check(metric.summary.gsub('-', ' ').gsub('/', ' ').delete('()')))
+      misspelled_words = check_misspelled(Spellchecker.check(metric.summary.gsub('-', ' ').gsub('/', ' ').delete(',()')))
       misspelled_words.each do |misspelled_word|
 
         counter_err += 1
@@ -138,7 +138,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
 
     # checking reports name
     project.reports.each do |report|
-      misspelled_words = check_misspelled(Spellchecker.check(report.title.gsub('-', ' ').gsub('/', ' ').delete('()')))
+      misspelled_words = check_misspelled(Spellchecker.check(report.title.gsub('-', ' ').gsub('/', ' ').delete(',()')))
       misspelled_words.each do |misspelled_word|
 
         counter_err += 1
@@ -154,7 +154,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
 
     # checking reports description
     project.reports.each do |report|
-      misspelled_words = check_misspelled(Spellchecker.check(report.summary.gsub('-', ' ').gsub('/', ' ').delete('()')))
+      misspelled_words = check_misspelled(Spellchecker.check(report.summary.gsub('-', ' ').gsub('/', ' ').delete(',()')))
       misspelled_words.each do |misspelled_word|
 
         counter_err += 1
@@ -170,7 +170,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
 
     # checking facts name
     project.facts.each do |fact|
-      misspelled_words = check_misspelled(Spellchecker.check(fact.title.gsub('-', ' ').gsub('/', ' ').delete('()')))
+      misspelled_words = check_misspelled(Spellchecker.check(fact.title.gsub('-', ' ').gsub('/', ' ').delete(',()')))
       misspelled_words.each do |misspelled_word|
 
         counter_err += 1
@@ -186,7 +186,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
 
     # checking facts description
     project.facts.each do |fact|
-      misspelled_words = check_misspelled(Spellchecker.check(fact.summary.gsub('-', ' ').gsub('/', ' ').delete('()')))
+      misspelled_words = check_misspelled(Spellchecker.check(fact.summary.gsub('-', ' ').gsub('/', ' ').delete(',()')))
       misspelled_words.each do |misspelled_word|
 
         counter_err += 1
@@ -202,7 +202,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
 
     # checking attributes name
     project.attributes.each do |attribute|
-      misspelled_words = check_misspelled(Spellchecker.check(attribute.title.gsub('-', ' ').gsub('/', ' ').delete('()')))
+      misspelled_words = check_misspelled(Spellchecker.check(attribute.title.gsub('-', ' ').gsub('/', ' ').delete(',()')))
       misspelled_words.each do |misspelled_word|
 
         counter_err += 1
@@ -218,7 +218,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
 
     # checking attributes description
     project.attributes.each do |attribute|
-      misspelled_words = check_misspelled(Spellchecker.check(attribute.summary.gsub('-', ' ').gsub('/', ' ').delete('()')))
+      misspelled_words = check_misspelled(Spellchecker.check(attribute.summary.gsub('-', ' ').gsub('/', ' ').delete(',()')))
       misspelled_words.each do |misspelled_word|
 
         counter_err += 1
@@ -234,7 +234,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
 
     # checking datasets name
     project.datasets.each do |dataset|
-      misspelled_words = check_misspelled(Spellchecker.check(dataset.title.gsub('-', ' ').gsub('/', ' ').delete('()')))
+      misspelled_words = check_misspelled(Spellchecker.check(dataset.title.gsub('-', ' ').gsub('/', ' ').delete(',()')))
       misspelled_words.each do |misspelled_word|
 
         counter_err += 1
@@ -250,7 +250,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
 
     # checking datasets description
     project.datasets.each do |dataset|
-      misspelled_words = check_misspelled(Spellchecker.check(dataset.summary.gsub('-', ' ').gsub('/', ' ').delete('()')))
+      misspelled_words = check_misspelled(Spellchecker.check(dataset.summary.gsub('-', ' ').gsub('/', ' ').delete(',()')))
       misspelled_words.each do |misspelled_word|
 
         counter_err += 1
