@@ -5,6 +5,15 @@ require 'csv'
 require 'optparse'
 require 'yaml'
 
+def isDateOrTimeAttribute(attribute)
+
+  excludeIdentifiers = %w(date day.in.month day.in.quarter day.in.euweek day.in.week day.in.year month month.in.quarter
+  month.in.year quarter quarter.in.year euweek euweek.in.quarter euweek.in.year week.in.quarter week week.in.year year
+  attr.time.ampm attr.time.hour.of.day attr.time.minute attr.time.minute.of.day attr.time.second attr.time.second.of.day)
+
+  excludeIdentifiers.include? attribute.identifier[0..attribute.identifier.rindex('.')-1] or excludeIdentifiers.include? attribute.identifier[attribute.identifier.index('.')+1..-1]
+end
+
 # initiate parameters for user input
 options = {}
 OptionParser.new do |opts|
@@ -28,11 +37,11 @@ excl = options[:excl]
 
 # make arrays from incl and excl parameters
 if incl.to_s != ''
-incl = incl.split(",")
+  incl = incl.split(',')
 end
 
 if excl.to_s != ''
-excl = excl.split(",")
+  excl = excl.split(',')
 end
 
 # if whitelabel is not specified set to default domain
@@ -65,35 +74,37 @@ GoodData.with_connection(login: username, password: password, server: server) do
     #check incl and excl tags first
     if incl.to_s == '' || !(attr.tag_set & incl).empty? then
       if excl.to_s == '' || (attr.tag_set & excl).empty? then
+        unless isDateOrTimeAttribute(attr)
 
-    num_objects = 0
-    objects = attr.usedby
-    objects.select { |attribute| attribute["category"] == 'metric' }.each { |r|
-      # get only metric objects
-      num_objects += 1
-    }
+          num_objects = 0
+          objects = attr.usedby
+          objects.select { |attribute| attribute["category"] == 'metric' }.each { |r|
+            # get only metric objects
+            num_objects += 1
+          }
 
-    objects.select { |attribute| attribute["category"] == 'report' }.each { |r|
-      # get only report objects
-      num_objects += 1
-    }
+          objects.select { |attribute| attribute["category"] == 'report' }.each { |r|
+            # get only report objects
+            num_objects += 1
+          }
 
-    # safe the result if there is ZERO objects that are using the attribute
-    if num_objects == 0 then
-      err_array.push(error_details = {
-          :type => "ERROR",
-          :url => server + '/#s=/gdc/projects/' + devel + '|objectPage|' + attr.uri,
-          :api => server + attr.uri,
-          :title => attr.title,
-          :description => 'This attribute ('+ attr.title + ') is not used by any object'
-      })
-      counter_err += 1
-    else
-      counter_ok += 1
+          # safe the result if there is ZERO objects that are using the attribute
+          if num_objects == 0 then
+            err_array.push(error_details = {
+                :type => 'ERROR',
+                :url => server + '/#s=/gdc/projects/' + devel + '|objectPage|' + attr.uri,
+                :api => server + attr.uri,
+                :title => attr.title,
+                :description => 'This attribute ('+ attr.title + ') is not used by any object'
+            })
+            counter_err += 1
+          else
+            counter_ok += 1
+          end
+        end
+      end
     end
   end
-end
-end
 
 
   #save errors in the result variable
@@ -112,37 +123,37 @@ end
     if incl.to_s == '' || !(fact.tag_set & incl).empty? then
       if excl.to_s == '' || (fact.tag_set & excl).empty? then
 
-    num_objects = 0
-    objects = fact.usedby
-    objects.select { |fact| fact["category"] == 'metric' }.each { |r|
-      # get only metric objects
-      num_objects += 1
-    }
+        num_objects = 0
+        objects = fact.usedby
+        objects.select { |fact| fact["category"] == 'metric' }.each { |r|
+          # get only metric objects
+          num_objects += 1
+        }
 
-    objects.select { |fact| fact["category"] == 'report' }.each { |r|
-      # get only report objects
-      num_objects += 1
-    }
+        objects.select { |fact| fact["category"] == 'report' }.each { |r|
+          # get only report objects
+          num_objects += 1
+        }
 
-    # safe the result if there is ZERO objects that are using the fact
-    if num_objects == 0 then
+        # safe the result if there is ZERO objects that are using the fact
+        if num_objects == 0 then
 
-      err_array.push(error_details = {
-          :type => "ERROR",
-          :url => server + '/#s=/gdc/projects/' + devel + '|objectPage|' + fact.uri,
-          :api => server + fact.uri,
-          :title => fact.title,
-          :description => 'This fact ('+ fact.title + ') is not used by any object'
-      })
-      counter_err += 1
-    else
-      counter_ok += 1
+          err_array.push(error_details = {
+              :type => 'ERROR',
+              :url => server + '/#s=/gdc/projects/' + devel + '|objectPage|' + fact.uri,
+              :api => server + fact.uri,
+              :title => fact.title,
+              :description => 'This fact ('+ fact.title + ') is not used by any object'
+          })
+          counter_err += 1
+        else
+          counter_ok += 1
+        end
+      end
+      #save errors in the result variable
+      $result.push({:section => 'Facts which have not been used in any object (metric or report).', :OK => counter_ok, :ERROR => counter_err, :output => err_array})
     end
   end
-  #save errors in the result variable
-  $result.push({:section => 'Facts which have not been used in any object (metric or report).', :OK => counter_ok, :ERROR => counter_err, :output => err_array})
-end
-end
 end
 #print out the result
 puts $result.to_json
