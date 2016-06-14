@@ -9,7 +9,7 @@ options = {}
 OptionParser.new do |opts|
   opts.on('-u', '--username USER', 'Username') { |v| options[:username] = v }
   opts.on('-p', '--password PASS', 'Password') { |v| options[:password] = v }
-  opts.on('-d', '--deleteproject ID', 'Delete Project') { |v| options[:delete] = v }
+  opts.on('-d', '--project_id ID', 'Project Id') { |v| options[:project_id] = v }
   opts.on('-h', '--hostname NAME', 'Hostname') { |v| options[:server] = v }
 
 end.parse!
@@ -18,9 +18,10 @@ end.parse!
 username = options[:username]
 password = options[:password]
 server = options[:server]
+project_id = options[:project_id]
 
 # if whitelabel is not specified set to default domain
-if server.to_s.empty? then
+if server.to_s.empty?
   server = 'https://secure.gooddata.com'
 end
 
@@ -31,12 +32,12 @@ GoodData.logging_off
 
 # connect to GoodData
 GoodData.with_connection(login: username, password: password, server: server) do |client|
+
   # get the project context using Project ID from user input
-  project = client.projects(options[:delete])
+  project = client.projects(project_id)
   project.delete
 
   $result.push({:section => 'Delete Project', :ERROR => 0})
-
   puts $result.to_json
 
 end

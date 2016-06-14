@@ -7,24 +7,25 @@ require 'yaml'
 # set all options
 options = {}
 OptionParser.new do |opts|
-    
-    opts.on('-u', '--username USER', 'Username') { |v| options[:username] = v }
-    opts.on('-p', '--password PASS', 'Password') { |v| options[:password] = v }
-    opts.on('-m', '--masterproject NAME', 'Master Project') { |v| options[:master] = v }
-    opts.on('-d', '--releasedate DATE', 'Release Date') { |v| options[:date] = v }
-    opts.on('-f', '--file FILE', 'Projects file') { |v| options[:file] = v }
-    opts.on('-h', '--hostname NAME', 'Hostname') { |v| options[:server] = v }
+
+  opts.on('-u', '--username USER', 'Username') { |v| options[:username] = v }
+  opts.on('-p', '--password PASS', 'Password') { |v| options[:password] = v }
+  opts.on('-d', '--devel_project NAME', 'Devel Project') { |v| options[:devel_project] = v }
+  opts.on('-f', '--file FILE', 'Projects File') { |v| options[:file] = v }
+  opts.on('-h', '--hostname NAME', 'Hostname') { |v| options[:server] = v }
 
 end.parse!
 
 # assign credentials for script from user input and master project id
 username = options[:username]
 password = options[:password]
-master = options[:master]
+devel_project = options[:devel_project]
 server = options[:server]
 
 # if whitelabel is not specified set to default domain
-if server.to_s.empty? then server = 'https://secure.gooddata.com' end
+if server.to_s.empty?
+  server = 'https://secure.gooddata.com'
+end
 
 # variables for standard output
 counter_ok = 0
@@ -41,47 +42,43 @@ target_projects = csv['project-id']
 
 # connect to GoodData
 GoodData.with_connection(login: username, password: password, server: server) do |client|
-    GoodData.with_project(master) do |master|
-        
-        # get master project blueprint (model)
-        master_model = master.blueprint
-        
-        # for each customer project merge models
-        target_projects.each do |project|
-            counter_ok += 1
+  GoodData.with_project(devel_project) do |devel_project|
 
-            GoodData.with_project(project) do |child|
+    # get master project blueprint (model)
+    devel_project_model = devel_project.blueprint
 
-            customer_model = child.blueprint
-            new_model = customer_model.merge(master_model)
-            
-            child.update_from_blueprint(new_model)
-            
-            begin
-                new_model = customer_model.merge(master_model)
-                
-                rescue Exception => msg
-                
-                counter_err += 1
-                err_array.push(error_details = {
-                    :type => "ERROR",
-                    :detail => msg.to_s,
-                    :message => "Merging two models is not possible."
-                })
-                
-                else
-                
-                child.update_from_blueprint(new_model)
-            end
-            
-         end
+    # for each customer project merge models
+    target_projects.each do |project|
+      counter_ok += 1
+
+      GoodData.with_project(project) do |child|
+
+        child_model = child.blueprint
+        new_model = child_model.merge(devel_project_model) #TODO delete ?
+        child.update_from_blueprint(new_model) #TODO delete ?
+
+        begin
+          new_model = child_model.merge(devel_project_model)
+        rescue Exception => message
+
+          counter_err += 1
+          err_array.push(error_details = {
+              :type => 'ERROR',
+              :detail => message.to_s,
+              :message => 'Merging two models is not possible.'
+          })
+
+        else
+          child.update_from_blueprint(new_model)
+        end
       end
     end
-    
-    # prepare part of the results
-    $result.push({:section => 'Merging models', :OK => counter_ok, :ERROR => counter_err, :output => err_array})
-    
-    puts $result.to_json
+  end
+
+  # prepare part of the results
+  $result.push({:section => 'Merging models', :OK => counter_ok, :ERROR => counter_err, :output => err_array})
+
+  puts $result.to_json
 
 end
 

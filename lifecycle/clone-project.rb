@@ -9,9 +9,9 @@ options = {}
 OptionParser.new do |opts|
   opts.on('-u', '--username USER', 'Username') { |v| options[:username] = v }
   opts.on('-p', '--password PASS', 'Password') { |v| options[:password] = v }
-  opts.on('-o', '--originalproject ID', 'Original Project') { |v| options[:original] = v }
-  opts.on('-c', '--cloneproject NAME', 'Clone Project') { |v| options[:clone] = v }
-  opts.on('-t', '--authtoken TOKEN', 'Authorization Token') { |v| options[:token] = v }
+  opts.on('-o', '--project_id ID', 'Project Id') { |v| options[:project_id] = v }
+  opts.on('-n', '--new_project_name NAME', 'New Project Name') { |v| options[:new_project_name] = v }
+  opts.on('-a', '--auth_token TOKEN', 'Authorization Token') { |v| options[:auth_token] = v }
   opts.on('-h', '--hostname NAME', 'Hostname') { |v| options[:server] = v }
 
 end.parse!
@@ -20,9 +20,12 @@ end.parse!
 username = options[:username]
 password = options[:password]
 server = options[:server]
+project_id = options[:project_id]
+new_project_name = options[:new_project_name]
+auth_token = options[:auth_token]
 
 # if whitelabel is not specified set to default domain
-if server.to_s.empty? then
+if server.to_s.empty?
   server = 'https://secure.gooddata.com'
 end
 
@@ -33,17 +36,17 @@ GoodData.logging_off
 
 # connect to GoodData
 GoodData.with_connection(login: username, password: password, server: server) do |client|
+
   # get the project context using Project ID from user input
-  project = client.projects(options[:original])
+  project = client.projects(project_id)
   cloned_project = project.clone(
-      :title => options[:clone],
-      :with_data => true, #TODO ??
+      :title => new_project_name,
+      :with_data => true,
       :with_users => true,
-      :auth_token => options[:token]
+      :auth_token => auth_token
   )
 
   $result.push({:section => 'Clone Project', :ERROR => 0, :output => {:project_id => cloned_project.obj_id}})
-
   puts $result.to_json
 
 end
