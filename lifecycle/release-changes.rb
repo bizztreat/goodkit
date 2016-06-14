@@ -23,7 +23,7 @@ end.parse!
 username = options[:username]
 password = options[:password]
 server = options[:server]
-ignore_tags = options[:tags].split(",") #TODO
+ignore_tags = options[:tags].split(',')
 
 
 # variables for script results
@@ -41,7 +41,7 @@ GoodData.logging_off
 
 # set the date from which we will be doing transfer
 #last_release_date = Time.parse(options[:date], '%e %b %Y')
-last_release_date = (Time.now - 3600*24)
+last_release_date = (Time.now - 3600 * 24)
 
 # assign master project id to variable
 master = options[:master]

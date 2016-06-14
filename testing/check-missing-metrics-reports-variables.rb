@@ -29,18 +29,17 @@ excl = options[:excl]
 
 # make arrays from incl and excl parameters
 if incl.to_s != ''
-incl = incl.split(",")
+  incl = incl.split(',')
 end
 
 if excl.to_s != ''
-excl = excl.split(",")
+  excl = excl.split(',')
 end
 
 # counters and arrays for results
-counter_ok = 0
-counter_err = 0
 err_array_1 = []
 err_array_2 = []
+err_array_3 = []
 $result = []
 
 # turn off logging for clear output
@@ -58,14 +57,16 @@ GoodData.with_connection(login: username, password: password, server: server) do
   devel_reports = []
   start_metrics = []
   devel_metrics = []
+  start_variables = []
+  devel_variables = []
 
-  # get all reports and metrics from devel project
+  # get all reports, metrics, variables from devel project
   GoodData.with_project(devel) do |project|
 
     project.reports.each do |report|
       if incl.to_s == '' || !(report.tag_set & incl).empty? then
         if excl.to_s == '' || (report.tag_set & excl).empty? then
-      devel_reports.push(report.uri.gsub(devel, "pid"))
+          devel_reports.push(report.uri.gsub(devel, 'pid'))
         end
       end
     end
@@ -73,7 +74,15 @@ GoodData.with_connection(login: username, password: password, server: server) do
     project.metrics.each do |metric|
       if incl.to_s == '' || !(metric.tag_set & incl).empty? then
         if excl.to_s == '' || (metric.tag_set & excl).empty? then
-      devel_metrics.push(metric.uri.gsub(devel, "pid"))
+          devel_metrics.push(metric.uri.gsub(devel, 'pid'))
+        end
+      end
+    end
+
+    project.variables.each do |variable|
+      if incl.to_s == '' || !(variable.tag_set & incl).empty? then
+        if excl.to_s == '' || (variable.tag_set & excl).empty? then
+          devel_variables.push(variable.uri.gsub(devel, 'pid'))
         end
       end
     end
@@ -85,33 +94,40 @@ GoodData.with_connection(login: username, password: password, server: server) do
     project.reports.each do |report|
       if incl.to_s == '' || !(report.tag_set & incl).empty? then
         if excl.to_s == '' || (report.tag_set & excl).empty? then
-      start_reports.push(report.uri.gsub(start, "pid"))
-          end
+          start_reports.push(report.uri.gsub(start, 'pid'))
         end
+      end
     end
 
     project.metrics.each do |metric|
       if incl.to_s == '' || !(metric.tag_set & incl).empty? then
         if excl.to_s == '' || (metric.tag_set & excl).empty? then
-      start_metrics.push(metric.uri.gsub(start, "pid"))
+          start_metrics.push(metric.uri.gsub(start, 'pid'))
+        end
+      end
+    end
+
+    project.variables.each do |variable|
+      if incl.to_s == '' || !(variable.tag_set & incl).empty? then
+        if excl.to_s == '' || (variable.tag_set & excl).empty? then
+          start_variables.push(variable.uri.gsub(start, 'pid'))
         end
       end
     end
   end
 
 
+  # diff for metrics
   metrics_diff = start_metrics - devel_metrics
+  metrics_diff.each do |metric|
+    err_array_1.push(error_details = {
+        :type => 'ERROR',
+        :url => server + '#s=/gdc/projects/' + start + '|objectPage|' + metric.gsub!('pid', start),
+        :api => server + metric,
+        :title => client.projects(start).metrics(metric.gsub('pid', start)).title,
+        :description => 'Metric is missing in Devel project'
+    })
 
-  if (metrics_diff.count > 0) then
-    metrics_diff.each do |m|
-      err_array_1.push(error_details = {
-          :type => "ERROR",
-          :url => server + '#s=/gdc/projects/' + start + '|objectPage|' + m.gsub!("pid", start),
-          :api => server + m,
-          :title => client.projects(start).metrics(m.gsub("pid", start)).title,
-          :description => "Metric is missing in Devel project"
-      })
-    end
   end
 
   # count errors and prepare details to the array
@@ -120,22 +136,17 @@ GoodData.with_connection(login: username, password: password, server: server) do
 
   $result.push({:section => 'Metrics missing in Devel project', :OK => counter_ok, :ERROR => counter_err, :output => err_array_1})
 
-  # print the diff for reports
+  # diff for reports
   reports_diff = start_reports - devel_reports
+  reports_diff.each do |report|
 
-  if (reports_diff.count > 0) then
-
-    reports_diff.each do |r|
-
-      err_array_2.push(error_details = {
-          :type => "ERROR",
-          :url => server + '#s=/gdc/projects/' + start + '%7CanalysisPage%7Chead%7C' + r.gsub!("pid", start),
-          :api => server + r,
-          :title => client.projects(start).reports(r.gsub("pid", start)).title,
-          :description => "Report is missing in Devel project"
-      })
-
-    end
+    err_array_2.push(error_details = {
+        :type => 'ERROR',
+        :url => server + '#s=/gdc/projects/' + start + '%7CanalysisPage%7Chead%7C' + report.gsub!('pid', start),
+        :api => server + report,
+        :title => client.projects(start).reports(report.gsub('pid', start)).title,
+        :description => 'Report is missing in Devel project'
+    })
   end
 
   # count errors and prepare details to the array
@@ -143,6 +154,25 @@ GoodData.with_connection(login: username, password: password, server: server) do
   counter_ok = start_reports.count - counter_err
 
   $result.push({:section => 'Reports missing in Devel project', :OK => counter_ok, :ERROR => counter_err, :output => err_array_2})
+
+  # diff for variables
+  variables_diff = start_variables - devel_variables
+  variables_diff.each do |variable|
+
+    err_array_3.push(error_details = {
+        :type => 'ERROR',
+        :url => server + '#s=/gdc/projects/' + start + '|objectPage|' + variable.gsub!('pid', start),
+        :api => server + variable,
+        :title => client.projects(start).variables(variable.gsub('pid', start)).title,
+        :description => 'Variable is missing in Devel project'
+    })
+  end
+
+  # count errors and prepare details to the array
+  counter_err = variables_diff.count
+  counter_ok = start_variables.count - counter_err
+
+  $result.push({:section => 'Variables missing in Devel project', :OK => counter_ok, :ERROR => counter_err, :output => err_array_3})
 
   puts $result.to_json
 
