@@ -158,7 +158,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
   $result.push({:section => 'Metrics missing in Devel project', :OK => counter_ok, :ERROR => counter_err, :output => err_array_1})
 
   # diff for variables
-  devel_variables_titles = devel_metrics.map { |variable| variable[:title] }
+  devel_variables_titles = devel_variables.map { |variable| variable[:title] }
   variables_diff = start_variables.reject { |variable| devel_variables_titles.include? variable[:title] }
   variables_diff.each do |variable|
 
