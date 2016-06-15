@@ -4,7 +4,7 @@ require 'csv'
 require 'optparse'
 require 'yaml'
 
-# setting up available options / parameters for the script
+# define options for script configuration
 options = {}
 OptionParser.new do |opts|
 
