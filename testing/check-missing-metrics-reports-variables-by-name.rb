@@ -117,7 +117,9 @@ GoodData.with_connection(login: username, password: password, server: server) do
   end
 
   # diff for reports
-  reports_diff = start_reports.to_a - devel_reports.to_a
+  devel_reports_titles = devel_reports.map { |report| report[:title] }
+  reports_diff = start_reports.reject { |report| devel_reports_titles.include? report[:title] }
+
   reports_diff.each do |report|
 
     err_array_2.push(error_details = {
@@ -136,7 +138,8 @@ GoodData.with_connection(login: username, password: password, server: server) do
   $result.push({:section => 'Reports missing in Devel project', :OK => counter_ok, :ERROR => counter_err, :output => err_array_2})
 
   # diff for metrics
-  metrics_diff = start_metrics.to_a - devel_metrics.to_a
+  devel_metrics_titles = devel_metrics.map { |metric| metric[:title] }
+  metrics_diff = start_metrics.reject { |metric| devel_metrics_titles.include? metric[:title] }
   metrics_diff.each do |metric|
     err_array_1.push(error_details = {
         :type => 'ERROR',
@@ -155,7 +158,8 @@ GoodData.with_connection(login: username, password: password, server: server) do
   $result.push({:section => 'Metrics missing in Devel project', :OK => counter_ok, :ERROR => counter_err, :output => err_array_1})
 
   # diff for variables
-  variables_diff = start_variables.to_a - devel_variables.to_a
+  devel_variables_titles = devel_metrics.map { |variable| variable[:title] }
+  variables_diff = start_variables.reject { |variable| devel_variables_titles.include? variable[:title] }
   variables_diff.each do |variable|
 
     err_array_3.push(error_details = {
