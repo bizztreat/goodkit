@@ -16,7 +16,7 @@ OptionParser.new do |opts|
 
 end.parse!
 
-# get credentials from input parameters
+# get credentials and others from input parameters
 username = options[:username]
 password = options[:password]
 server = options[:server]

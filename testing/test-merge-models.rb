@@ -47,15 +47,14 @@ GoodData.with_connection(login: username, password: password, server: server) do
     GoodData.with_project(start_project) do |start_project|
 
       start_project_model = start_project.blueprint
-
       begin
-        new_model = start_project_model.merge(devel_project_model).to_s
+        new_model = start_project_model.merge(devel_project_model)
       rescue Exception => message
 
         result_array.push(error_details = {
             :type => 'ERROR',
-            :url => 'Merging two models is not possible.',
-            :api => 'Merging two models is not possible.',
+            :url => '#',
+            :api => '#',
             :message => message.to_s
         })
 
@@ -63,9 +62,9 @@ GoodData.with_connection(login: username, password: password, server: server) do
       else
         result_array.push(error_details = {
             :type => 'INFO',
-            :url => 'Models have been merged successfully',
-            :api => 'Models have been merged successfully',
-            :message => 'Models have been merged successfully'
+            :url => '#',
+            :api => '#',
+            :message => 'Models have been merged successfully: ' + new_model.to_s
         })
 
         $result.push({:section => 'Models have been merged successfully', :OK => 1, :ERROR => 0, :output => result_array})

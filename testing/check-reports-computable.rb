@@ -47,30 +47,30 @@ GoodData.logging_off
 
 GoodData.with_connection(login: username, password: password, server: server) do |client|
 
-        # connect to project and check if the report is computable checks if there is an error and then print the report with error
-        GoodData.with_project(devel) do |project|
-          # select original reports include and exclude tags
-        reports = project.reports.select { |r| incl.to_s == '' || !(r.tag_set & incl).empty? }.sort_by(&:title)
-          reports = reports.select { |r| excl.to_s == '' || (r.tag_set & excl).empty? }.sort_by(&:title)
+  # connect to project and check if the report is computable checks if there is an error and then print the report with error
+  GoodData.with_project(devel) do |project|
+    # select original reports include and exclude tags
+    reports = project.reports.select { |r| incl.to_s == '' || !(r.tag_set & incl).empty? }.sort_by(&:title)
+    reports = reports.select { |r| excl.to_s == '' || (r.tag_set & excl).empty? }.sort_by(&:title)
 
-                reports.peach do |r|
-                    begin
-                            counter_ok += 1
-                            r.definition.execute
-                    rescue
-                              counter_err += 1
-                              err_array.push(error_details = {
-                                  :type => "ERROR",
-                                  :url => server + '#s=/gdc/projects/' + devel + '|analysisPage|head|' + r.uri,
-                                  :api => server + r.uri,
-                                  :title => r.title,
-                                  :description => 'This report is not computable.'
-                              })
-                    end
-                end
-                # prepare part of the results
-                $result.push({:section => 'Uncomputable reports', :OK => counter_ok, :ERROR => counter_err, :output => err_array})
-            end
+    reports.peach do |r|
+      begin
+        counter_ok += 1
+        r.definition.execute
+      rescue
+        counter_err += 1
+        err_array.push(error_details = {
+            :type => "ERROR",
+            :url => server + '#s=/gdc/projects/' + devel + '|analysisPage|head|' + r.uri,
+            :api => server + r.uri,
+            :title => r.title,
+            :description => 'This report is not computable.'
+        })
+      end
+    end
+    # prepare part of the results
+    $result.push({:section => 'Uncomputable reports', :OK => counter_ok, :ERROR => counter_err, :output => err_array})
+  end
 end
 
 puts $result.to_json

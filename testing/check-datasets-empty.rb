@@ -4,21 +4,21 @@ require 'csv'
 require 'optparse'
 require 'yaml'
 
-# collect all parameters from user
+# define options for script configuration
 options = {}
 OptionParser.new do |opts|
 
   opts.on('-u', '--username USER', 'Username') { |v| options[:username] = v }
   opts.on('-p', '--password PASS', 'Password') { |v| options[:password] = v }
-  opts.on('-d', '--develproject NAME', 'Development Project') { |v| options[:devel] = v }
+  opts.on('-d', '--development_project ID', 'Development Project') { |v| options[:development_project] = v }
   opts.on('-h', '--hostname NAME', 'Hostname') { |v| options[:server] = v }
 
 end.parse!
 
-# get parameters from input for conection and for project id
+# get credentials and others from input parameters
 username = options[:username]
 password = options[:password]
-devel = options[:devel]
+development_project = options[:development_project]
 server = options[:server]
 
 # variables for standard output
@@ -31,41 +31,36 @@ $result = []
 GoodData.logging_off
 
 # if whitelabel is not specified set to default domain
-if server.to_s.empty? then
+if server.to_s.empty?
   server = 'https://secure.gooddata.com'
 end
 
 GoodData.with_connection(login: username, password: password, server: server) do |client|
 
-  # check if any datasets is empty -> print the dataset name
-  GoodData.with_project(devel) do |project|
+  GoodData.with_project(development_project) do |project|
+
     blueprint = project.blueprint
     blueprint.datasets.each do |dataset|
 
+      # creates a metric which return number of lines in dataset
       count = dataset.count(project)
-      if (count.to_i < 1) then
-        # count errors and prepare details to the array
+      if count.to_i < 1
+
         counter_err += 1
-        objectDataset = GoodData::Dataset[dataset.id, {:client => client, :project => project}]
-        error_details = {
-            :type => "ERROR",
-            :url => server + '/#s=/gdc/projects/' + devel + '|objectPage|' + objectDataset.uri,
-            :api => server + objectDataset.uri,
+        object_dataset = GoodData::Dataset[dataset.id, {:client => client, :project => project}]
+        err_array.push(error_details = {
+            :type => 'ERROR',
+            :url => server + '/#s=/gdc/projects/' + development_project + '|objectPage|' + object_dataset.uri,
+            :api => server + object_dataset.uri,
             :title => dataset.title,
-            :description => "Dataset it empty."
-        }
-
-        # save detail to the array
-        err_array.push(JSON.generate(error_details))
-
-        # count OK objects
+            :description => 'Dataset it empty.'
+        })
       else
         counter_ok += 1
       end
     end
   end
 
-  # prepare part of the results
   $result.push({:section => 'Empty datasets check', :OK => counter_ok, :ERROR => counter_err, :output => err_array})
 
   puts $result.to_json

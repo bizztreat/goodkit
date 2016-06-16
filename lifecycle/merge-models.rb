@@ -10,16 +10,16 @@ OptionParser.new do |opts|
 
   opts.on('-u', '--username USER', 'Username') { |v| options[:username] = v }
   opts.on('-p', '--password PASS', 'Password') { |v| options[:password] = v }
-  opts.on('-d', '--devel_project NAME', 'Devel Project') { |v| options[:devel_project] = v }
+  opts.on('-d', '--development_project ID', 'Development Project') { |v| options[:development_project] = v }
   opts.on('-f', '--file FILE', 'Projects File') { |v| options[:file] = v }
   opts.on('-h', '--hostname NAME', 'Hostname') { |v| options[:server] = v }
 
 end.parse!
 
-# assign credentials for script from user input and master project id
+# get credentials and others from input parameters
 username = options[:username]
 password = options[:password]
-devel_project = options[:devel_project]
+development_project = options[:development_project]
 server = options[:server]
 
 # if whitelabel is not specified set to default domain
@@ -42,23 +42,25 @@ target_projects = csv['project-id']
 
 # connect to GoodData
 GoodData.with_connection(login: username, password: password, server: server) do |client|
-  GoodData.with_project(devel_project) do |devel_project|
 
-    # get master project blueprint (model)
-    devel_project_model = devel_project.blueprint
+  # connect to development GoodData project
+  GoodData.with_project(development_project) do |development_project|
 
-    # for each customer project merge models
+    # get development project blueprint (model)
+    development_project_model = development_project.blueprint
+
+    # for each customer/child project merge models
     target_projects.each do |project|
       counter_ok += 1
 
       GoodData.with_project(project) do |child|
 
         child_model = child.blueprint
-        new_model = child_model.merge(devel_project_model) #TODO delete ?
+        new_model = child_model.merge(development_project_model) #TODO delete ?
         child.update_from_blueprint(new_model) #TODO delete ?
 
         begin
-          new_model = child_model.merge(devel_project_model)
+          new_model = child_model.merge(development_project_model)
         rescue Exception => message
 
           counter_err += 1
