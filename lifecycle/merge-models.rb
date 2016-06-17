@@ -29,8 +29,8 @@ end
 
 # variables for standard output
 counter_ok = 0
-counter_err = 0
-err_array = []
+counter_errors = 0
+output = []
 $result = []
 
 # turn off logging for clear output
@@ -63,8 +63,8 @@ GoodData.with_connection(login: username, password: password, server: server) do
           new_model = child_model.merge(development_project_model)
         rescue Exception => message
 
-          counter_err += 1
-          err_array.push(error_details = {
+          counter_errors += 1
+          output.push(error_details = {
               :type => 'ERROR',
               :detail => message.to_s,
               :message => 'Merging two models is not possible.'
@@ -78,7 +78,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
   end
 
   # prepare part of the results
-  $result.push({:section => 'Merging models', :OK => counter_ok, :ERROR => counter_err, :output => err_array})
+  $result.push({:section => 'Merging models', :OK => counter_ok, :ERROR => counter_errors, :output => output})
 
   puts $result.to_json
 

@@ -23,8 +23,8 @@ server = options[:server]
 
 # variables for standard output
 counter_ok = 0
-counter_err = 0
-err_array = []
+counter_error = 0
+output = []
 $result = []
 
 # turn off logging for clear output
@@ -43,12 +43,12 @@ GoodData.with_connection(login: username, password: password, server: server) do
     blueprint.datasets.each do |dataset|
 
       # creates a metric which return number of lines in dataset
-      count = dataset.count(project)
-      if count.to_i < 1
+      lines = dataset.count(project)
+      if lines.to_i < 1
 
-        counter_err += 1
+        counter_error += 1
         object_dataset = GoodData::Dataset[dataset.id, {:client => client, :project => project}]
-        err_array.push(error_details = {
+        output.push(error_details = {
             :type => 'ERROR',
             :url => server + '/#s=/gdc/projects/' + development_project + '|objectPage|' + object_dataset.uri,
             :api => server + object_dataset.uri,
@@ -61,8 +61,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
     end
   end
 
-  $result.push({:section => 'Empty datasets check', :OK => counter_ok, :ERROR => counter_err, :output => err_array})
-
+  $result.push({:section => 'Empty datasets check', :OK => counter_ok, :ERROR => counter_error, :output => output})
   puts $result.to_json
 
 end

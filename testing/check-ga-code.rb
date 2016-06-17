@@ -60,7 +60,6 @@ GoodData.with_connection(login: username, password: password, server: server) do
     end
 
     $result.push({:section => 'Missing GA code check.', :OK => counter_ok, :ERROR => counter_err, :output => err_array})
-
     puts $result.to_json
 
   end
