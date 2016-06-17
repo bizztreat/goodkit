@@ -90,7 +90,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
     end
   end
 
-  $result.push({:section => 'Updated metrics which have been changed.', :OK => counter_metrics_info, :ERROR => 0, :output => output_1})
+  $result.push({:section => 'Updated metrics which have been changed.', :OK => 0, :INFO => counter_metrics_info, :ERROR => 0, :output => output_1})
 
   # all affected dashboards and reports for changed metric
   updated_metrics.each do |uri|
