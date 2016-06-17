@@ -37,7 +37,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
   project = client.projects(project_id)
   project.delete
 
-  $result.push({:section => 'Delete Project', :ERROR => 0})
+  $result.push({:section => 'Delete Project', :OK => 1, :INFO => 0, :ERROR => 0})
   puts $result.to_json
 
 end

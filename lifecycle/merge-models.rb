@@ -78,7 +78,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
   end
 
   # prepare part of the results
-  $result.push({:section => 'Merging models', :OK => counter_ok, :ERROR => counter_errors, :output => output})
+  $result.push({:section => 'Merging models', :OK => counter_ok, :INFO => 0, :ERROR => counter_errors, :output => output})
 
   puts $result.to_json
 

@@ -27,8 +27,8 @@ end
 
 # variables for standard output
 counter_ok = 0
-counter_err = 0
-err_array = []
+counter_error = 0
+output = []
 $result = []
 
 # turn off logging for clear output
@@ -47,8 +47,8 @@ GoodData.with_connection(login: username, password: password, server: server) do
         if tab.items.to_s.include? 'https://demo.zoomint.com/stat/%CURRENT_DASHBOARD_URI%/%CURRENT_DASHBOARD_TAB_URI%'
           counter_ok += 1
         else
-          counter_err += 1
-          err_array.push(error_details = {
+          counter_error += 1
+          output.push(error_details = {
               :type => 'ERROR',
               :url => server + '/#s=/gdc/projects/' + development_project + '|projectDashboardPage|' + dashboard.uri + '|' + tab.identifier,
               :api => server + dashboard.uri,
@@ -59,7 +59,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
       end
     end
 
-    $result.push({:section => 'Missing GA code check.', :OK => counter_ok, :ERROR => counter_err, :output => err_array})
+    $result.push({:section => 'Missing GA code check.', :OK => counter_ok, :INFO => 0, :ERROR => counter_error, :output => output})
     puts $result.to_json
 
   end

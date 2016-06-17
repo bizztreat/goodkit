@@ -30,8 +30,8 @@ if server.to_s.empty?
   server = 'https://secure.gooddata.com'
 end
 
-counter_err = 0
-err_array = []
+counter_error = 0
+output = []
 $result = []
 
 # turn off logging for clear output
@@ -61,8 +61,8 @@ GoodData.with_connection(login: username, password: password, server: server) do
             # check if the metric is deleted
             if metric.deprecated
 
-              counter_err += 1
-              err_array.push(error_details = {
+              counter_error += 1
+              output.push(error_details = {
                   :type => 'ERROR',
                   :url => server + '/#s=/gdc/projects/' + development_project + '|objectPage|' + metric.uri,
                   :api => server + metric.uri,
@@ -74,9 +74,9 @@ GoodData.with_connection(login: username, password: password, server: server) do
         end
       end
 
-      if counter_err > 0
-        $result.push({:section => 'This report "' + report.title + '" contains deleted metrics', :OK => 0, :ERROR => counter_err, :output => err_array})
-        counter_err = 0
+      if counter_error > 0
+        $result.push({:section => 'This report "' + report.title + '" contains deleted metrics', :OK => 0, :INFO => 0, :ERROR => counter_error, :output => output})
+        counter_error = 0
       end
     end
   end

@@ -61,7 +61,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
     end
   end
 
-  $result.push({:section => 'Empty datasets check', :OK => counter_ok, :ERROR => counter_error, :output => output})
+  $result.push({:section => 'Empty datasets check', :OK => counter_ok, :INFO => 0, :ERROR => counter_error, :output => output})
   puts $result.to_json
 
 end

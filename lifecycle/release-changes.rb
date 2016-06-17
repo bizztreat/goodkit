@@ -28,7 +28,7 @@ tags_excluded = options[:tags_excluded].to_s.split(',')
 # variables for script results
 output = []
 $result = []
-counter_ok = 0
+counter_info = 0
 
 # if not specific white labeled server set to default
 if server.to_s.empty?
@@ -60,7 +60,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
     dashboards_to_migrate.each do |dashboard|
 
       objects_to_migrate.push(dashboard)
-      counter_ok += 1
+      counter_info += 1
       output.push(error_details = {
           :type => 'INFO',
           :url => server + '#s=/gdc/projects/' + development_project + '|projectDashboardPage|' + dashboard.uri,
@@ -69,11 +69,11 @@ GoodData.with_connection(login: username, password: password, server: server) do
       })
     end
 
-    $result.push({:section => 'Following dashboards from development_project updated after ' + last_release_date.to_s + ' has been exported.', :OK => counter_ok, :ERROR => 0, :output => output})
+    $result.push({:section => 'Following dashboards from development_project updated after ' + last_release_date.to_s + ' has been exported.', :OK => 0, :INFO => counter_info, :ERROR => 0, :output => output})
 
     # reset result variables
     output = []
-    counter_ok = 0
+    counter_info = 0
 
     # get all reports
     reports_to_migrate = project.reports.select { |report| report.updated > last_release_date && (report.tag_set & tags_excluded).empty? }
@@ -81,7 +81,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
     # push all reports objects to the array that we will be migrating between projects
     reports_to_migrate.each do |report|
       objects_to_migrate.push(report)
-      counter_ok += 1
+      counter_info += 1
       output.push(error_details = {
           :type => 'INFO',
           :url => server + '#s=/gdc/projects/' + development_project + '|analysisPage|head|' + report.uri,
@@ -90,11 +90,11 @@ GoodData.with_connection(login: username, password: password, server: server) do
       })
     end
 
-    $result.push({:section => 'Following reports from development_project updated after ' + last_release_date.to_s + ' has been exported.', :OK => counter_ok, :ERROR => 0, :output => output})
+    $result.push({:section => 'Following reports from development_project updated after ' + last_release_date.to_s + ' has been exported.', :OK => 0, :INFO => counter_info, :ERROR => 0, :output => output})
 
     # reset result variables
     output = []
-    counter_ok = 0
+    counter_info = 0
 
     # get all metrics
     metrics_to_migrate = project.metrics.select { |metric| metric.updated > last_release_date && (metric.tag_set & tags_excluded).empty? }
@@ -102,7 +102,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
     # push all metrics objects to the array that we will be migrating between projects
     metrics_to_migrate.each do |metric|
       objects_to_migrate.push(metric)
-      counter_ok += 1
+      counter_info += 1
       output.push(error_details = {
           :type => 'INFO',
           :url => server + '#s=/gdc/projects/' + development_project + '|objectPage|' + metric.uri,
@@ -111,11 +111,11 @@ GoodData.with_connection(login: username, password: password, server: server) do
       })
     end
 
-    $result.push({:section => 'Following metrics from development_project updated after ' + last_release_date.to_s + ' has been exported.', :OK => counter_ok, :ERROR => 0, :output => output})
+    $result.push({:section => 'Following metrics from development_project updated after ' + last_release_date.to_s + ' has been exported.', :OK => 0, :INFO => counter_info, :ERROR => 0, :output => output})
 
     # reset result variables
     output = []
-    counter_ok = 0
+    counter_info = 0
 
     # get all variables
     variables_to_migrate = project.variables.select { |variable| variable.updated > last_release_date && (variable.tag_set & tags_excluded).empty? }
@@ -123,7 +123,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
     # push all variables objects to the array that we will be migrating between projects
     variables_to_migrate.each do |variable|
       objects_to_migrate.push(variable)
-      counter_ok += 1
+      counter_info += 1
       output.push(error_details = {
           :type => 'INFO',
           :url => server + '#s=/gdc/projects/' + development_project + '|objectPage|' + variable.uri,
@@ -132,7 +132,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
       })
     end
 
-    $result.push({:section => 'Following variable from development_project updated after ' + last_release_date.to_s + ' has been exported.', :OK => counter_ok, :ERROR => 0, :output => output})
+    $result.push({:section => 'Following variable from development_project updated after ' + last_release_date.to_s + ' has been exported.', :OK => 0, :INFO => counter_info, :ERROR => 0, :output => output})
     puts $result.to_json
 
     # migrate all objects between projects

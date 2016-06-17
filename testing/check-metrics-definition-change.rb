@@ -31,9 +31,9 @@ if server.to_s.empty?
   server = 'https://secure.gooddata.com'
 end
 
-counter_metrics_ok = 0
-counter_reports_ok = 0
-counter_dashboards_ok = 0
+counter_metrics_info = 0
+counter_reports_info = 0
+counter_dashboards_info = 0
 output_1 = []
 output_2 = []
 output_3 = []
@@ -86,11 +86,11 @@ GoodData.with_connection(login: username, password: password, server: server) do
           :description => 'This updated metric has been changed.'
       })
       updated_metrics.push(uri.gsub('pid', development_project))
-      counter_metrics_ok += 1
+      counter_metrics_info += 1
     end
   end
 
-  $result.push({:section => 'Updated metrics which have been changed.', :OK => counter_metrics_ok, :ERROR => 0, :output => output_1})
+  $result.push({:section => 'Updated metrics which have been changed.', :OK => counter_metrics_info, :ERROR => 0, :output => output_1})
 
   # all affected dashboards and reports for changed metric
   updated_metrics.each do |uri|
@@ -106,7 +106,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
           :title => report.title,
           :description => 'Updated metric "' + metric.title + '" has been used in this report'
       })
-      counter_reports_ok += 1
+      counter_reports_info += 1
     end
 
     objects.select { |object| object['category'] == 'projectDashboard' }.each do |object|
@@ -119,15 +119,15 @@ GoodData.with_connection(login: username, password: password, server: server) do
           :title => dashboard.title,
           :description => 'Updated metric "' + metric.title + '" has been used in this dashboard'
       })
-      counter_dashboards_ok += 1
+      counter_dashboards_info += 1
     end
   end
 
   # GROUP BY to count dashboard just once
   output_3 = output_3.uniq
 
-  $result.push({:section => 'Reports in which have been used a changed metric', :OK => counter_reports_ok, :ERROR => 0, :output => output_2})
-  $result.push({:section => 'Dashboard in which have been used a changed metric', :OK => counter_dashboards_ok, :ERROR => 0, :output => output_3})
+  $result.push({:section => 'Reports in which have been used a changed metric', :OK => 0, :INFO => counter_reports_info, :ERROR => 0, :output => output_2})
+  $result.push({:section => 'Dashboard in which have been used a changed metric', :OK => 0, :INFO => counter_dashboards_info, :ERROR => 0, :output => output_3})
   puts $result.to_json
 
 end

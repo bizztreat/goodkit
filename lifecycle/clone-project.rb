@@ -46,7 +46,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
       :auth_token => auth_token
   )
 
-  $result.push({:section => 'Clone Project', :ERROR => 0, :output => {:project_id => cloned_project.obj_id}})
+  $result.push({:section => 'Clone Project', :OK => 1, :INFO => 0, :ERROR => 0, :output => {:project_id => cloned_project.obj_id}})
   puts $result.to_json
 
 end
