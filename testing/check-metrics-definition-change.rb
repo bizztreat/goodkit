@@ -47,7 +47,7 @@ updated_metrics = []
 # turn off logging for clear output
 GoodData.logging_off
 
-# connect to gooddata
+# connect to GoodData
 GoodData.with_connection(login: username, password: password, server: server) do |client|
 
   # get metric expression from development

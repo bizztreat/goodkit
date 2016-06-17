@@ -35,8 +35,10 @@ if server.to_s.empty?
   server = 'https://secure.gooddata.com'
 end
 
+# connect to GoodData
 GoodData.with_connection(login: username, password: password, server: server) do |client|
 
+  # connect to development GoodData project
   GoodData.with_project(development_project) do |project|
 
     blueprint = project.blueprint

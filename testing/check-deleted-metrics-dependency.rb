@@ -37,10 +37,10 @@ $result = []
 # turn off logging for clear output
 GoodData.logging_off
 
-# connect to gooddata
+# connect to GoodData
 GoodData.with_connection(login: username, password: password, server: server) do |client|
 
-  # connect to development project and get metric expression
+  # connect to development GoodData project
   GoodData.with_project(development_project) do |project|
 
     # get metric expression from development project

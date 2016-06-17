@@ -47,7 +47,7 @@ target_projects = csv['project-id']
 
 objects_to_migrate = Array.new
 
-# connect to development project and select dashboards, reports and metrics to migrate, filter those without tags
+# connect to GoodData
 GoodData.with_connection(login: username, password: password, server: server) do |client|
 
   # connect to development GoodData project
