@@ -64,15 +64,14 @@ client.disconnect
 # metrics duplicity in project
 while (development_project_metrics.length > 0)
 
-  metric_1 = development_project_metrics[0] # TODO change development_project_metrics.pop
-  development_project_metrics.delete_if { |metric_2| metric_2[:uri] == metric_1[:uri] }
+  metric_1 = development_project_metrics.pop
 
   development_project_metrics.each do |metric_2|
 
     metric_1_pretty_expression_without_spaces = metric_1[:pretty_expression].split(' ').sort.join
     metric_2_pretty_expression_without_spaces = metric_2[:pretty_expression].split(' ').sort.join
 
-    pretty_expressions_distance = Levenshtein.distance(metric_1_pretty_expression_without_spaces, metric_2_pretty_expression_without_spaces)
+    pretty_expressions_distance = Levenshtein.distance(metric_1_pretty_expression_without_spaces, metric_2_pretty_expression_without_spaces) #TODO try levenshtein_fast by C
 
     if pretty_expressions_distance <= levenshtein_distance_threshold
       if pretty_expressions_distance == 0
