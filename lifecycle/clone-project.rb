@@ -35,20 +35,18 @@ $result = []
 GoodData.logging_off
 
 # connect to GoodData
-GoodData.with_connection(login: username, password: password, server: server) do |client|
+client = GoodData.connect(login: username, password: password, server: server)
 
-  # get the project context using Project ID from user input
-  project = client.projects(project_id)
-  cloned_project = project.clone(
-      :title => new_project_name,
-      :with_data => true,
-      :with_users => true,
-      :auth_token => auth_token
-  )
+# get the project context using Project ID from user input
+project = client.projects(project_id)
+cloned_project = project.clone(
+    :title => new_project_name,
+    :with_data => true,
+    :with_users => true,
+    :auth_token => auth_token
+)
 
-  $result.push({:section => 'Clone Project', :OK => 1, :INFO => 0, :ERROR => 0, :output => {:project_id => cloned_project.obj_id}})
-  puts $result.to_json
+$result.push({:section => 'Clone Project', :OK => 1, :INFO => 0, :ERROR => 0, :output => {:project_id => cloned_project.obj_id}})
+puts $result.to_json
 
-end
-
-GoodData.disconnect
+client.disconnect

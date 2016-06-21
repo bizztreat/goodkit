@@ -36,36 +36,33 @@ if server.to_s.empty?
 end
 
 # connect to GoodData
-GoodData.with_connection(login: username, password: password, server: server) do |client|
+client = GoodData.connect(login: username, password: password, server: server)
 
-  # connect to development GoodData project
-  GoodData.with_project(development_project) do |project|
+# connect to development GoodData project
+project = client.projects(development_project)
 
-    blueprint = project.blueprint
-    blueprint.datasets.each do |dataset|
+blueprint = project.blueprint
+blueprint.datasets.each do |dataset|
 
-      # creates a metric which return number of lines in dataset
-      lines = dataset.count(project)
-      if lines.to_i < 1
+  # creates a metric which return number of lines in dataset
+  lines = dataset.count(project)
+  if lines.to_i < 1
 
-        counter_error += 1
-        object_dataset = GoodData::Dataset[dataset.id, {:client => client, :project => project}]
-        output.push(error_details = {
-            :type => 'ERROR',
-            :url => server + '/#s=/gdc/projects/' + development_project + '|objectPage|' + object_dataset.uri,
-            :api => server + object_dataset.uri,
-            :title => dataset.title,
-            :description => 'Dataset it empty.'
-        })
-      else
-        counter_ok += 1
-      end
-    end
+    counter_error += 1
+    object_dataset = GoodData::Dataset[dataset.id, {:client => client, :project => project}]
+    output.push(error_details = {
+        :type => 'ERROR',
+        :url => server + '/#s=/gdc/projects/' + development_project + '|objectPage|' + object_dataset.uri,
+        :api => server + object_dataset.uri,
+        :title => dataset.title,
+        :description => 'Dataset it empty.'
+    })
+  else
+    counter_ok += 1
   end
-
-  $result.push({:section => 'Empty datasets check', :OK => counter_ok, :INFO => 0, :ERROR => counter_error, :output => output})
-  puts $result.to_json
-
 end
 
-GoodData.disconnect
+$result.push({:section => 'Empty datasets check', :OK => counter_ok, :INFO => 0, :ERROR => counter_error, :output => output})
+puts $result.to_json
+
+client.disconnect

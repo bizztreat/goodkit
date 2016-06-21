@@ -31,15 +31,11 @@ $result = []
 GoodData.logging_off
 
 # connect to GoodData
-GoodData.with_connection(login: username, password: password, server: server) do |client|
+client = GoodData.connect(login: username, password: password, server: server)
 
-  # get the project context using Project ID from user input
-  project = client.projects(project_id)
-  project.delete
+client.projects(project_id).delete
 
-  $result.push({:section => 'Delete Project', :OK => 1, :INFO => 0, :ERROR => 0})
-  puts $result.to_json
+$result.push({:section => 'Delete Project', :OK => 1, :INFO => 0, :ERROR => 0})
+puts $result.to_json
 
-end
-
-GoodData.disconnect
+client.disconnect

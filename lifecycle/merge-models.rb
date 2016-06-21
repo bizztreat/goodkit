@@ -41,47 +41,45 @@ csv = CSV.read(options[:file], :headers => true)
 target_projects = csv['project-id']
 
 # connect to GoodData
-GoodData.with_connection(login: username, password: password, server: server) do |client|
+client = GoodData.connect(login: username, password: password, server: server)
 
-  # connect to development GoodData project
-  GoodData.with_project(development_project) do |development_project|
+# connect to development GoodData project
+development_project = client.projects(development_project)
 
-    # get development project blueprint (model)
-    development_project_model = development_project.blueprint
+# get development project blueprint (model)
+development_project_model = development_project.blueprint
 
-    # for each customer/child project merge models
-    target_projects.each do |project|
-      counter_ok += 1
+# for each customer/child project merge models
+target_projects.each do |project|
+  counter_ok += 1
 
-      GoodData.with_project(project) do |child|
+  GoodData.with_project(project) do |child|
 
-        child_model = child.blueprint
-        new_model = child_model.merge(development_project_model) #TODO delete ?
-        child.update_from_blueprint(new_model) #TODO delete ?
+    child_model = child.blueprint
+    new_model = child_model.merge(development_project_model) #TODO delete ?
+    child.update_from_blueprint(new_model) #TODO delete ?
 
-        begin
-          new_model = child_model.merge(development_project_model)
-        rescue Exception => message
+    begin
+      new_model = child_model.merge(development_project_model)
+    rescue Exception => message
 
-          counter_errors += 1
-          output.push(error_details = {
-              :type => 'ERROR',
-              :detail => message.to_s,
-              :message => 'Merging two models is not possible.'
-          })
+      counter_errors += 1
+      output.push(error_details = {
+          :type => 'ERROR',
+          :detail => message.to_s,
+          :message => 'Merging two models is not possible.'
+      })
 
-        else
-          child.update_from_blueprint(new_model)
-        end
-      end
+    else
+      child.update_from_blueprint(new_model)
     end
   end
-
-  # prepare part of the results
-  $result.push({:section => 'Merging models', :OK => counter_ok, :INFO => 0, :ERROR => counter_errors, :output => output})
-
-  puts $result.to_json
-
 end
 
-GoodData.disconnect
+
+# prepare part of the results
+$result.push({:section => 'Merging models', :OK => counter_ok, :INFO => 0, :ERROR => counter_errors, :output => output})
+puts $result.to_json
+
+
+client.disconnect

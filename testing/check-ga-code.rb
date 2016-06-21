@@ -4,6 +4,7 @@ require 'csv'
 require 'optparse'
 require 'yaml'
 
+# define options for script configuration
 options = {}
 OptionParser.new do |opts|
 
@@ -35,35 +36,32 @@ $result = []
 GoodData.logging_off
 
 # connect to GoodData
-GoodData.with_connection(login: username, password: password, server: server) do |client|
+client = GoodData.connect(login: username, password: password, server: server)
 
-  # connect to development GoodData project
-  GoodData.with_project(development_project) do |project|
+# connect to development GoodData project
+project = client.projects(development_project)
 
-    # for each dashboard and tab check for the URL including GA tracking code
-    project.dashboards.each do |dashboard|
-      dashboard.tabs.each do |tab|
+# for each dashboard and tab check for the URL including GA tracking code
+project.dashboards.each do |dashboard|
+  dashboard.tabs.each do |tab|
 
-        # check the GA tracking code
-        if tab.items.to_s.include? 'https://demo.zoomint.com/stat/%CURRENT_DASHBOARD_URI%/%CURRENT_DASHBOARD_TAB_URI%'
-          counter_ok += 1
-        else
-          counter_error += 1
-          output.push(error_details = {
-              :type => 'ERROR',
-              :url => server + '/#s=/gdc/projects/' + development_project + '|projectDashboardPage|' + dashboard.uri + '|' + tab.identifier,
-              :api => server + dashboard.uri,
-              :title => dashboard.title + ' - ' + tab.title,
-              :description => 'GA script is missing.'
-          })
-        end
-      end
+    # check the GA tracking code
+    if tab.items.to_s.include? 'https://demo.zoomint.com/stat/%CURRENT_DASHBOARD_URI%/%CURRENT_DASHBOARD_TAB_URI%'
+      counter_ok += 1
+    else
+      counter_error += 1
+      output.push(error_details = {
+          :type => 'ERROR',
+          :url => server + '/#s=/gdc/projects/' + development_project + '|projectDashboardPage|' + dashboard.uri + '|' + tab.identifier,
+          :api => server + dashboard.uri,
+          :title => dashboard.title + ' - ' + tab.title,
+          :description => 'GA script is missing.'
+      })
     end
-
-    $result.push({:section => 'Missing GA code check.', :OK => counter_ok, :INFO => 0, :ERROR => counter_error, :output => output})
-    puts $result.to_json
-
   end
 end
 
-GoodData.disconnect
+$result.push({:section => 'Missing GA code check.', :OK => counter_ok, :INFO => 0, :ERROR => counter_error, :output => output})
+puts $result.to_json
+
+client.disconnect

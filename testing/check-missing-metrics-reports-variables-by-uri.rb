@@ -58,7 +58,7 @@ project = client.projects(development_project)
 project.reports.each do |report|
   if tags_included.empty? || !(report.tag_set & tags_included).empty?
     if (report.tag_set & tags_excluded).empty?
-      development_project_reports.push({:uri => report.uri.gsub(development_project, 'pid'), :title => report.title})
+      development_project_reports.push(report.uri.gsub(development_project, 'pid'))
     end
   end
 end
@@ -66,7 +66,7 @@ end
 project.metrics.each do |metric|
   if tags_included.empty? || !(metric.tag_set & tags_included).empty?
     if (metric.tag_set & tags_excluded).empty?
-      development_project_metrics.push({:uri => metric.uri.gsub(development_project, 'pid'), :title => metric.title})
+      development_project_metrics.push(metric.uri.gsub(development_project, 'pid'))
     end
   end
 end
@@ -74,7 +74,7 @@ end
 project.variables.each do |variable|
   if tags_included.empty? || !(variable.tag_set & tags_included).empty?
     if (variable.tag_set & tags_excluded).empty?
-      development_project_variables.push({:uri => variable.uri.gsub(development_project, 'pid'), :title => variable.title})
+      development_project_variables.push(variable.uri.gsub(development_project, 'pid'))
     end
   end
 end
@@ -86,7 +86,7 @@ project = client.projects(start_project)
 project.reports.each do |report|
   if tags_included.empty? || !(report.tag_set & tags_included).empty?
     if (report.tag_set & tags_excluded).empty?
-      start_project_reports.push({:uri => report.uri.gsub(start_project, 'pid'), :title => report.title})
+      start_project_reports.push(report.uri.gsub(start_project, 'pid'))
     end
   end
 end
@@ -94,7 +94,7 @@ end
 project.metrics.each do |metric|
   if tags_included.empty? || !(metric.tag_set & tags_included).empty?
     if (metric.tag_set & tags_excluded).empty?
-      start_project_metrics.push({:uri => metric.uri.gsub(start_project, 'pid'), :title => metric.title})
+      start_project_metrics.push(metric.uri.gsub(start_project, 'pid'))
     end
   end
 end
@@ -102,10 +102,11 @@ end
 project.variables.each do |variable|
   if tags_included.empty? || !(variable.tag_set & tags_included).empty?
     if (variable.tag_set & tags_excluded).empty?
-      start_project_variables.push({:uri => variable.uri.gsub(start_project, 'pid'), :title => variable.title})
+      start_project_variables.push(variable.uri.gsub(start_project, 'pid'))
     end
   end
 end
+
 
 client.disconnect
 
@@ -115,9 +116,9 @@ reports_diff.each do |report|
 
   output_1.push(error_details = {
       :type => 'ERROR',
-      :url => server + '#s=/gdc/projects/' + start_project + '%7CanalysisPage%7Chead%7C' + report[:uri].gsub!('pid', start_project),
-      :api => server + report[:uri],
-      :title => report[:title],
+      :url => server + '#s=/gdc/projects/' + start_project + '%7CanalysisPage%7Chead%7C' + report.gsub!('pid', start_project),
+      :api => server + report,
+      :title => client.projects(start_project).reports(report.gsub('pid', start_project)).title,
       :description => 'Report is missing in Devel project'
   })
 end
@@ -133,9 +134,9 @@ metrics_diff = start_project_metrics - development_project_metrics
 metrics_diff.each do |metric|
   output_2.push(error_details = {
       :type => 'ERROR',
-      :url => server + '#s=/gdc/projects/' + start_project + '|objectPage|' + metric[:uri].gsub!('pid', start_project),
-      :api => server + metric[:uri],
-      :title => metric[:title],
+      :url => server + '#s=/gdc/projects/' + start_project + '|objectPage|' + metric.gsub!('pid', start_project),
+      :api => server + metric,
+      :title => client.projects(start_project).metrics(metric.gsub('pid', start_project)).title,
       :description => 'Metric is missing in Devel project'
   })
 
@@ -147,15 +148,16 @@ counter_ok = start_project_metrics.count - counter_error
 
 $result.push({:section => 'Metrics missing in Devel project', :OK => counter_ok, :INFO => 0, :ERROR => counter_error, :output => output_2})
 
+
 # diff for variables
 variables_diff = start_project_variables - development_project_variables
 variables_diff.each do |variable|
 
   output_3.push(error_details = {
       :type => 'ERROR',
-      :url => server + '#s=/gdc/projects/' + start_project + '|objectPage|' + variable[:uri].gsub!('pid', start_project),
-      :api => server + variable[:uri],
-      :title => variable[:title],
+      :url => server + '#s=/gdc/projects/' + start_project + '|objectPage|' + variable.gsub!('pid', start_project),
+      :api => server + variable,
+      :title => client.projects(start_project).variables(variable.gsub('pid', start_project)).title,
       :description => 'Variable is missing in Devel project'
   })
 end
@@ -166,3 +168,6 @@ counter_ok = start_project_variables.count - counter_error
 
 $result.push({:section => 'Variables missing in Devel project', :OK => counter_ok, :INFO => 0, :ERROR => counter_error, :output => output_3})
 puts $result.to_json
+
+
+

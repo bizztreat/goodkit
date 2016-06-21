@@ -1,4 +1,3 @@
-#Checking for non-used facts and attributes
 require 'date'
 require 'gooddata'
 require 'csv'
@@ -14,148 +13,116 @@ def isDateOrTimeAttribute(attribute)
   excludeIdentifiers.include? attribute.identifier[0..attribute.identifier.rindex('.')-1] or excludeIdentifiers.include? attribute.identifier[attribute.identifier.index('.')+1..-1]
 end
 
-# initiate parameters for user input
+# define options for script configuration
 options = {}
 OptionParser.new do |opts|
 
   opts.on('-u', '--username USER', 'Username') { |v| options[:username] = v }
   opts.on('-p', '--password PASS', 'Password') { |v| options[:password] = v }
-  opts.on('-d', '--develproject NAME', 'Development Project') { |v| options[:devel] = v }
+  opts.on('-d', '--development_project ID', 'Development Project') { |v| options[:development_project] = v }
   opts.on('-h', '--hostname NAME', 'Hostname') { |v| options[:server] = v }
-  opts.on('-i', '--include INCLUDE', 'Tag included') { |v| options[:incl] = v }
-  opts.on('-e', '--exclude EXCLUDE', 'Tag excluded') { |v| options[:excl] = v }
+  opts.on('-i', '--include INCLUDE', 'Tag included') { |v| options[:tags_included] = v }
+  opts.on('-e', '--exclude EXCLUDE', 'Tag excluded') { |v| options[:tags_included] = v }
 
 end.parse!
 
 # check all parameters
 username = options[:username]
 password = options[:password]
-devel = options[:devel]
+development_project = options[:development_project]
 server = options[:server]
-incl = options[:incl]
-excl = options[:excl]
-
-# make arrays from incl and excl parameters
-if incl.to_s != ''
-  incl = incl.split(',')
-end
-
-if excl.to_s != ''
-  excl = excl.split(',')
-end
+tags_included = options[:tags_included].to_s.split(',')
+tags_excluded = options[:tags_excluded].to_s.split(',')
 
 # if whitelabel is not specified set to default domain
-if server.to_s.empty? then
+if server.to_s.empty?
   server = 'https://secure.gooddata.com'
 end
 
 counter_ok = 0
-counter_err = 0
-err_array = []
+counter_info = 0
+output = []
 $result = []
 
 # turn off logging for clear output
 GoodData.logging_off
 
 # connect to GoodData
-GoodData.with_connection(login: username, password: password, server: server) do |client|
+client = GoodData.connect(login: username, password: password, server: server)
 
-  # prepare hashes and arrays for results
-  $devel_metrics = Hash.new
-  $start_metrics = Hash.new
+# connect to project context
+project = client.projects(development_project)
 
-  # connect to project context
-  project = client.projects(devel)
+# find unused attributes
+project.attributes.each do |attribute|
 
-  # Find unused attributes
-  # for each attribute
-  project.attributes.each do |attr|
+  # check included and excluded tags
+  if tags_included.empty? || !(attribute.tag_set & tags_included).empty?
+    if (attribute.tag_set & tags_excluded).empty?
+      unless isDateOrTimeAttribute(attribute)
 
-    #check incl and excl tags first
-    if incl.to_s == '' || !(attr.tag_set & incl).empty? then
-      if excl.to_s == '' || (attr.tag_set & excl).empty? then
-        unless isDateOrTimeAttribute(attr)
+        counter_objects = 0
+        objects = attribute.usedby
 
-          num_objects = 0
-          objects = attr.usedby
-          objects.select { |attribute| attribute["category"] == 'metric' }.each { |r|
-            # get only metric objects
-            num_objects += 1
-          }
+        counter_objects += objects.select { |object| object['category'] == 'metric' }.length
+        counter_objects += objects.select { |object| object['category'] == 'report' }.length
 
-          objects.select { |attribute| attribute["category"] == 'report' }.each { |r|
-            # get only report objects
-            num_objects += 1
-          }
-
-          # safe the result if there is ZERO objects that are using the attribute
-          if num_objects == 0 then
-            err_array.push(error_details = {
-                :type => 'ERROR',
-                :url => server + '/#s=/gdc/projects/' + devel + '|objectPage|' + attr.uri,
-                :api => server + attr.uri,
-                :title => attr.title,
-                :description => 'This attribute ('+ attr.title + ') is not used by any object'
-            })
-            counter_err += 1
-          else
-            counter_ok += 1
-          end
-        end
-      end
-    end
-  end
-
-
-  #save errors in the result variable
-  $result.push({:section => 'Attributes which have not been used in any object (metric or report).', :OK => counter_ok, :ERROR => counter_err, :output => err_array})
-
-  #reset variables for counting errors
-  err_array = []
-  counter_ok = 0
-  counter_err = 0
-
-  # Find unused facts
-  # for each fact do the check
-  project.facts.each do |fact|
-
-    #check incl and excl tags first
-    if incl.to_s == '' || !(fact.tag_set & incl).empty? then
-      if excl.to_s == '' || (fact.tag_set & excl).empty? then
-
-        num_objects = 0
-        objects = fact.usedby
-        objects.select { |fact| fact["category"] == 'metric' }.each { |r|
-          # get only metric objects
-          num_objects += 1
-        }
-
-        objects.select { |fact| fact["category"] == 'report' }.each { |r|
-          # get only report objects
-          num_objects += 1
-        }
-
-        # safe the result if there is ZERO objects that are using the fact
-        if num_objects == 0 then
-
-          err_array.push(error_details = {
-              :type => 'ERROR',
-              :url => server + '/#s=/gdc/projects/' + devel + '|objectPage|' + fact.uri,
-              :api => server + fact.uri,
-              :title => fact.title,
-              :description => 'This fact ('+ fact.title + ') is not used by any object'
+        # safe the result if there is ZERO objects that are using the attribute
+        if counter_objects == 0
+          output.push(error_details = {
+              :type => 'INFO',
+              :url => server + '/#s=/gdc/projects/' + development_project + '|objectPage|' + attribute.uri,
+              :api => server + attribute.uri,
+              :title => attribute.title,
+              :description => 'This attribute ('+ attribute.title + ') is not used by any object'
           })
-          counter_err += 1
+          counter_info += 1
         else
           counter_ok += 1
         end
       end
-      #save errors in the result variable
-      $result.push({:section => 'Facts which have not been used in any object (metric or report).', :OK => counter_ok, :ERROR => counter_err, :output => err_array})
     end
   end
 end
-#print out the result
+
+$result.push({:section => 'Attributes which have not been used in any object (metric or report).', :OK => counter_ok, :INFO => counter_info, :ERROR => 0, :output => output})
+
+# reset variables for counting errors
+output = []
+counter_ok = 0
+counter_info = 0
+
+# find unused facts
+project.facts.each do |fact|
+
+  # check included and excluded tags
+  if tags_included.empty? || !(fact.tag_set & tags_included).empty?
+    if (fact.tag_set & tags_excluded).empty?
+
+      counter_objects = 0
+      objects = fact.usedby
+
+      counter_objects += objects.select { |object| object['category'] == 'metric' }.length
+      counter_objects += objects.select { |object| object['category'] == 'report' }.length
+
+      # safe the result if there is ZERO objects that are using the fact
+      if counter_objects == 0
+        output.push(error_details = {
+            :type => 'INFO',
+            :url => server + '/#s=/gdc/projects/' + development_project + '|objectPage|' + fact.uri,
+            :api => server + fact.uri,
+            :title => fact.title,
+            :description => 'This fact ('+ fact.title + ') is not used by any object'
+        })
+        counter_info += 1
+      else
+        counter_ok += 1
+      end
+    end
+  end
+end
+
+$result.push({:section => 'Facts which have not been used in any object (metric or report).', :OK => counter_ok, :INFO => counter_info, :ERROR => 0, :output => output})
 puts $result.to_json
 
-GoodData.disconnect
+client.disconnect

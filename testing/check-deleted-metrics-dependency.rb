@@ -38,50 +38,48 @@ $result = []
 GoodData.logging_off
 
 # connect to GoodData
-GoodData.with_connection(login: username, password: password, server: server) do |client|
+client = GoodData.connect(login: username, password: password, server: server)
 
-  # connect to development GoodData project
-  GoodData.with_project(development_project) do |project|
+# connect to development GoodData project
+project = client.projects(development_project)
 
-    # get metric expression from development project
-    project.reports.each do |report|
+# get metric expression from development project
+project.reports.each do |report|
 
-      # check included and excluded tags
-      if tags_included.empty? || !(report.tag_set & tags_included).empty?
-        if (report.tag_set & tags_excluded).empty?
+  # check included and excluded tags
+  if tags_included.empty? || !(report.tag_set & tags_included).empty?
+    if (report.tag_set & tags_excluded).empty?
 
-          # cache object which are current using on the report
-          objects = report.definition.using
+      # cache object which are current using on the report
+      objects = report.definition.using
 
-          # go through them
-          objects.select { |object| object['category'] == 'metric' }.each do |object|
+      # go through them
+      objects.select { |object| object['category'] == 'metric' }.each do |object|
 
-            metric = project.metrics(object['link'])
+        metric = project.metrics(object['link'])
 
-            # check if the metric is deleted
-            if metric.deprecated
+        # check if the metric is deleted
+        if metric.deprecated
 
-              counter_error += 1
-              output.push(error_details = {
-                  :type => 'ERROR',
-                  :url => server + '/#s=/gdc/projects/' + development_project + '|objectPage|' + metric.uri,
-                  :api => server + metric.uri,
-                  :title => metric.title,
-                  :description => 'This report\'s metric has been deleted.'
-              })
-            end
-          end
+          counter_error += 1
+          output.push(error_details = {
+              :type => 'ERROR',
+              :url => server + '/#s=/gdc/projects/' + development_project + '|objectPage|' + metric.uri,
+              :api => server + metric.uri,
+              :title => metric.title,
+              :description => 'This report\'s metric has been deleted.'
+          })
         end
-      end
-
-      if counter_error > 0
-        $result.push({:section => 'This report "' + report.title + '" contains deleted metrics', :OK => 0, :INFO => 0, :ERROR => counter_error, :output => output})
-        counter_error = 0
       end
     end
   end
 
-  puts $result.to_json
-
+  if counter_error > 0
+    $result.push({:section => 'This report "' + report.title + '" contains deleted metrics', :OK => 0, :INFO => 0, :ERROR => counter_error, :output => output})
+    counter_error = 0
+  end
 end
-GoodData.disconnect
+
+puts $result.to_json
+
+client.disconnect
