@@ -160,6 +160,7 @@ Checks if there was some change in metric definition (not metadata but expressio
 
 Checks if all reports are computable and gives you links to non computable reports as output.
 
+
 ###14-check-ga-code.rb
 
 Checks if all dashboards contains Google Analytics tracking code. Prints link to dashboard tabs that don't have the tracking code embedded.
@@ -167,3 +168,16 @@ Checks if all dashboards contains Google Analytics tracking code. Prints link to
 ###15-check-not-used-objects.rb
 
 Prints out all attributes and facts that are not used in any metric or report. Prints out links to 
+
+###16-check-atribute-values.rb
+Checks if atribute is not missing any value and there are no extra values as well.
+
+This script has two parts. To switch between these two parts use parameter GENERATE -g "true/false" 
+
+1. - the first part is used to generate JSON file containing values of attributes. -g "true"
+
+2. - the second part checks the values from the generated JSON file. -g "false"
+
+To select the group of checked attributes use the parameter -a "Attribute1,Attribute2" , used as a list of attributes. 
+
+
