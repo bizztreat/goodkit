@@ -108,8 +108,6 @@ project.variables.each do |variable|
 end
 
 
-client.disconnect
-
 # diff for reports
 reports_diff = start_project_reports - development_project_reports
 reports_diff.each do |report|
@@ -169,5 +167,6 @@ counter_ok = start_project_variables.count - counter_error
 $result.push({:section => 'Variables missing in Devel project', :OK => counter_ok, :INFO => 0, :ERROR => counter_error, :output => output_3})
 puts $result.to_json
 
+client.disconnect
 
 
