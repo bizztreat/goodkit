@@ -174,9 +174,9 @@ Checks if atribute is not missing any value and there are no extra values as wel
 
 This script has to parts. To switch between these two parts use parameter GENERATE -g "true/false" 
 
-the first part is used to generate JSON file containing values of attributes -g "true"
+1. - the first part is used to generate JSON file containing values of attributes -g "true"
 
-the second part checks the values from the JSON file -g "false"
+2. - the second part checks the values from the JSON file -g "false"
 
 To select the group of checked attributes use the parameter -a "Attribute1,Attribute2" which is used as a list of attributes. 
 
