@@ -8,7 +8,7 @@ require 'yaml'
 
 def add_to_csv(csv, keys, object)
 
-  unless csv.any? { |row| row[:key] == object.title }
+  unless csv.any? { |row| row['identifier'] == object.identifier }
 
     row = Hash[keys.map { |key| [key, ''] }]
     row['identifier'] = object.identifier
@@ -48,9 +48,6 @@ password = options[:password]
 project = options[:project]
 server = options[:server]
 
-# counters and arrays for results
-$result = []
-
 # turn off logging for clear output
 GoodData.logging_off
 
@@ -69,7 +66,7 @@ client = GoodData.connect(login: username, password: password, server: server)
 project = client.projects(project)
 
 project.dashboards.each do |dashboard|
-  add_to_csv(csv, keys, dashboard)
+  csv = add_to_csv(csv, keys, dashboard)
   dashboard.tabs.each do |tab|
     csv = add_to_csv(csv, keys, tab)
   end
@@ -93,17 +90,13 @@ end
 
 client.disconnect
 
-# write hash to CSV
-file = File.open('dictionaries/translation/dictionary.csv', 'w')
-CSV.generate(file, {:force_quotes => true}) do |file|
+# write hash to
+CSV.open('dictionaries/translation/dictionary.csv', 'w') do |file|
+  file << keys
   csv.each do |row|
     file << row.values
   end
 end
-File.write('dictionaries/translation/dictionary.csv', file)
-File.close
-
-
 
 
 
