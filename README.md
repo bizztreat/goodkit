@@ -172,9 +172,10 @@ Prints out all attributes and facts that are not used in any metric or report. P
 ###16-check-atribute-values.rb
 Checks if atribute is not missing any value and there are no extra values as well.
 
-This script has to parts: the first part is used to generate JSON file containing values of attributes
-                          the second part checks the values from the JSON file
-For switching between these two parts use parameter -g "true/false"
+This script has to parts: 
+the first part is used to generate JSON file containing values of attributes
+the second part checks the values from the JSON file
+To switch between these two parts use parameter -g "true/false"
 
 To select the group of checked attributes use the parameter -a "Attribute1,Attribute2" 
 
