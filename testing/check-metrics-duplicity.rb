@@ -71,30 +71,31 @@ while (development_project_metrics.length > 0)
     metric_1_pretty_expression_without_spaces = metric_1[:pretty_expression].split(' ').sort.join
     metric_2_pretty_expression_without_spaces = metric_2[:pretty_expression].split(' ').sort.join
 
-    pretty_expressions_distance = Levenshtein.distance(metric_1_pretty_expression_without_spaces, metric_2_pretty_expression_without_spaces)
+    unless metric_2[:pretty_expression] =~ /^SELECT [\d]+$/
+      pretty_expressions_distance = Levenshtein.distance(metric_1_pretty_expression_without_spaces, metric_2_pretty_expression_without_spaces)
 
-    if pretty_expressions_distance <= levenshtein_distance_threshold
-      if pretty_expressions_distance == 0
-        output.push(error_details = {
-            :distance => 0,
-            :type => 'ERROR',
-            :url => server + '#s=/gdc/projects/' + development_project + '|objectPage|' + metric_2[:uri],
-            :api => server + metric_1[:uri],
-            :title => metric_1[:title],
-            :description => '<a href="' + server + metric_1[:uri] + '">Metric 1</a> is duplicated with <a href="' + server + metric_2[:uri] + '">Metric 2</a>'
-        })
-        counter_error += 1
-      else
-        # pretty_expressions_normalized_distance = Levenshtein.normalized_distance(metric_1_pretty_expression_without_spaces, metric_2_pretty_expression_without_spaces)
-        output.push(error_details = {
-            :distance => pretty_expressions_distance,
-            :type => 'INFO',
-            :url => server + '#s=/gdc/projects/' + development_project + '|objectPage|' + metric_2[:uri],
-            :api => server + metric_1[:uri],
-            :title => metric_1[:title],
-            :description => '<a href="' + server + metric_1[:uri] + '">Metric 1</a> is duplicated with <a href="' + server + metric_2[:uri] + '">Metric 2</a> with distance ' + pretty_expressions_distance.to_s # + ' and normalized distance is' + pretty_expressions_normalized_distance.to_s
-        })
-        counter_info += 1
+      if pretty_expressions_distance <= levenshtein_distance_threshold
+        if pretty_expressions_distance == 0
+          output.push(error_details = {
+              :distance => 0,
+              :type => 'ERROR',
+              :url => server + '#s=/gdc/projects/' + development_project + '|objectPage|' + metric_2[:uri],
+              :api => server + metric_1[:uri],
+              :title => metric_1[:pretty_expression],
+              :description => '<a href="' + server + '#s=/gdc/projects/' + development_project + '|objectPage|' + metric_1[:uri] + '">Metric 1</a>, <a href="' + server + '#s=/gdc/projects/' + development_project + '|objectPage|' + metric_2[:uri] + '">Metric 2</a>'
+          })
+          counter_error += 1
+        else
+          output.push(error_details = {
+              :distance => pretty_expressions_distance,
+              :type => 'INFO',
+              :url => server + '#s=/gdc/projects/' + development_project + '|objectPage|' + metric_2[:uri],
+              :api => server + metric_1[:uri],
+              :title => metric_1[:pretty_expression],
+              :description => '<a href="' + server + '#s=/gdc/projects/' + development_project + '|objectPage|' + metric_1[:uri] + '">Metric 1</a>, <a href="' + server + '#s=/gdc/projects/' + development_project + '|objectPage|' + metric_2[:uri] + '">Metric 2</a>'
+          })
+          counter_info += 1
+        end
       end
     end
   end
@@ -102,7 +103,7 @@ end
 
 output.sort { |error_detail_1, error_detail_2| error_detail_1[:distance].to_i <=> error_detail_2[:distance].to_i }
 
-$result.push({:section => 'Duplicity missing in Devel project', :OK => 0, :INFO => counter_info, :ERROR => counter_error, :output => output})
+$result.push({:section => 'Duplicity in Devel project', :OK => 0, :INFO => counter_info, :ERROR => counter_error, :output => output})
 puts $result.to_json
 
 
