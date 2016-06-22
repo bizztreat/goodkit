@@ -3,7 +3,7 @@ require 'gooddata'
 require 'csv'
 require 'optparse'
 require 'yaml'
-require 'levenshtein'
+require 'levenshtein' #levenshtein-ffi
 
 # define options for script configuration
 options = {}
@@ -71,7 +71,7 @@ while (development_project_metrics.length > 0)
     metric_1_pretty_expression_without_spaces = metric_1[:pretty_expression].split(' ').sort.join
     metric_2_pretty_expression_without_spaces = metric_2[:pretty_expression].split(' ').sort.join
 
-    pretty_expressions_distance = Levenshtein.distance(metric_1_pretty_expression_without_spaces, metric_2_pretty_expression_without_spaces) #TODO try levenshtein_fast by C
+    pretty_expressions_distance = Levenshtein.distance(metric_1_pretty_expression_without_spaces, metric_2_pretty_expression_without_spaces)
 
     if pretty_expressions_distance <= levenshtein_distance_threshold
       if pretty_expressions_distance == 0
