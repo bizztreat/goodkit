@@ -6,7 +6,7 @@ require 'yaml'
 
 #TODO co už tam není reportovat
 
-def add_to_csv(csv, keys, object)
+def add_to_csv(csv, keys, object, url)
 
   unless csv.any? { |row| row['identifier'] == object.identifier }
 
@@ -14,9 +14,9 @@ def add_to_csv(csv, keys, object)
     row['identifier'] = object.identifier
 
     if object.respond_to?(:category)
-      row['category'] = object.category
+      row['category'] = '=HYPERLINK("' + url + '","' + object.category + '")'
     else
-      row['category'] = 'tab'
+      row['category'] = '=HYPERLINK("' + url + '","tab")'
     end
 
     row['en_title'] = object.title
@@ -66,33 +66,38 @@ client = GoodData.connect(login: username, password: password, server: server)
 project = client.projects(project)
 
 project.dashboards.each do |dashboard|
-  csv = add_to_csv(csv, keys, dashboard)
+  url = server + '/#s=' + project.uri + '|projectDashboardPage|' + dashboard.uri
+  csv = add_to_csv(csv, keys, dashboard, url)
   dashboard.tabs.each do |tab|
-    csv = add_to_csv(csv, keys, tab)
+    url = server + '/#s=' + project.uri + '|projectDashboardPage|' + dashboard.uri + '|' + tab.identifier
+    csv = add_to_csv(csv, keys, tab, url)
   end
 end
 
 project.reports.each do |report|
-  csv = add_to_csv(csv, keys, report)
+  url = server + '#s=' + project.uri + '|analysisPage|head|' + report.uri
+  csv = add_to_csv(csv, keys, report, url)
 end
 
 project.metrics.each do |metric|
-  csv = add_to_csv(csv, keys, metric)
+  url = server + '/#s=' + project.uri + '|objectPage|' + metric.uri
+  csv = add_to_csv(csv, keys, metric, url)
 end
 
 project.attributes.each do |attribute|
-  csv = add_to_csv(csv, keys, attribute)
+  url = server + '/#s=' + project.uri + '|objectPage|' + attribute.uri
+  csv = add_to_csv(csv, keys, attribute, url)
 end
 
 project.facts.each do |fact|
-  csv = add_to_csv(csv, keys, fact)
+  url = server + '/#s=' + project.uri + '|objectPage|' + fact.uri
+  csv = add_to_csv(csv, keys, fact, url)
 end
 
 client.disconnect
 
 # write hash to
 CSV.open('dictionaries/translation/dictionary.csv', 'w') do |file|
-  file << keys
   csv.each do |row|
     file << row.values
   end
