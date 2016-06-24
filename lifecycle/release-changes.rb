@@ -61,7 +61,7 @@ dashboards_to_migrate.each do |dashboard|
 
   objects_to_migrate.push(dashboard)
   counter_info += 1
-  output.push(error_details = {
+  output.push(details = {
       :type => 'INFO',
       :url => server + '#s=/gdc/projects/' + development_project + '|projectDashboardPage|' + dashboard.uri,
       :api => server + dashboard.uri,
@@ -82,7 +82,7 @@ reports_to_migrate = project.reports.select { |report| report.updated > last_rel
 reports_to_migrate.each do |report|
   objects_to_migrate.push(report)
   counter_info += 1
-  output.push(error_details = {
+  output.push(details = {
       :type => 'INFO',
       :url => server + '#s=/gdc/projects/' + development_project + '|analysisPage|head|' + report.uri,
       :api => server + report.uri,
@@ -103,7 +103,7 @@ metrics_to_migrate = project.metrics.select { |metric| metric.updated > last_rel
 metrics_to_migrate.each do |metric|
   objects_to_migrate.push(metric)
   counter_info += 1
-  output.push(error_details = {
+  output.push(details = {
       :type => 'INFO',
       :url => server + '#s=/gdc/projects/' + development_project + '|objectPage|' + metric.uri,
       :api => server + metric.uri,
@@ -124,7 +124,7 @@ variables_to_migrate = project.variables.select { |variable| variable.updated > 
 variables_to_migrate.each do |variable|
   objects_to_migrate.push(variable)
   counter_info += 1
-  output.push(error_details = {
+  output.push(details = {
       :type => 'INFO',
       :url => server + '#s=/gdc/projects/' + development_project + '|objectPage|' + variable.uri,
       :api => server + variable.uri,

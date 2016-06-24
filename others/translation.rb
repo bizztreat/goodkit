@@ -94,6 +94,11 @@ project.facts.each do |fact|
   csv = add_to_csv(csv, keys, fact, url)
 end
 
+project.variables.each do |variable|
+  url = server + '/#s=' + project.uri + '|objectPage|' + variable.uri
+  csv = add_to_csv(csv, keys, variable, url)
+end
+
 client.disconnect
 
 # write hash to

@@ -137,11 +137,11 @@ excl = options[:excl]
 
 # make arrays from incl and excl parameters
 if incl.to_s != ''
-incl = incl.split(",")
+  incl = incl.split(",")
 end
 
 if excl.to_s != ''
-excl = excl.split(",")
+  excl = excl.split(",")
 end
 
 # if whitelabel is not specified set to default domain
@@ -189,52 +189,52 @@ GoodData.with_connection(login: username, password: password, server: server) do
           # check exclude/include tag conditions
           if incl.to_s == '' || !(a.tag_set & incl).empty? then
             if excl.to_s == '' || (a.tag_set & excl).empty? then
-          a.title = create_attribute_name(d.title, main_dataset_identifier, main_date_time_identifier, a.identifier)
-          a.title
-          a.save
-
-          # IF checks if the folder exists and if the name is same and one more check if the folder is not deleted from GD GUI (deprecated)
-          if folder_cache.key?(a.content['dimension']) && folder_cache[a.content['dimension']].title == create_folder_name(d.title, main_dataset_identifier, main_date_time_identifier) && !folder_cache[a.content['dimension']].deprecated
-
-            #push info detail to result array as INFO
-            result_array.push(error_details = {
-                :type => "INFO",
-                :url => server + '#s=/gdc/projects/' + devel + '|objectPage|' + a.uri,
-                :api => server + a.uri,
-                :message => 'The attribute (' + a.title + ') is already in folder "' + create_folder_name(d.title, main_dataset_identifier, main_date_time_identifier) + '".'
-            })
-            # count objects
-            counter_ok += 1
-          else
-            #push info detail to result array as ERROR
-            result_array.push(error_details = {
-                :type => "ERROR",
-                :url => server + '#s=/gdc/projects/' + devel + '|objectPage|' + a.uri,
-                :api => server + a.uri,
-                :message => 'The attribute (' + a.title + ') has been moved to  folder "' + create_folder_name(d.title, main_dataset_identifier, main_date_time_identifier) + '".'
-            })
-            # count objects
-            counter_err += 1
-            # ACTION -- do the changes
-            if all_folders.key?(create_folder_name(d.title, main_dataset_identifier, main_date_time_identifier))
-              # "we have it so we just need to assign it"
-              a.content['dimension'] = all_folders[create_folder_name(d.title, main_dataset_identifier, main_date_time_identifier)]
+              a.title = create_attribute_name(d.title, main_dataset_identifier, main_date_time_identifier, a.identifier)
+              a.title
               a.save
-            else
-              # we have to create it first
-              folder = create_folder(project, create_folder_name(d.title, main_dataset_identifier, main_date_time_identifier))
-              folder_cache[folder.uri] = folder
-              #refresh folder's list
-              client.get("#{project.md['query']}/dimensions")['query']['entries'].map do |i|
-                all_folders.[]=(i['title'], i['link'])
+
+              # IF checks if the folder exists and if the name is same and one more check if the folder is not deleted from GD GUI (deprecated)
+              if folder_cache.key?(a.content['dimension']) && folder_cache[a.content['dimension']].title == create_folder_name(d.title, main_dataset_identifier, main_date_time_identifier) && !folder_cache[a.content['dimension']].deprecated
+
+                #push info detail to result array as INFO
+                result_array.push(error_details = {
+                    :type => "INFO",
+                    :url => server + '#s=/gdc/projects/' + devel + '|objectPage|' + a.uri,
+                    :api => server + a.uri,
+                    :message => 'The attribute (' + a.title + ') is already in folder "' + create_folder_name(d.title, main_dataset_identifier, main_date_time_identifier) + '".'
+                })
+                # count objects
+                counter_ok += 1
+              else
+                #push info detail to result array as ERROR
+                result_array.push(error_details = {
+                    :type => "ERROR",
+                    :url => server + '#s=/gdc/projects/' + devel + '|objectPage|' + a.uri,
+                    :api => server + a.uri,
+                    :message => 'The attribute (' + a.title + ') has been moved to  folder "' + create_folder_name(d.title, main_dataset_identifier, main_date_time_identifier) + '".'
+                })
+                # count objects
+                counter_err += 1
+                # ACTION -- do the changes
+                if all_folders.key?(create_folder_name(d.title, main_dataset_identifier, main_date_time_identifier))
+                  # "we have it so we just need to assign it"
+                  a.content['dimension'] = all_folders[create_folder_name(d.title, main_dataset_identifier, main_date_time_identifier)]
+                  a.save
+                else
+                  # we have to create it first
+                  folder = create_folder(project, create_folder_name(d.title, main_dataset_identifier, main_date_time_identifier))
+                  folder_cache[folder.uri] = folder
+                  #refresh folder's list
+                  client.get("#{project.md['query']}/dimensions")['query']['entries'].map do |i|
+                    all_folders.[]=(i['title'], i['link'])
+                  end
+                  all_folders.values.uniq
+                  # Now assign
+                  a.content['dimension'] = folder.uri
+                  a.save
+                end
+
               end
-              all_folders.values.uniq
-              # Now assign
-              a.content['dimension'] = folder.uri
-              a.save
-            end
-
-            end
             end
           end
         end

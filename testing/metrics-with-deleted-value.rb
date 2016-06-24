@@ -40,39 +40,36 @@ if server.to_s.empty?
 end
 
 # connect to GoodData
-GoodData.with_connection(login: username, password: password, server: server) do |client|
+client = GoodData.connect(login: username, password: password, server: server)
 
-  # connect to development GoodData project
-  GoodData.with_project(development_project) do |project|
+# connect to development GoodData project
+development_project = client.projects(development_project)
 
-    project.metrics.each do |metric|
+development_project.metrics.each do |metric|
 
-      # check included and excluded tags
-      if tags_included.empty? || !(metric.tag_set & tags_included).empty?
-        if (metric.tag_set & tags_excluded).empty?
+  # check included and excluded tags
+  if tags_included.empty? || !(metric.tag_set & tags_included).empty?
+    if (metric.tag_set & tags_excluded).empty?
 
-          # check that metric value contains deleted value
-          if metric.pretty_expression.include? '[(empty value)]'
+      # check that metric value contains deleted value
+      if metric.pretty_expression.include? '[(empty value)]'
 
-            output.push(error_details = {
-                :type => 'ERROR',
-                :url => server + '/#s=/gdc/projects/' + development_project + '|objectPage|' + metric.uri,
-                :api => server + metric.uri,
-                :title => metric.title,
-                :description => 'Metric contains (delete value) ' + metric.pretty_expression
-            })
-            counter_error += 1
-          else
-            counter_ok += 1
-          end
-        end
+        output.push(error_details = {
+            :type => 'ERROR',
+            :url => server + '/#s=' + development_project.uri + '|objectPage|' + metric.uri,
+            :api => server + metric.uri,
+            :title => metric.title,
+            :description => 'Metric contains (delete value) ' + metric.pretty_expression
+        })
+        counter_error += 1
+      else
+        counter_ok += 1
       end
     end
-
-    $result.push({:section => 'Metrics with Deleted Value', :OK => counter_ok, :INFO => 0, :ERROR => counter_error, :output => output})
-    puts $result.to_json
-
   end
 end
 
-GoodData.disconnect
+$result.push({:section => 'Metrics with Deleted Value', :OK => counter_ok, :INFO => 0, :ERROR => counter_error, :output => output})
+puts $result.to_json
+
+client.disconnect

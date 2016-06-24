@@ -55,16 +55,13 @@ target_projects.each do |project|
 
   GoodData.with_project(project) do |child|
 
-    child_model = child.blueprint
-    new_model = child_model.merge(development_project_model) #TODO delete ?
-    child.update_from_blueprint(new_model) #TODO delete ?
-
     begin
+      child_model = child.blueprint
       new_model = child_model.merge(development_project_model)
     rescue Exception => message
 
       counter_errors += 1
-      output.push(error_details = {
+      output.push(details = {
           :type => 'ERROR',
           :detail => message.to_s,
           :message => 'Merging two models is not possible.'
@@ -76,10 +73,7 @@ target_projects.each do |project|
   end
 end
 
-
-# prepare part of the results
 $result.push({:section => 'Merging models', :OK => counter_ok, :INFO => 0, :ERROR => counter_errors, :output => output})
 puts $result.to_json
-
 
 client.disconnect

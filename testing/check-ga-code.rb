@@ -50,7 +50,7 @@ project.dashboards.each do |dashboard|
       counter_ok += 1
     else
       counter_error += 1
-      output.push(error_details = {
+      output.push(details = {
           :type => 'ERROR',
           :url => server + '/#s=/gdc/projects/' + development_project + '|projectDashboardPage|' + dashboard.uri + '|' + tab.identifier,
           :api => server + dashboard.uri,

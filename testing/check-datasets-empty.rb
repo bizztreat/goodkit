@@ -50,7 +50,7 @@ blueprint.datasets.each do |dataset|
 
     counter_error += 1
     object_dataset = GoodData::Dataset[dataset.id, {:client => client, :project => project}]
-    output.push(error_details = {
+    output.push(details = {
         :type => 'ERROR',
         :url => server + '/#s=/gdc/projects/' + development_project + '|objectPage|' + object_dataset.uri,
         :api => server + object_dataset.uri,

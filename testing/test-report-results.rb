@@ -10,88 +10,74 @@ OptionParser.new do |opts|
 
   opts.on('-u', '--username USER', 'Username') { |v| options[:username] = v }
   opts.on('-p', '--password PASS', 'Password') { |v| options[:password] = v }
-  opts.on('-s', '--startproject NAME', 'Start Project') { |v| options[:start] = v }
-  opts.on('-d', '--develproject NAME', 'Development Project') { |v| options[:devel] = v }
+  opts.on('-s', '--start_project ID', 'Start Project') { |v| options[:start_project] = v }
+  opts.on('-d', '--development_project ID', 'Development Project') { |v| options[:development_project] = v }
   opts.on('-h', '--hostname NAME', 'Hostname') { |v| options[:server] = v }
-  opts.on('-i', '--include INCLUDE', 'Tag included') { |v| options[:incl] = v }
-  opts.on('-e', '--exclude EXCLUDE', 'Tag excluded') { |v| options[:excl] = v }
+  opts.on('-i', '--include INCLUDE', 'Tag included') { |v| options[:tags_included] = v }
+  opts.on('-e', '--exclude EXCLUDE', 'Tag excluded') { |v| options[:tags_excluded] = v }
 
 end.parse!
 
-# assign to username
+# get credentials and others from input parameters
 username = options[:username]
 password = options[:password]
+start_project = options[:start_project]
+development_project = options[:development_project]
 server = options[:server]
-incl = options[:incl]
-excl = options[:excl]
-
-# make arrays from incl and excl parameters
-if incl.to_s != ''
-  incl = incl.split(",")
-end
-
-if excl.to_s != ''
-  excl = excl.split(",")
-end
+tags_included = options[:tags_included].to_s.split(',')
+tags_excluded = options[:tags_excluded].to_s.split(',')
 
 # variables for standard output
 counter_ok = 0
-counter_err = 0
-err_array = []
+counter_error = 0
+output = []
 $result = []
 
 # turn off logging for clear output
 GoodData.logging_off
 
 # if whitelabel is not specified set to default domain
-if server.to_s.empty? then
+if server.to_s.empty?
   server = 'https://secure.gooddata.com'
 end
 
-GoodData.with_connection(login: username, password: password, server: server) do |client|
+# connect to GoodData
+client = GoodData.connect(login: username, password: password, server: server)
 
-  # get project context for both start and devel
-  start = client.projects(options[:start])
-  devel = client.projects(options[:devel])
+# connect to development and start GoodData projects
+start_project = client.projects(start_project)
+development_project = client.projects(development_project)
 
-    # select original reports include and exclude tags
-    orig_reports = start.reports.select { |r| incl.to_s == '' || !(r.tag_set & incl).empty? }.sort_by(&:title)
-    orig_reports = orig_reports.select { |r| excl.to_s == '' || (r.tag_set & excl).empty? }.sort_by(&:title)
 
-    # select new reports include and exclude tags
-    new_reports = devel.reports.select { |r| incl.to_s == '' || !(r.tag_set & incl).empty? }.sort_by(&:title)
-    new_reports = new_reports.select { |r| excl.to_s == '' || (r.tag_set & excl).empty? }.sort_by(&:title)
+# select start project reports and include and exclude tags
+start_project_reports = start_project.reports.select { |report| (tags_included.empty? || !(report.tag_set & tags_included).empty?) && (report.tag_set & tags_excluded).empty? }.sort_by(&:title)
 
-    results = orig_reports.zip(new_reports).pmap do |reports|
-      # compute both reports and add the report at the end for being able to print a report later
-      reports.map(&:execute) + [reports.last]
-    end
+# select development project reports and include and exclude tags
+development_project_reports = development_project.reports.select { |report| (tags_included.empty? || !(report.tag_set & tags_included).empty?) && (report.tag_set & tags_excluded).empty? }.sort_by(&:title)
 
-    # print report name and result true/false if the result is complete
-    results.map do |res|
-      orig_result, new_result, new_report = res
-
-      if orig_result != new_result then
-        counter_err += 1
-        err_array.push(error_details = {
-            :type => "ERROR",
-            :url => server + '#s=/gdc/projects/' + devel.pid + '|analysisPage|head|' + new_report.uri,
-            :api => server + new_report.uri,
-            :title => new_report.title, 
-            :message => "New report result is different."
-        })
-
-      else
-        # count OK objects
-        counter_ok += 1
-      end
-  end
-
-  # prepare part of the results
-  $result.push({:section => 'Compare report results', :OK => counter_ok, :ERROR => counter_err, :output => err_array})
-
-  puts $result.to_json
-
+results = start_project_reports.zip(development_project_reports).pmap do |reports|
+  # compute both reports and add the report at the end for being able to print a report later
+  reports.map(&:execute) + [reports.last] #TODO ??
 end
 
-GoodData.disconnect
+results.map do |result|
+  orig_result, new_result, new_report = result
+
+  if orig_result != new_result
+    output.push(details = {
+        :type => 'ERROR',
+        :url => server + '#s=' + development_project.uri + '|analysisPage|head|' + new_report.uri,
+        :api => server + new_report.uri,
+        :title => new_report.title,
+        :message => 'Development report result is different.'
+    })
+    counter_error += 1
+  else
+    counter_ok += 1
+  end
+end
+
+$result.push({:section => 'Compare report results', :OK => counter_ok, :INFO => 0, :ERROR => counter_error, :output => output})
+puts $result.to_json
+
+client.disconnect

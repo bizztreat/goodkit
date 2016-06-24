@@ -30,6 +30,7 @@ if server.to_s.empty?
   server = 'https://secure.gooddata.com'
 end
 
+# variables for standard output
 counter_error = 0
 output = []
 $result = []
@@ -62,7 +63,7 @@ project.reports.each do |report|
         if metric.deprecated
 
           counter_error += 1
-          output.push(error_details = {
+          output.push(details = {
               :type => 'ERROR',
               :url => server + '/#s=/gdc/projects/' + development_project + '|objectPage|' + metric.uri,
               :api => server + metric.uri,

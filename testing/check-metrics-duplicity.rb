@@ -29,7 +29,7 @@ tags_included = options[:tags_included].to_s.split(',')
 tags_excluded = options[:tags_excluded].to_s.split(',')
 
 
-# counters and arrays for results
+# variables for standard output
 counter_error = 0
 counter_info = 0
 output = []
@@ -76,7 +76,7 @@ while (development_project_metrics.length > 0)
 
       if pretty_expressions_distance <= levenshtein_distance_threshold
         if pretty_expressions_distance == 0
-          output.push(error_details = {
+          output.push(details = {
               :distance => 0,
               :type => 'ERROR',
               :url => server + '#s=/gdc/projects/' + development_project + '|objectPage|' + metric_2[:uri],
@@ -86,7 +86,7 @@ while (development_project_metrics.length > 0)
           })
           counter_error += 1
         else
-          output.push(error_details = {
+          output.push(details = {
               :distance => pretty_expressions_distance,
               :type => 'INFO',
               :url => server + '#s=/gdc/projects/' + development_project + '|objectPage|' + metric_2[:uri],

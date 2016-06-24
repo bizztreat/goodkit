@@ -46,7 +46,7 @@ cloned_project = project.clone(
     :auth_token => auth_token
 )
 
-$result.push({:section => 'Clone Project', :OK => 1, :INFO => 0, :ERROR => 0, :output => {:project_id => cloned_project.obj_id}})
+$result.push({:section => 'Clone Project', :OK => 1, :INFO => 0, :ERROR => 0, :output => {:project_id => cloned_project.obj_id}}) #TODO change to obj_id to pid
 puts $result.to_json
 
 client.disconnect

@@ -112,7 +112,7 @@ end
 reports_diff = start_project_reports - development_project_reports
 reports_diff.each do |report|
 
-  output_1.push(error_details = {
+  output_1.push(details = {
       :type => 'ERROR',
       :url => server + '#s=/gdc/projects/' + start_project + '%7CanalysisPage%7Chead%7C' + report.gsub!('pid', start_project),
       :api => server + report,
@@ -130,7 +130,7 @@ $result.push({:section => 'Reports missing in Devel project', :OK => counter_ok,
 # diff for metrics
 metrics_diff = start_project_metrics - development_project_metrics
 metrics_diff.each do |metric|
-  output_2.push(error_details = {
+  output_2.push(details = {
       :type => 'ERROR',
       :url => server + '#s=/gdc/projects/' + start_project + '|objectPage|' + metric.gsub!('pid', start_project),
       :api => server + metric,
@@ -151,7 +151,7 @@ $result.push({:section => 'Metrics missing in Devel project', :OK => counter_ok,
 variables_diff = start_project_variables - development_project_variables
 variables_diff.each do |variable|
 
-  output_3.push(error_details = {
+  output_3.push(details = {
       :type => 'ERROR',
       :url => server + '#s=/gdc/projects/' + start_project + '|objectPage|' + variable.gsub!('pid', start_project),
       :api => server + variable,

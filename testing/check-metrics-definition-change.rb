@@ -32,6 +32,7 @@ if server.to_s.empty?
   server = 'https://secure.gooddata.com'
 end
 
+# variables for standard output
 counter_metrics_info = 0
 counter_reports_info = 0
 counter_dashboards_info = 0
@@ -79,7 +80,7 @@ project = client.projects(development_project)
 development_metrics.each_key do |uri|
 
   if start_metrics[uri] != development_metrics[uri]
-    output_1.push(error_details = {
+    output_1.push(details = {
         :type => 'INFO',
         :url => server + '/#s=/gdc/projects/' + development_project + '|objectPage|' + uri.gsub('pid', development_project),
         :api => server + uri.gsub('pid', development_project),
@@ -101,7 +102,7 @@ updated_metrics.each do |uri|
   objects.select { |object| object['category'] == 'report' }.each do |object|
 
     report = project.reports(object['link'])
-    output_2.push(error_details = {
+    output_2.push(details = {
         :type => 'INFO',
         :url => server + '/#s=/gdc/projects/' + development_project + '%7CanalysisPage%7Chead%7C' + report.uri,
         :api => server + report.uri,
@@ -114,7 +115,7 @@ updated_metrics.each do |uri|
   objects.select { |object| object['category'] == 'projectDashboard' }.each do |object|
 
     dashboard = project.dashboards(object['link'])
-    output_3.push(error_details = {
+    output_3.push(details = {
         :type => 'INFO',
         :url => server + '/#s=/gdc/projects/' + development_project + '|projectDashboardPage|' + dashboard.uri,
         :api => server + dashboard.uri,
