@@ -4,95 +4,86 @@ require 'csv'
 require 'optparse'
 require 'yaml'
 
-# get setup for user input parameters
+# define options for script configuration
 options = {}
 OptionParser.new do |opts|
 
   opts.on('-u', '--username USER', 'Username') { |v| options[:username] = v }
   opts.on('-p', '--password PASS', 'Password') { |v| options[:password] = v }
-  opts.on('-s', '--startproject NAME', 'Start Project') { |v| options[:start] = v }
-  opts.on('-d', '--develproject NAME', 'Development Project') { |v| options[:devel] = v }
+  opts.on('-s', '--start_project ID', 'Start Project') { |v| options[:start_project] = v }
+  opts.on('-d', '--development_project ID', 'Development Project') { |v| options[:development_project] = v }
   opts.on('-h', '--hostname NAME', 'Hostname') { |v| options[:server] = v }
 
 end.parse!
 
-# get credentials and project ids from parameters
+# get credentials and others from input parameters
 username = options[:username]
 password = options[:password]
-start = options[:start]
-devel = options[:devel]
+start_project = options[:start_project]
+development_project = options[:development_project]
 server = options[:server]
 
 # variables for standard output
 counter_ok = 0
-counter_err = 0
-err_array = []
+counter_error = 0
+output = []
 $result = []
 
 # turn off logging for clear output
 GoodData.logging_off
 
 # if whitelabel is not specified set to default domain
-if server.to_s.empty? then
+if server.to_s.empty?
   server = 'https://secure.gooddata.com'
 end
 
-# specify aggregations to check
+# specify aggregations functions to check
 aggregations = [:sum, :avg, :median, :min, :max]
-#aggregations = [:sum]
 
 # connect to GoodData
-GoodData.with_connection(login: username, password: password, server: server) do |client|
-  GoodData.with_project(start) do |project|
+client = GoodData.connect(login: username, password: password, server: server)
 
-    # compute the aggregations for all fact in start project
-    $start_results = {}
-    project.facts.each do |fact|
-      aggregations.each do |aggr|
-        metric = fact.create_metric(:title => "#{fact.uri}", :type => aggr)
-        res = metric.execute
-        $start_results[metric.title] = res
-      end
-    end
+# connect to development and start GoodData projects
+start_project = client.projects(start_project)
+development_project = client.projects(development_project)
+
+# compute the aggregations for all facts in start project
+start_facts_results = {}
+start_project.facts.each do |fact|
+  aggregations.each do |aggregation|
+    metric = fact.create_metric(:title => fact.uri, :type => aggregation)
+    result = metric.execute
+    start_facts_results[fact.uri] = result
   end
-
-  GoodData.with_project(devel) do |project|
-
-    # compute the aggregations for all fact in devel project
-    $devel_fact_results = {}
-    project.facts.each do |fact|
-
-      aggregations.each do |aggr|
-        metric = fact.create_metric(:title => "#{fact.uri}", :type => aggr)
-        res = metric.execute
-        $devel_fact_results[metric.title] = res
-      end
-    end
-  end
-
-  # compare results between projects
-  $devel_fact_results.each do |key, value|
-    if $start_results[key] != $devel_fact_results[key] then
-      # count errors and prepare details to the array
-      counter_err += 1
-      err_array.push (error_details = {
-          :type => "ERROR",
-          :url => server + '/#s=/gdc/projects' + devel +'|objectPage|' + key.to_s,
-          :api => server + key.to_s,
-          :title => client.projects(start).metrics(key.to_s).title,
-          :description => "Aggregation is different"
-      })
-
-    else
-      # count OK objects
-      counter_ok += 1
-    end
-  end
-
-  # prepare part of the results
-  $result.push({:section => 'Compare aggregations between start and devel project', :OK => counter_ok, :ERROR => counter_err, :output => err_array})
-  puts $result.to_json
-
 end
 
-GoodData.disconnect
+# compute the aggregations for all facts in development project
+development_facts_results = {}
+development_project.facts.each do |fact|
+  aggregations.each do |aggregation|
+    metric = fact.create_metric(:title => fact.uri, :type => aggregation)
+    result = metric.execute
+    development_facts_results[fact.uri] = result
+  end
+end
+
+# compare results between projects
+development_facts_results.each do |key, _|
+  if start_facts_results[key] != development_facts_results[key]
+    output.push(details = {
+        :type => 'ERROR',
+        :url => server + '/#s=' + development_project.uri + '|objectPage|' + key.to_s,
+        :api => server + key.to_s,
+        :title => start_project.metrics(key.to_s).title,
+        :description => 'Aggregation is different'
+    })
+    counter_error += 1
+  else
+    counter_ok += 1
+  end
+end
+
+$result.push({:section => 'Compare aggregations between start and devel project', :OK => counter_ok, :INFO => 0, :ERROR => counter_error, :output => output})
+puts $result.to_json
+
+client.disconnect

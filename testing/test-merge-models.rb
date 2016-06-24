@@ -10,23 +10,22 @@ OptionParser.new do |opts|
 
   opts.on('-u', '--username USER', 'Username') { |v| options[:username] = v }
   opts.on('-p', '--password PASS', 'Password') { |v| options[:password] = v }
-  opts.on('-d', '--devel_project NAME', 'Devel Project') { |v| options[:devel_project] = v }
-  opts.on('-s', '--start_project NAME', 'Devel Project') { |v| options[:start_project] = v }
+  opts.on('-s', '--start_project ID', 'Start Project') { |v| options[:start_project] = v }
+  opts.on('-d', '--development_project ID', 'Development Project') { |v| options[:development_project] = v }
   opts.on('-f', '--file FILE', 'Projects file') { |v| options[:file] = v }
   opts.on('-h', '--hostname NAME', 'Hostname') { |v| options[:server] = v }
 
 end.parse!
 
-
-# assign credentials for script from user input and devel project project id
+# get credentials and others from input parameters
 username = options[:username]
 password = options[:password]
-devel_project = options[:devel_project]
 start_project = options[:start_project]
+development_project = options[:development_project]
 server = options[:server]
 
 # variables for script results
-result_array = []
+output = []
 $result = []
 
 # if whitelabel is not specified set to default domain
@@ -38,42 +37,39 @@ end
 GoodData.logging_off
 
 # connect to GoodData
-GoodData.with_connection(login: username, password: password, server: server) do |client|
-  GoodData.with_project(devel_project) do |devel_project|
+client = GoodData.connect(login: username, password: password, server: server)
 
-    # get devel project project blueprint (model)
-    devel_project_model = devel_project.blueprint
+# connect to development and start GoodData projects
+start_project = client.projects(start_project)
+development_project = client.projects(development_project)
 
-    GoodData.with_project(start_project) do |start_project|
+# get development project blueprint (model)
+devel_project_model = development_project.blueprint
 
-      start_project_model = start_project.blueprint
-      begin
-        new_model = start_project_model.merge(devel_project_model)
-      rescue Exception => message
+begin
+  start_project_model = start_project.blueprint
+  new_model = start_project_model.merge(devel_project_model)
+rescue Exception => message
 
-        result_array.push(error_details = {
-            :type => 'ERROR',
-            :url => '#',
-            :api => '#',
-            :message => message.to_s
-        })
+  output.push(details = {
+      :type => 'ERROR',
+      :url => '#',
+      :api => '#',
+      :message => message.to_s
+  })
 
-        $result.push({:section => 'Merging two models is not possible.', :OK => 0, :ERROR => 1, :output => result_array})
-      else
-        result_array.push(error_details = {
-            :type => 'INFO',
-            :url => '#',
-            :api => '#',
-            :message => 'Models have been merged successfully: ' + new_model.to_s
-        })
+  $result.push({:section => 'Merging two models is not possible.', :OK => 0, :INFO => 0, :ERROR => 1, :output => output})
+else
+  output.push(details = {
+      :type => 'INFO',
+      :url => '#',
+      :api => '#',
+      :message => 'Models have been merged successfully: ' + new_model.to_s
+  })
 
-        $result.push({:section => 'Models have been merged successfully', :OK => 1, :ERROR => 0, :output => result_array})
-      end
-    end
-  end
+  $result.push({:section => 'Models have been merged successfully', :OK => 1, :INFO => 0, :ERROR => 0, :output => output})
 end
 
-#print out the result
 puts $result.to_json
 
 GoodData.disconnect

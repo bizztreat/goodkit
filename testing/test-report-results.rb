@@ -48,7 +48,6 @@ client = GoodData.connect(login: username, password: password, server: server)
 start_project = client.projects(start_project)
 development_project = client.projects(development_project)
 
-
 # select start project reports and include and exclude tags
 start_project_reports = start_project.reports.select { |report| (tags_included.empty? || !(report.tag_set & tags_included).empty?) && (report.tag_set & tags_excluded).empty? }.sort_by(&:title)
 

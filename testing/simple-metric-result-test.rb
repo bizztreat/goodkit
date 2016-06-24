@@ -1,4 +1,3 @@
-#Testing Report results between Start and Devel projects.
 require 'date'
 require 'gooddata'
 require 'csv'
@@ -11,37 +10,29 @@ OptionParser.new do |opts|
 
   opts.on('-u', '--username USER', 'Username') { |v| options[:username] = v }
   opts.on('-p', '--password PASS', 'Password') { |v| options[:password] = v }
-  opts.on('-d', '--develproject NAME', 'Devel Project') { |v| options[:devel] = v }
+  opts.on('-d', '--development_project ID', 'Development Project') { |v| options[:development_project] = v }
   opts.on('-h', '--hostname NAME', 'Hostname') { |v| options[:server] = v }
   opts.on('-i', '--include INCLUDE', 'Tag included') { |v| options[:incl] = v }
   opts.on('-e', '--exclude EXCLUDE', 'Tag excluded') { |v| options[:excl] = v }
+
 end.parse!
 
-# get credentials from input parameters
+# get credentials and others from input parameters
 username = options[:username]
 password = options[:password]
-devel = options[:devel]
+development_project = options[:development_project]
 server = options[:server]
-incl = options[:incl]
-excl = options[:excl]
+tags_included = options[:tags_included].to_s.split(',')
+tags_excluded = options[:tags_excluded].to_s.split(',')
 
-# make arrays from incl and excl parameters
-if incl.to_s != ''
-  incl = incl.split(",")
-end
-
-if excl.to_s != ''
-  excl = excl.split(",")
-end
-
-# variables for script results
-result_array = []
-count_ok = 0
+# variables for standard output
+count_info = 0
 count_error = 0
+output = []
 $result = []
 
 # if whitelabel is not specified set to default domain
-if server.to_s.empty? then
+if server.to_s.empty?
   server = 'https://secure.gooddata.com'
 end
 
@@ -49,46 +40,39 @@ end
 GoodData.logging_off
 
 # connect to GoodData
-GoodData.with_connection(login: username, password: password, server: server) do |client|
+client = GoodData.connect(login: username, password: password, server: server)
 
-  # get the project context using Project ID from user input
-  devel_project = client.projects(devel)
+# connect to development GoodData project
+development_project = client.projects(development_project)
 
-  # check all metrics according to tag's rules
-  devel_project.metrics.each do |m|
+development_project.metrics.each do |metric|
+  if tags_included.empty? || !(metric.tag_set & tags_included).empty?
+    if (metric.tag_set & tags_excluded).empty?
 
-    if incl.to_s == '' || !(m.tag_set & incl).empty? then
-      if excl.to_s == '' || (m.tag_set & excl).empty? then
-
-        begin
-          # push the result to result_array
-          result_array.push(error_details = {
-              :type => "INFO",
-              :url => server + '/#s=/gdc/projects/' + devel + '|objectPage|' + m.uri,
-              :api => server + m.uri,
-              :title => m.title,
-              :description => 'Results of the metric ('+ m.title + ') is: ' + m.execute.to_s
-          })
-          count_ok += 1
-        rescue
-          # push the result to result_array
-          result_array.push(error_details = {
-              :type => "ERROR",
-              :url => server + '/#s=/gdc/projects/' + devel + '|objectPage|' + m.uri,
-              :api => server + m.uri,
-              :title => m.title,
-              :description => 'Results of the metric ('+ m.title + ') is uncomputable.'
-          })
-          count_error += 1
-        end
+      begin
+        output.push(details = {
+            :type => 'INFO',
+            :url => server + '/#s=' + development_project.uri + '|objectPage|' + metric.uri,
+            :api => server + metric.uri,
+            :title => metric.title,
+            :description => 'Results of the metric ('+ metric.title + ') is: ' + metric.execute.to_s
+        })
+        count_info += 1
+      rescue
+        output.push(details = {
+            :type => 'ERROR',
+            :url => server + '/#s=' + development_project.uri + '|objectPage|' + metric.uri,
+            :api => server + metric.uri,
+            :title => metric.title,
+            :description => 'Results of the metric ('+ metric.title + ') is uncomputable.'
+        })
+        count_error += 1
       end
     end
   end
-  #save errors in the result variable
-  $result.push({:section => 'Metric results between Start and Devel projects.', :OK => count_ok, :ERROR => count_error, :output => result_array})
 end
 
-#print out the result
+$result.push({:section => 'Metric results between Start and Development projects.', :OK => 0, :INFO => count_info, :ERROR => count_error, :output => output})
 puts $result.to_json
 
 GoodData.disconnect
