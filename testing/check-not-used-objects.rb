@@ -26,7 +26,7 @@ OptionParser.new do |opts|
 
 end.parse!
 
-# check all parameters
+# get credentials and others from input parameters
 username = options[:username]
 password = options[:password]
 development_project = options[:development_project]
@@ -69,7 +69,7 @@ project.attributes.each do |attribute|
 
         # safe the result if there is ZERO objects that are using the attribute
         if counter_objects == 0
-          output.push(error_details = {
+          output.push(details = {
               :type => 'INFO',
               :url => server + '/#s=/gdc/projects/' + development_project + '|objectPage|' + attribute.uri,
               :api => server + attribute.uri,
@@ -107,7 +107,7 @@ project.facts.each do |fact|
 
       # safe the result if there is ZERO objects that are using the fact
       if counter_objects == 0
-        output.push(error_details = {
+        output.push(details = {
             :type => 'INFO',
             :url => server + '/#s=/gdc/projects/' + development_project + '|objectPage|' + fact.uri,
             :api => server + fact.uri,

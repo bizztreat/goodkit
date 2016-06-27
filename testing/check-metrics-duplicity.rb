@@ -71,7 +71,8 @@ while (development_project_metrics.length > 0)
     metric_1_pretty_expression_without_spaces = metric_1[:pretty_expression].split(' ').sort.join
     metric_2_pretty_expression_without_spaces = metric_2[:pretty_expression].split(' ').sort.join
 
-    unless metric_2[:pretty_expression] =~ /^SELECT [\d]+$/
+    unless metric_2[:pretty_expression] =~ /^SELECT -?\d+(\.\d+)?$/
+
       pretty_expressions_distance = Levenshtein.distance(metric_1_pretty_expression_without_spaces, metric_2_pretty_expression_without_spaces)
 
       if pretty_expressions_distance <= levenshtein_distance_threshold
