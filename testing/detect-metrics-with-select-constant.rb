@@ -51,7 +51,7 @@ development_project.metrics.pmap do |metric|
   if tags_included.empty? || !(metric.tag_set & tags_included).empty?
     if (metric.tag_set & tags_excluded).empty?
 
-      # check if the metric contains special characters which mean it's not just SELECT and a constant
+      # check if the metric contains just SELECT and a constant
       if metric.expression =~ /^SELECT -?\d+(\.\d+)?$/
         output.push(details = {
             :type => 'ERROR',
