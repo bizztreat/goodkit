@@ -23,19 +23,10 @@ end.parse!
 username = options[:username]
 password = options[:password]
 server = options[:server]
-start = options[:start]
-devel = options[:devel]
-incl = options[:incl]
-excl = options[:excl]
-
-# make arrays from incl and excl parameters
-if incl.to_s != ''
-  incl = incl.split(",")
-end
-
-if excl.to_s != ''
-  excl = excl.split(",")
-end
+start_project = options[:start_project]
+development_project = options[:development_project]
+tags_included = options[:tags_included].to_s.split(',')
+tags_excluded = options[:tags_excluded].to_s.split(',')
 
 # variables for script results
 result_array = []
@@ -43,52 +34,51 @@ $result = []
 counter_ok = 0
 
 # if whitelabel is not specified set to default domain
-if server.to_s.empty? then
+if server.to_s.empty?
   server = 'https://secure.gooddata.com'
 end
 
 # turn off GoodData logging
 GoodData.logging_off
 
-# connect to gooddata project
-GoodData.with_connection(login: username, password: password, server: server) do |client|
 
-  start_project = client.projects(start)
-  devel_project = client.projects(devel)
+# connect to GoodData
+client = GoodData.connect(login: username, password: password, server: server)
 
-  # get metric from start project  include and exclude tags
-  orig_metrics = start_project.metrics.select { |r| incl.to_s == '' || !(r.tag_set & incl).empty? }.sort_by(&:title)
-  orig_metrics = orig_metrics.select { |r| excl.to_s == '' || (r.tag_set & excl).empty? }.sort_by(&:title)
+# connect to development and start GoodData projects
+start_project = client.projects(start_project)
+development_project = client.projects(development_project)
 
-  # get metrics from devel project include and exclude tags
-  new_metrics = devel_project.metrics.select { |r| incl.to_s == '' || !(r.tag_set & incl).empty? }.sort_by(&:title)
-  new_metrics = new_metrics.select { |r| excl.to_s == '' || (r.tag_set & excl).empty? }.sort_by(&:title)
+# select start project metrics and include and exclude tags
+start_project_metrics = start_project.metrics.select { |metric| (tags_included.empty? || !(metric.tag_set & tags_included).empty?) && (metric.tag_set & tags_excluded).empty? }.sort_by(&:title)
 
+# select development project metrics and include and exclude tags
+development_project_metrics = development_project.metrics.select { |metric| (tags_included.empty? || !(metric.tag_set & tags_included).empty?) && (metric.tag_set & tags_excluded).empty? }.sort_by(&:title)
 
-  # compare results
-  results = orig_metrics.zip(new_metrics).pmap do |metrics|
-    # compute both metrics and add the metrics at the end for being able to print a metric later
-    metrics.map(&:execute) + [metrics.last]
-  end
+# compare results
+results = start_project_metrics.zip(development_project_metrics).pmap do |metrics|
+  # compute both metrics and add the metrics at the end for being able to print a metric later
+  metrics.map(&:execute) + [metrics.last]
+end
 
-  # print results for both metrics from start and devel
-  results.map do |res|
-    orig_result, new_result, new_metrics = res
+# print results for both metrics from start and devel
+results.map do |res|
+  orig_result, new_result, new_metrics = res
 
-    result_array.push({
-      :type => "INFO",
+  result_array.push(details = {
+      :type => 'INFO',
       :url => server + '/#s=/gdc/projects/' + devel + '|objectPage|' + new_metrics.uri,
       :api => server + new_metrics.uri,
       :title => '',
       :description => 'Results of the metric ('+ new_metrics.title + ') are in both projects equal.'
-    })
-    # count objects
-    counter_ok += 1
-  end
-
-  #save errors in the result variable
-  $result.push({:section => 'Metric results between Start and Devel projects.', :OK => counter_ok, :ERROR => 0, :output => result_array})
+  })
+  # count objects
+  counter_ok += 1
 end
+
+#save errors in the result variable
+$result.push({:section => 'Metric results between Start and Devel projects.', :OK => counter_ok, :ERROR => 0, :output => result_array})
+
 
 #print out the result
 puts $result.to_json

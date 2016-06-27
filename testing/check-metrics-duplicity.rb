@@ -47,19 +47,17 @@ end
 client = GoodData.connect(login: username, password: password, server: server)
 
 # connect to development GoodData project
-project = client.projects(development_project)
+development_project = client.projects(development_project)
 
 development_project_metrics = []
 
-project.metrics.each do |metric|
+development_project.metrics.each do |metric|
   if tags_included.empty? || !(metric.tag_set & tags_included).empty?
     if (metric.tag_set & tags_excluded).empty?
       development_project_metrics.push({:uri => metric.uri, :title => metric.title, :pretty_expression => metric.pretty_expression})
     end
   end
 end
-
-client.disconnect
 
 # metrics duplicity in project
 while (development_project_metrics.length > 0)
@@ -80,20 +78,20 @@ while (development_project_metrics.length > 0)
           output.push(details = {
               :distance => 0,
               :type => 'ERROR',
-              :url => server + '#s=/gdc/projects/' + development_project + '|objectPage|' + metric_2[:uri],
+              :url => server + '#s=' + development_project.uri + '|objectPage|' + metric_2[:uri],
               :api => server + metric_1[:uri],
               :title => metric_1[:pretty_expression],
-              :description => '<a href="' + server + '#s=/gdc/projects/' + development_project + '|objectPage|' + metric_1[:uri] + '">Metric 1</a>, <a href="' + server + '#s=/gdc/projects/' + development_project + '|objectPage|' + metric_2[:uri] + '">Metric 2</a>'
+              :description => '<a href="' + server + '#s=' + development_project.uri + '|objectPage|' + metric_1[:uri] + '">Metric 1</a>, <a href="' + server + '#s=' + development_project.uri + '|objectPage|' + metric_2[:uri] + '">Metric 2</a>'
           })
           counter_error += 1
         else
           output.push(details = {
               :distance => pretty_expressions_distance,
               :type => 'INFO',
-              :url => server + '#s=/gdc/projects/' + development_project + '|objectPage|' + metric_2[:uri],
+              :url => server + '#s=' + development_project.uri + '|objectPage|' + metric_2[:uri],
               :api => server + metric_1[:uri],
               :title => metric_1[:pretty_expression],
-              :description => '<a href="' + server + '#s=/gdc/projects/' + development_project + '|objectPage|' + metric_1[:uri] + '">Metric 1</a>, <a href="' + server + '#s=/gdc/projects/' + development_project + '|objectPage|' + metric_2[:uri] + '">Metric 2</a>'
+              :description => '<a href="' + server + '#s=' + development_project.uri + '|objectPage|' + metric_1[:uri] + '">Metric 1</a>, <a href="' + server + '#s=' + development_project.uri + '|objectPage|' + metric_2[:uri] + '">Metric 2</a>'
           })
           counter_info += 1
         end
@@ -107,5 +105,6 @@ output.sort { |error_detail_1, error_detail_2| error_detail_1[:distance].to_i <=
 $result.push({:section => 'Duplicity in Devel project', :OK => 0, :INFO => counter_info, :ERROR => counter_error, :output => output})
 puts $result.to_json
 
+client.disconnect
 
 

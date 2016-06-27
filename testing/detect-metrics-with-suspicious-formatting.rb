@@ -12,8 +12,12 @@ OptionParser.new do |opts|
   opts.on('-p', '--password PASS', 'Password') { |v| options[:password] = v }
   opts.on('-d', '--development_project ID', 'Development Project') { |v| options[:development_project] = v }
   opts.on('-h', '--hostname NAME', 'Hostname') { |v| options[:server] = v }
-  opts.on('-i', '--include INCLUDE', 'Tag included') { |v| options[:tags_included] = v }
-  opts.on('-e', '--exclude EXCLUDE', 'Tag excluded') { |v| options[:tags_excluded] = v }
+  opts.on('-f', '--format Format', 'Format') { |v| options[:format] = v }
+  opts.on('-c', '--check Check', 'Check') { |v| options[:check] = v }
+  opts.on('-t', '--title TITLE', 'Text in title') { |v| options[:title] = v }
+  opts.on('-i', '--include INCLUDE', 'Tag included') { |v| options[:incl] = v }
+  opts.on('-e', '--exclude EXCLUDE', 'Tag excluded') { |v| options[:excl] = v }
+
 end.parse!
 
 # get all parameters - username, password and project id
@@ -29,9 +33,18 @@ if server.to_s.empty?
   server = 'https://secure.gooddata.com'
 end
 
+# allowed metric format (any difference formatting is counted as an error) for example: "#,##0%" Please youse "" for format!
+format = options[:format]
+
+# Do you want to combinate checking metric format with checking a name of metric? (true=yes, false=no). for example: true
+check_text_in_title = options[:check]
+
+# If you set up "check_text_in_title" to "true", a format of metrics will be check just for metrics containing "text_in_title" in their title!
+text_in_title = options[:title]
+
 # variables for standard output
 counter_ok = 0
-counter_err = 0
+counter_error = 0
 output = []
 $result = []
 
@@ -51,16 +64,16 @@ development_project.metrics.pmap do |metric|
   if tags_included.empty? || !(metric.tag_set & tags_included).empty?
     if (metric.tag_set & tags_excluded).empty?
 
-      # check if the metric contains special characters which mean it's not just SELECT and a constant
-      if metric.expression =~ /^SELECT -?\d+(\.\d+)?$/
+      # check just metric format or format and title together
+      if ((metric.content['format'] != format) && !(check_text_in_title)) || ((metric.content['format'] != format) && (metric.title.include? text_in_title))
         output.push(details = {
             :type => 'ERROR',
             :url => server + '/#s=' + development_project.uri + '|objectPage|' + metric.uri,
             :api => server + metric.uri,
             :title => metric.title,
-            :description => 'Suspicious metric detected.'
+            :description => 'Suspicious metric formatting detected.'
         })
-        counter_err += 1
+        counter_error += 1
       else
         counter_ok += 1
       end
@@ -68,7 +81,8 @@ development_project.metrics.pmap do |metric|
   end
 end
 
-$result.push({:section => 'Suspicious metrics check.', :OK => counter_ok, :INFO => 0, :ERROR => counter_err, :output => output})
+# prepare part of the results
+$result.push({:section => 'Suspicious metric´s formatting check.', :OK => counter_ok, :INFO => 0, :ERROR => counter_error, :output => output})
 puts $result.to_json
 
 client.disconnect
