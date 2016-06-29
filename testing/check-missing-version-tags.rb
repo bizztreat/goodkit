@@ -96,6 +96,34 @@ development_project.metrics.each do |metric|
 end
 
 $result.push({:section => 'Metrics without version tags', :OK => counter_ok, :INFO => 0, :ERROR => counter_error, :output => output})
+
+# reset output variables
+counter_ok = 0
+counter_error = 0
+output = []
+
+# check all variables for missing tags
+development_project.variables.each do |variable|
+  if tags_included.empty? || !(variable.tag_set & tags_included).empty?
+    if (variable.tag_set & tags_excluded).empty?
+
+      if variable.tags =~ /\d+(\.\d+)?/
+        counter_ok += 1
+      else
+        output.push(details = {
+            :type => 'ERROR',
+            :url => server + '#s=' + development_project.uri + '|objectPage|' + variable.uri,
+            :api => server + variable.uri,
+            :title => variable.title,
+            :description => 'Variable does not have a version tag.'
+        })
+        counter_error += 1
+      end
+    end
+  end
+end
+
+$result.push({:section => 'Variables without version tags', :OK => counter_ok, :INFO => 0, :ERROR => counter_error, :output => output})
 puts $result.to_json
 
 client.disconnect
