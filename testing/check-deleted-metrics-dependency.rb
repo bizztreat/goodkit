@@ -62,7 +62,6 @@ project.reports.each do |report|
         # check if the metric is deleted
         if metric.deprecated
 
-          counter_error += 1
           output.push(details = {
               :type => 'ERROR',
               :url => server + '/#s=/gdc/projects/' + development_project + '|objectPage|' + metric.uri,
@@ -70,6 +69,7 @@ project.reports.each do |report|
               :title => metric.title,
               :description => 'This report\'s metric has been deleted.'
           })
+          counter_error += 1
         end
       end
     end

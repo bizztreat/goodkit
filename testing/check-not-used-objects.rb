@@ -69,6 +69,7 @@ project.attributes.each do |attribute|
 
         # safe the result if there is ZERO objects that are using the attribute
         if counter_objects == 0
+
           output.push(details = {
               :type => 'INFO',
               :url => server + '/#s=/gdc/projects/' + development_project + '|objectPage|' + attribute.uri,
@@ -107,6 +108,7 @@ project.facts.each do |fact|
 
       # safe the result if there is ZERO objects that are using the fact
       if counter_objects == 0
+
         output.push(details = {
             :type => 'INFO',
             :url => server + '/#s=/gdc/projects/' + development_project + '|objectPage|' + fact.uri,

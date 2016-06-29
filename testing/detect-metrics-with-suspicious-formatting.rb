@@ -66,6 +66,7 @@ development_project.metrics.pmap do |metric|
 
       # check just metric format or format and title together
       if ((metric.content['format'] != format) && !(check_text_in_title)) || ((metric.content['format'] != format) && (metric.title.include? text_in_title))
+
         output.push(details = {
             :type => 'ERROR',
             :url => server + '/#s=' + development_project.uri + '|objectPage|' + metric.uri,

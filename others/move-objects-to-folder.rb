@@ -1,9 +1,10 @@
-#This script moves all FACTS and ATTRIBUTES to a folder that has the same name as the dataset in which they are
 require 'date'
 require 'gooddata'
 require 'csv'
 require 'optparse'
 require 'yaml'
+
+# more info http://stackoverflow.com/questions/35447652/is-it-possible-change-attribute-folder-in-gooddata-project-by-ruby
 
 options = {}
 OptionParser.new do |opts|
@@ -16,6 +17,7 @@ OptionParser.new do |opts|
   opts.on('-e', '--exclude EXCLUDE', 'Tag excluded') { |v| options[:excl] = v }
 
 end.parse!
+
 
 # assign username and password to variables
 username = options[:username]
@@ -104,7 +106,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
                   :type => "INFO",
                   :url => server + '#s=/gdc/projects/' + devel + '|objectPage|' + a.uri,
                   :api => server + a.uri,
-                  :message => 'The attribute (' + a.title + ') is already in folder (' + dataset.title + ').'
+                  :description => 'The attribute (' + a.title + ') is already in folder (' + dataset.title + ').'
               })
               # count objects
               counter_ok += 1
@@ -115,7 +117,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
                   :type => "ERROR",
                   :url => server + '#s=/gdc/projects/' + devel + '|objectPage|' + a.uri,
                   :api => server + a.uri,
-                  :message => 'The attribute (' + a.title + ') has been moved to (' + dataset.title + ').'
+                  :description => 'The attribute (' + a.title + ') has been moved to (' + dataset.title + ').'
               })
               # count objects
               counter_err += 1
@@ -179,7 +181,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
                   :type => "INFO",
                   :url => server + '#s=/gdc/projects/' + devel + '|objectPage|' + f.uri,
                   :api => server + f.uri,
-                  :message => 'The fact (' + f.title + ') is already in folder (' + dataset.title + ').'
+                  :description => 'The fact (' + f.title + ') is already in folder (' + dataset.title + ').'
               })
               # count info objects
               counter_ok += 1
@@ -190,7 +192,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
                   :type => "ERROR",
                   :url => server + '#s=/gdc/projects/' + devel + '|objectPage|' + f.uri,
                   :api => server + f.uri,
-                  :message => 'The fact (' + f.title + ') has been moved to (' + dataset.title + ').'
+                  :description => 'The fact (' + f.title + ') has been moved to (' + dataset.title + ').'
               })
               # count error objects
               counter_err += 1

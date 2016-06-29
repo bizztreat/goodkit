@@ -48,8 +48,7 @@ blueprint.datasets.each do |dataset|
   lines = dataset.count(project)
   if lines.to_i < 1
 
-    counter_error += 1
-    object_dataset = GoodData::Dataset[dataset.id, {:client => client, :project => project}]
+    object_dataset = GoodData::Dataset[dataset.id, {:client => client, :project => project}] #TODO remove
     output.push(details = {
         :type => 'ERROR',
         :url => server + '/#s=/gdc/projects/' + development_project + '|objectPage|' + object_dataset.uri,
@@ -57,6 +56,7 @@ blueprint.datasets.each do |dataset|
         :title => dataset.title,
         :description => 'Dataset it empty.'
     })
+    counter_error += 1
   else
     counter_ok += 1
   end

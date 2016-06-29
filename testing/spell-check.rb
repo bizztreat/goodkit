@@ -63,7 +63,6 @@ development_project.dashboards.each do |dashboard|
   misspelled_words = check_misspelled(Spellchecker.check(dashboard.title.gsub('-', ' ').gsub('/', ' ').delete(',()')))
   misspelled_words.each do |misspelled_word|
 
-    counter_error += 1
     output.push(details = {
         :type => 'ERROR',
         :url => server + '/#s=' + development_project.uri + '|projectDashboardPage|' + dashboard.uri,
@@ -71,13 +70,13 @@ development_project.dashboards.each do |dashboard|
         :title => '"' + misspelled_word[:error] + '"' +' in dashboards name '+ dashboard.title,
         :description => 'Suggestion: ' + misspelled_word[:suggestions]
     })
+    counter_error += 1
   end
 
   # checking dashboards description
   misspelled_words = check_misspelled(Spellchecker.check(dashboard.summary.gsub('-', ' ').gsub('/', ' ').delete(',()')))
   misspelled_words.each do |misspelled_word|
 
-    counter_error += 1
     output.push(details = {
         :type => 'ERROR',
         :url => server + '/#s=' + development_project.uri + '|projectDashboardPage|' + dashboard.uri,
@@ -85,6 +84,7 @@ development_project.dashboards.each do |dashboard|
         :title => '"' + misspelled_word[:error] + '"' +' in dashboards description '+ dashboard.summary,
         :description => 'Suggestion: ' + misspelled_word[:suggestions]
     })
+    counter_error += 1
   end
 
   dashboard.tabs.each do |tab|
@@ -93,7 +93,6 @@ development_project.dashboards.each do |dashboard|
     misspelled_words = check_misspelled(Spellchecker.check(tab.title.gsub('-', ' ').gsub('/', ' ').delete(',()')))
     misspelled_words.each do |misspelled_word|
 
-      counter_error += 1
       output.push(details = {
           :type => 'ERROR',
           :url => server + '/#s=' + development_project.uri + '|projectDashboardPage|' + dashboard.uri + '|' + tab.identifier,
@@ -101,6 +100,7 @@ development_project.dashboards.each do |dashboard|
           :title => '"' + misspelled_word[:error] + '"' + ' in tab name '+ dashboard.title + ' - ' + tab.title,
           :description => 'Suggestion: ' + misspelled_word[:suggestions]
       })
+      counter_error += 1
     end
   end
 end
@@ -110,7 +110,6 @@ development_project.metrics.each do |metric|
   misspelled_words = check_misspelled(Spellchecker.check(metric.title.gsub('-', ' ').gsub('/', ' ').delete(',()')))
   misspelled_words.each do |misspelled_word|
 
-    counter_error += 1
     output.push(details = {
         :type => 'ERROR',
         :url => server + '#s=' + development_project.uri + '|objectPage|' + metric.uri,
@@ -118,6 +117,7 @@ development_project.metrics.each do |metric|
         :title => '"' + misspelled_word[:error] + '"' + ' in metric name '+ metric.title,
         :description => 'Suggestion: ' + misspelled_word[:suggestions]
     })
+    counter_error += 1
   end
 end
 
@@ -126,7 +126,6 @@ development_project.metrics.each do |metric|
   misspelled_words = check_misspelled(Spellchecker.check(metric.summary.gsub('-', ' ').gsub('/', ' ').delete(',()')))
   misspelled_words.each do |misspelled_word|
 
-    counter_error += 1
     output.push(details = {
         :type => 'ERROR',
         :url => server + '#s=' + development_project.uri + '|objectPage|' + metric.uri,
@@ -134,6 +133,7 @@ development_project.metrics.each do |metric|
         :title => '"' + misspelled_word[:error] + '"' + ' in description '+ metric.summary,
         :description => 'Suggestion: ' + misspelled_word[:suggestions]
     })
+    counter_error += 1
   end
 end
 
@@ -142,7 +142,6 @@ development_project.reports.each do |report|
   misspelled_words = check_misspelled(Spellchecker.check(report.title.gsub('-', ' ').gsub('/', ' ').delete(',()')))
   misspelled_words.each do |misspelled_word|
 
-    counter_error += 1
     output.push(details = {
         :type => 'ERROR',
         :url => server + '#s=' + development_project.uri + '|analysisPage|head|' + report.uri,
@@ -150,6 +149,7 @@ development_project.reports.each do |report|
         :title => '"' + misspelled_word[:error] + '"' + ' in report name '+ report.title,
         :description => 'Suggestion: ' + misspelled_word[:suggestions]
     })
+    counter_error += 1
   end
 end
 
@@ -158,7 +158,6 @@ development_project.reports.each do |report|
   misspelled_words = check_misspelled(Spellchecker.check(report.summary.gsub('-', ' ').gsub('/', ' ').delete(',()')))
   misspelled_words.each do |misspelled_word|
 
-    counter_error += 1
     output.push(details = {
         :type => 'ERROR',
         :url => server + '#s=' + development_project.uri + '|analysisPage|head|' + report.uri,
@@ -166,6 +165,7 @@ development_project.reports.each do |report|
         :title => '"' + misspelled_word[:error] + '"' + ' in report description '+ report.summary,
         :description => 'Suggestion: ' + misspelled_word[:suggestions]
     })
+    counter_error += 1
   end
 end
 
@@ -174,7 +174,6 @@ development_project.facts.each do |fact|
   misspelled_words = check_misspelled(Spellchecker.check(fact.title.gsub('-', ' ').gsub('/', ' ').delete(',()')))
   misspelled_words.each do |misspelled_word|
 
-    counter_error += 1
     output.push(details = {
         :type => 'ERROR',
         :url => server + '#s=' + development_project.uri + '|analysisPage|head|' + fact.uri,
@@ -182,6 +181,7 @@ development_project.facts.each do |fact|
         :title => '"' + misspelled_word[:error] + '"' + ' in fact name '+ fact.title,
         :description => 'Suggestion: ' + misspelled_word[:suggestions]
     })
+    counter_error += 1
   end
 end
 
@@ -190,7 +190,6 @@ development_project.facts.each do |fact|
   misspelled_words = check_misspelled(Spellchecker.check(fact.summary.gsub('-', ' ').gsub('/', ' ').delete(',()')))
   misspelled_words.each do |misspelled_word|
 
-    counter_error += 1
     output.push(details = {
         :type => 'ERROR',
         :url => server + '#s=' + development_project.uri + '|analysisPage|head|' + fact.uri,
@@ -198,6 +197,7 @@ development_project.facts.each do |fact|
         :title => '"' + misspelled_word[:error] + '"' + ' in fact description ' + fact.summary,
         :description => 'Suggestion: ' + misspelled_word[:suggestions]
     })
+    counter_error += 1
   end
 end
 
@@ -206,7 +206,6 @@ development_project.attributes.each do |attribute|
   misspelled_words = check_misspelled(Spellchecker.check(attribute.title.gsub('-', ' ').gsub('/', ' ').delete(',()')))
   misspelled_words.each do |misspelled_word|
 
-    counter_error += 1
     output.push(details = {
         :type => 'ERROR',
         :url => server + '#s=' + development_project.uri + '|analysisPage|head|' + attribute.uri,
@@ -214,6 +213,7 @@ development_project.attributes.each do |attribute|
         :title => '"' + misspelled_word[:error] + '"' + ' in attribute ' + attribute.title,
         :description => 'Suggestion: ' + misspelled_word[:suggestions]
     })
+    counter_error += 1
   end
 end
 
@@ -222,7 +222,6 @@ development_project.attributes.each do |attribute|
   misspelled_words = check_misspelled(Spellchecker.check(attribute.summary.gsub('-', ' ').gsub('/', ' ').delete(',()')))
   misspelled_words.each do |misspelled_word|
 
-    counter_error += 1
     output.push(details = {
         :type => 'ERROR',
         :url => server + '#s=' + development_project.uri + '|analysisPage|head|' + attribute.uri,
@@ -230,6 +229,7 @@ development_project.attributes.each do |attribute|
         :title => '"' + misspelled_word[:error] + '"' + ' in attribute description ' + attribute.summary,
         :description => 'Suggestion: ' + misspelled_word[:suggestions]
     })
+    counter_error += 1
   end
 end
 
@@ -238,7 +238,6 @@ development_project.datasets.each do |dataset|
   misspelled_words = check_misspelled(Spellchecker.check(dataset.title.gsub('-', ' ').gsub('/', ' ').delete(',()')))
   misspelled_words.each do |misspelled_word|
 
-    counter_error += 1
     output.push(details = {
         :type => 'ERROR',
         :url => server + '#s=' + development_project.uri + '|analysisPage|head|' + dataset.uri,
@@ -246,6 +245,7 @@ development_project.datasets.each do |dataset|
         :title => '"' + misspelled_word[:error] + '"' + ' in dataset name '+ dataset.title,
         :description => 'Suggestion: ' + misspelled_word[:suggestions]
     })
+    counter_error += 1
   end
 end
 
@@ -254,7 +254,6 @@ development_project.datasets.each do |dataset|
   misspelled_words = check_misspelled(Spellchecker.check(dataset.summary.gsub('-', ' ').gsub('/', ' ').delete(',()')))
   misspelled_words.each do |misspelled_word|
 
-    counter_error += 1
     output.push(details = {
         :type => 'ERROR',
         :url => server + '#s=' + development_project.uri + '|analysisPage|head|' + dataset.uri,
@@ -262,11 +261,11 @@ development_project.datasets.each do |dataset|
         :title => '"' + misspelled_word[:error] + '"' + ' in dataset description '+ dataset.summary,
         :description => 'Suggestion: ' + misspelled_word[:suggestions]
     })
+    counter_error += 1
   end
 end
 
 $result.push({:section => 'Spell Check name and description in dashboards, tabs, metrics, reports, facts, attributes and datasets', :OK => counter_ok, :INFO => 0, :ERROR => counter_error, :output => output})
 puts $result.to_json
-
 
 client.disconnect

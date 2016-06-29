@@ -50,12 +50,12 @@ begin
   start_project_model = start_project.blueprint
   new_model = start_project_model.merge(devel_project_model)
 rescue Exception => message
-
   output.push(details = {
       :type => 'ERROR',
       :url => '#',
       :api => '#',
-      :message => message.to_s
+      :title => '#',
+      :description => message.to_s
   })
 
   $result.push({:section => 'Merging two models is not possible.', :OK => 0, :INFO => 0, :ERROR => 1, :output => output})
@@ -64,7 +64,8 @@ else
       :type => 'INFO',
       :url => '#',
       :api => '#',
-      :message => 'Models have been merged successfully: ' + new_model.to_s
+      :title => '#',
+      :description => 'Models have been merged successfully: ' + new_model.to_s
   })
 
   $result.push({:section => 'Models have been merged successfully', :OK => 1, :INFO => 0, :ERROR => 0, :output => output})
@@ -72,4 +73,4 @@ end
 
 puts $result.to_json
 
-GoodData.disconnect
+client.disconnect

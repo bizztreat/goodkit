@@ -53,6 +53,7 @@ development_project.metrics.pmap do |metric|
 
       # check if the metric contains just SELECT and a constant
       if metric.expression =~ /^SELECT -?\d+(\.\d+)?$/
+
         output.push(details = {
             :type => 'ERROR',
             :url => server + '/#s=' + development_project.uri + '|objectPage|' + metric.uri,

@@ -117,7 +117,6 @@ if generate == 'false'
       extra = attributes[attribute.title] - values
       #check if there is any inconsistency
       if missing.any? || extra.any?
-        counter_error += 1
         output.push(details = {
             :type => 'ERROR',
             :url => server + '/#s=' + development_project.uri + '|objectPage|' + a.uri,
@@ -125,8 +124,8 @@ if generate == 'false'
             :title => attribute.title,
             :description => 'The attribute "' + attribute.title + '" is missing these values "' + missing.to_s + '" and contains extra values "' + extra.to_s + '".'
         })
+        counter_error += 1
       else
-        counter_info += 1
         output.push(details = {
             :type => 'INFO',
             :url => server + '/#s=' + development_project.uri + '|objectPage|' + a.uri,
@@ -134,6 +133,7 @@ if generate == 'false'
             :title => attribute.title,
             :description => 'The attribute`s "' + attribute.title + '" values are identical.'
         })
+        counter_info += 1
       end
     end
   end

@@ -109,7 +109,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
               :url => server + '/#s=/gdc/projects/' + devel.pid + '|objectPage|' + met.uri,
               :api => server + met.uri,
               :title => met.title,
-              :message => "Metric is not in folder."
+              :description => "Metric is not in folder."
           })
 
         else

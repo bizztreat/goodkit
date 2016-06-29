@@ -49,7 +49,6 @@ project.dashboards.each do |dashboard|
     if tab.items.to_s.include? 'https://demo.zoomint.com/stat/%CURRENT_DASHBOARD_URI%/%CURRENT_DASHBOARD_TAB_URI%'
       counter_ok += 1
     else
-      counter_error += 1
       output.push(details = {
           :type => 'ERROR',
           :url => server + '/#s=/gdc/projects/' + development_project + '|projectDashboardPage|' + dashboard.uri + '|' + tab.identifier,
@@ -57,6 +56,7 @@ project.dashboards.each do |dashboard|
           :title => dashboard.title + ' - ' + tab.title,
           :description => 'GA script is missing.'
       })
+      counter_error += 1
     end
   end
 end

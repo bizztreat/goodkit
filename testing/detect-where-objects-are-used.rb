@@ -76,7 +76,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
                     :type => "INFO",
                     :url => server + '/#s=/gdc/projects/' + devel + '|analysisPage|head|' + report.uri,
                     :api => server + report.uri,
-                    :message => 'The attribute (' + attr.title + ') is being used in report (' + report.title + ').'
+                    :description => 'The attribute (' + attr.title + ') is being used in report (' + report.title + ').'
                 })
                 # count objects
                 num_objects += 1
@@ -105,7 +105,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
                     :type => "INFO",
                     :url => server + '/#s=/gdc/projects/' + devel + '|analysisPage|head|' + report.uri,
                     :api => server + report.uri,
-                    :message => 'The fact "' + fact.title + '" is being used in report "' + report.title + '".'
+                    :description => 'The fact "' + fact.title + '" is being used in report "' + report.title + '".'
                 })
                 # count objects
                 num_objects += 1

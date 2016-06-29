@@ -59,7 +59,7 @@ development_project.metrics.each do |metric|
   end
 end
 
-# metrics duplicity in project
+# check metrics duplicity in project
 while (development_project_metrics.length > 0)
 
   metric_1 = development_project_metrics.pop

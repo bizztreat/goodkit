@@ -70,6 +70,7 @@ end
 # compare results between projects
 development_facts_results.each do |key, _|
   if start_facts_results[key] != development_facts_results[key]
+
     output.push(details = {
         :type => 'ERROR',
         :url => server + '/#s=' + development_project.uri + '|objectPage|' + key.to_s,

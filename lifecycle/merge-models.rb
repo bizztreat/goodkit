@@ -59,14 +59,14 @@ target_projects.each do |project|
       child_model = child.blueprint
       new_model = child_model.merge(development_project_model)
     rescue Exception => message
-
-      counter_errors += 1
       output.push(details = {
           :type => 'ERROR',
-          :detail => message.to_s,
-          :message => 'Merging two models is not possible.'
+          :url => '#',
+          :api => '#',
+          :title => message.to_s,
+          :description => 'Merging two models is not possible.',
       })
-
+      counter_errors += 1
     else
       child.update_from_blueprint(new_model)
     end

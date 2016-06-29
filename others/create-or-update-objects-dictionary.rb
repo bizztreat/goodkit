@@ -4,8 +4,6 @@ require 'csv'
 require 'optparse'
 require 'yaml'
 
-#TODO co už tam není reportovat
-
 def add_to_csv(csv, keys, object, url)
 
   unless csv.any? { |row| row['identifier'] == object.identifier }
@@ -22,10 +20,18 @@ def add_to_csv(csv, keys, object, url)
     row['en_title'] = object.title
 
     if object.respond_to?(:summary)
-      row['en_description'] = object.summary
+      row['en_description'] = object.summary # TODO is it only fot tab??
     end
 
     csv.push(row)
+  else
+    csv.map! do |row|
+      if row['identifier'] == object.identifier
+        row['category'] = '=HYPERLINK("' + url + '","'+ row['category'] +'")'
+      end
+
+      row
+    end
   end
 
   csv
@@ -57,7 +63,7 @@ if server.to_s.empty?
 end
 
 keys = %w(identifier category en_title en_description cz_title cz_description)
-csv = CSV.read('dictionaries/translation/dictionary.csv').map { |row| Hash[keys.zip(row)] }
+csv = CSV.read('dictionaries/translation/objects-dictionary.csv').map { |row| Hash[keys.zip(row)] }
 
 # connect to GoodData
 client = GoodData.connect(login: username, password: password, server: server)
@@ -101,8 +107,7 @@ end
 
 client.disconnect
 
-# write hash to
-CSV.open('dictionaries/translation/dictionary.csv', 'w') do |file|
+CSV.open('dictionaries/translation/objects-dictionary.csv', 'w') do |file|
   csv.each do |row|
     file << row.values
   end

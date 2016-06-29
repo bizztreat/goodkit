@@ -60,13 +60,14 @@ dashboards_to_migrate = project.dashboards.select { |dashboard| dashboard.update
 dashboards_to_migrate.each do |dashboard|
 
   objects_to_migrate.push(dashboard)
-  counter_info += 1
   output.push(details = {
       :type => 'INFO',
       :url => server + '#s=/gdc/projects/' + development_project + '|projectDashboardPage|' + dashboard.uri,
       :api => server + dashboard.uri,
-      :message => 'The dashboard '+ dashboard.title + ' has been exported'
+      :title => dashboard.title,
+      :description => 'The dashboard has been exported'
   })
+  counter_info += 1
 end
 
 $result.push({:section => 'Following dashboards from development_project updated after ' + last_release_date.to_s + ' has been exported.', :OK => 0, :INFO => counter_info, :ERROR => 0, :output => output})
@@ -80,14 +81,16 @@ reports_to_migrate = project.reports.select { |report| report.updated > last_rel
 
 # push all reports objects to the array that we will be migrating between projects
 reports_to_migrate.each do |report|
+
   objects_to_migrate.push(report)
-  counter_info += 1
   output.push(details = {
       :type => 'INFO',
       :url => server + '#s=/gdc/projects/' + development_project + '|analysisPage|head|' + report.uri,
       :api => server + report.uri,
-      :message => 'The report '+ report.title + ' has been exported.'
+      :title => report.title,
+      :description => 'The report has been exported.'
   })
+  counter_info += 1
 end
 
 $result.push({:section => 'Following reports from development_project updated after ' + last_release_date.to_s + ' has been exported.', :OK => 0, :INFO => counter_info, :ERROR => 0, :output => output})
@@ -101,14 +104,16 @@ metrics_to_migrate = project.metrics.select { |metric| metric.updated > last_rel
 
 # push all metrics objects to the array that we will be migrating between projects
 metrics_to_migrate.each do |metric|
+
   objects_to_migrate.push(metric)
-  counter_info += 1
   output.push(details = {
       :type => 'INFO',
       :url => server + '#s=/gdc/projects/' + development_project + '|objectPage|' + metric.uri,
       :api => server + metric.uri,
-      :message => 'The metric '+ metric.title + ' has been exported.'
+      :title => metric.title,
+      :description => 'The metric has been exported.'
   })
+  counter_info += 1
 end
 
 $result.push({:section => 'Following metrics from development_project updated after ' + last_release_date.to_s + ' has been exported.', :OK => 0, :INFO => counter_info, :ERROR => 0, :output => output})
@@ -122,14 +127,16 @@ variables_to_migrate = project.variables.select { |variable| variable.updated > 
 
 # push all variables objects to the array that we will be migrating between projects
 variables_to_migrate.each do |variable|
+
   objects_to_migrate.push(variable)
-  counter_info += 1
   output.push(details = {
       :type => 'INFO',
       :url => server + '#s=/gdc/projects/' + development_project + '|objectPage|' + variable.uri,
       :api => server + variable.uri,
-      :message => 'The variable '+ variable.title + ' has been exported.'
+      :title => variable.title,
+      :description => 'The variable has been exported.'
   })
+  counter_info += 1
 end
 
 $result.push({:section => 'Following variable from development_project updated after ' + last_release_date.to_s + ' has been exported.', :OK => 0, :INFO => counter_info, :ERROR => 0, :output => output})

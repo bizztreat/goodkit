@@ -63,12 +63,13 @@ results.map do |result|
   orig_result, new_result, new_metrics = result
 
   if orig_result != new_result
+
     output.push(details = {
         :type => 'ERROR',
         :url => server + '#s=' + development_project.uri + '|analysisPage|head|' + new_metrics.uri,
         :api => server + new_metrics.uri,
         :title => new_metrics.title,
-        :message => 'Development metric result is different.'
+        :description => 'Development metric result is different.'
     })
     counter_error += 1
   else

@@ -49,7 +49,7 @@ project.users.each do |user|
 
   user_email_domain = user.email.split('@')[1]
   unless allowed_domains.include? user_email_domain
-    counter_error += 1
+
     output.push(details = {
         :type => 'ERROR',
         :url => server + '#s=' + project.uri + '|projectPage|',
@@ -57,10 +57,11 @@ project.users.each do |user|
         :title => user.first_name + ' ' + user.last_name,
         :description => user.email + ' email is not allow'
     })
+    counter_error += 1
   end
 
   if domains_of_support.include? user_email_domain
-    counter_info += 1
+
     output.push(details = {
         :type => 'INFO',
         :url => server + '#s=' + project.uri + '|projectPage|',
@@ -68,6 +69,7 @@ project.users.each do |user|
         :title => user.first_name + ' ' + user.last_name,
         :description => user.email + ' email is on support domain list'
     })
+    counter_info += 1
   end
 end
 

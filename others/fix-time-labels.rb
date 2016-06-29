@@ -201,7 +201,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
                     :type => "INFO",
                     :url => server + '#s=/gdc/projects/' + devel + '|objectPage|' + a.uri,
                     :api => server + a.uri,
-                    :message => 'The attribute (' + a.title + ') is already in folder "' + create_folder_name(d.title, main_dataset_identifier, main_date_time_identifier) + '".'
+                    :description => 'The attribute (' + a.title + ') is already in folder "' + create_folder_name(d.title, main_dataset_identifier, main_date_time_identifier) + '".'
                 })
                 # count objects
                 counter_ok += 1
@@ -211,7 +211,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
                     :type => "ERROR",
                     :url => server + '#s=/gdc/projects/' + devel + '|objectPage|' + a.uri,
                     :api => server + a.uri,
-                    :message => 'The attribute (' + a.title + ') has been moved to  folder "' + create_folder_name(d.title, main_dataset_identifier, main_date_time_identifier) + '".'
+                    :description => 'The attribute (' + a.title + ') has been moved to  folder "' + create_folder_name(d.title, main_dataset_identifier, main_date_time_identifier) + '".'
                 })
                 # count objects
                 counter_err += 1
@@ -264,7 +264,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
               :type => "INFO",
               :url => server + '#s=/gdc/projects/' + devel + '|objectPage|' + object.uri,
               :api => server + object.uri,
-              :message => 'The folder (' + object.title + ') has been deleted.'
+              :description => 'The folder (' + object.title + ') has been deleted.'
           })
           # count objects
           counter_ok += 1
