@@ -4,6 +4,23 @@ require 'csv'
 require 'optparse'
 require 'yaml'
 
+def translation_tags(csv, language, object)
+
+  tags = object.tags.split(' ')
+
+  tags.each do |tag|
+
+    row = csv.select { |row| row['en'] == tag }.first
+
+    unless row.nil? || row[language].empty?
+
+      object.remove_tag(tag)
+      object.add_tag(row[language])
+      object.save
+    end
+  end
+end
+
 # define options for script configuration
 options = {}
 OptionParser.new do |opts|
@@ -31,14 +48,8 @@ if server.to_s.empty?
   server = 'https://secure.gooddata.com'
 end
 
-# variables for standard output
-counter_ok = 0
-counter_error = 0
-output = []
-$result = []
-
-keys = %w(identifier category en_title en_description cz_title cz_description)
-csv = CSV.read('dictionaries/translation/objects-objects-dictionary.csv').map { |row| Hash[keys.zip(row)] }
+keys = %w(en cz)
+csv = CSV.read('dictionaries/translation/tags-dictionary.csv').map { |row| Hash[keys.zip(row)] }
 
 # connect to GoodData
 client = GoodData.connect(login: username, password: password, server: server)
@@ -46,42 +57,29 @@ client = GoodData.connect(login: username, password: password, server: server)
 # connect to development GoodData project
 project = client.projects(project)
 
-csv.peach do |row|
-
-  if (row.key? language + '_title') && (row.key? language + '_description')
-
-    if row['category'].include? '"tab"'
-      catch :take_me_out do
-        project.dashboards.each do |dashboard|
-          dashboard.tabs.each do |tab|
-            if tab.identifier == row['identifier']
-              tab.title = row[language + '_title'].nil? ? tab.title : row[language + '_title'].to_s
-              dashboard.save
-              throw :take_me_out # break 2
-            end
-          end
-        end
-      end
-    else
-      object = project.objects(row['identifier'])
-      object.title = row[language + '_title'].nil? ? object.title : row[language + '_title'].to_s
-      object.summary = row[language + '_description'].nil? ? object.summary : row[language + '_description'].to_s
-      object.save
-    end
-  else
-    output.push(details = {
-        :type => 'ERROR',
-        :url => '#',
-        :api => '#',
-        :title => language,
-        :description => 'The language is not supported'
-    })
-    break
-  end
+project.dashboards.each do |dashboard|
+  translation_tags(csv, language, dashboard)
 end
 
-$result.push({:section => 'Translated objects', :OK => counter_ok, :INFO => 0, :ERROR => counter_error, :output => output})
-puts $result.to_json
+project.reports.each do |report|
+  translation_tags(csv, language, report)
+end
+
+project.metrics.each do |metric|
+  translation_tags(csv, language, metric)
+end
+
+project.attributes.each do |attribute|
+  translation_tags(csv, language, attribute)
+end
+
+project.facts.each do |fact|
+  translation_tags(csv, language, fact)
+end
+
+project.variables.each do |variable|
+  translation_tags(csv, language, variable)
+end
 
 client.disconnect
 
