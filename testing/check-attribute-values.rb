@@ -31,7 +31,6 @@ generate = options[:generate]
 tags_included = options[:tags_included].to_s.split(',')
 tags_excluded = options[:tags_excluded].to_s.split(',')
 
-
 if generate.to_s.empty?
   generate = 'false'
 end
@@ -60,8 +59,11 @@ development_project = client.projects(development_project)
 # generate JSON file first
 if generate == 'true'
   development_project.attributes.each do |attribute|
+
+    # check included and excluded tags
     if tags_included.empty? || !(attribute.tag_set & tags_included).empty?
       if (attribute.tag_set & tags_excluded).empty?
+
         if attributes.include? attribute.title
           values = []
           attribute.values.each do |value|

@@ -17,7 +17,6 @@ OptionParser.new do |opts|
 
 end.parse!
 
-
 # get credentials and others from input parameters
 username = options[:username]
 password = options[:password]

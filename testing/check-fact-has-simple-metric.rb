@@ -1,9 +1,3 @@
-#The script is checking all facts in the project if they have metric in format 'SELECT 'MetricName''
-#There are three options:
-# 1 the fact has a metric with the same name and the metric is in correct format
-# 2 the fact has a metric with the same name but the metric is not in simple format
-# 3 the fact does not have any metric
-
 require 'date'
 require 'gooddata'
 require 'csv'
@@ -12,7 +6,7 @@ require 'yaml'
 require 'rubygems'
 require 'json'
 
-# prepare all parameters options
+# define options for script configuration
 options = {}
 OptionParser.new do |opts|
 
@@ -56,16 +50,18 @@ client = GoodData.connect(login: username, password: password, server: server)
 # connect to development GoodData project
 development_project = client.projects(development_project)
 metrics = {}
+
 development_project.metrics.pmap do |metric|
   metrics.store(metric.title, metric.expression)
 end
 
 development_project.facts.each do |fact|
+
   if tags_included.empty? || !(fact.tag_set & tags_included).empty?
     if (fact.tag_set & tags_excluded).empty?
+
       if metrics.include? fact.title
         if metrics[fact.title] == 'SELECT [' + fact.uri + ']'
-          counter_info += 1
           output_1.push(details = {
               :type => 'INFO',
               :url => server + '/#s=' + development_project.uri + '|objectPage|' + fact.uri,
@@ -73,8 +69,8 @@ development_project.facts.each do |fact|
               :title => fact.title,
               :description => 'The fact "' + fact.title + '" has simple metric.'
           })
+          counter_info += 1
         else
-          counter_error += 1
           output_2.push(details = {
               :type => 'ERROR',
               :url => server + '/#s=' + development_project.uri + '|objectPage|' + fact.uri,
@@ -82,9 +78,9 @@ development_project.facts.each do |fact|
               :title => fact.title,
               :description => 'The fact "' + fact.title + '" has a metric but not in simple format.'
           })
+          counter_error += 1
         end
       else
-        counter_error_2 += 1
         output_3.push(details = {
             :type => 'ERROR',
             :url => server + '/#s=' + development_project.uri + '|objectPage|' + fact.uri,
@@ -92,6 +88,7 @@ development_project.facts.each do |fact|
             :title => fact.title,
             :description => 'The fact "' + fact.title + '" does not have any metric.'
         })
+        counter_error_2 += 1
       end
     end
   end
