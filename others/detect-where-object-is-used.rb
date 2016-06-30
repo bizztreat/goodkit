@@ -12,6 +12,7 @@ OptionParser.new do |opts|
   opts.on('-p', '--password PASS', 'Password') { |v| options[:password] = v }
   opts.on('-d', '--development_project ID', 'Development Project') { |v| options[:development_project] = v }
   opts.on('-h', '--hostname NAME', 'Hostname') { |v| options[:server] = v }
+  opts.on('-o', '--object_identifier OBJECT', 'Object Identifier') { |v| options[:object_identifier] = v }
 
 end.parse!
 
@@ -20,15 +21,15 @@ username = options[:username]
 password = options[:password]
 development_project = options[:development_project]
 server = options[:server]
+object_identifier = options[:object_identifier]
+
 
 # if whitelabel is not specified set to default domain
 if server.to_s.empty?
   server = 'https://secure.gooddata.com'
 end
 
-# variables for standard output
-counter_ok = 0
-counter_error = 0
+counter_info = 0
 output = []
 $result = []
 
@@ -39,30 +40,23 @@ GoodData.logging_off
 client = GoodData.connect(login: username, password: password, server: server)
 
 # connect to development GoodData project
-project = client.projects(development_project)
+development_project = client.projects(development_project)
 
-blueprint = project.blueprint
-blueprint.datasets.each do |dataset|
+object = development_project.objects(object_identifier)
 
-  # creates a metric which return number of lines in dataset
-  lines = dataset.count(project)
-  if lines.to_i < 1
-
-    object_dataset = GoodData::Dataset[dataset.id, {:client => client, :project => project}] #TODO remove
+development_project.reports.peach do |report|
+  if report.definition.using? object
     output.push(details = {
-        :type => 'ERROR',
-        :url => server + '/#s=/gdc/projects/' + development_project + '|objectPage|' + object_dataset.uri,
-        :api => server + object_dataset.uri,
-        :title => dataset.title,
-        :description => 'Dataset it empty.'
+        :type => 'INFO',
+        :url => server + '/#s=' + development_project.uri + '|analysisPage|head|' + report.uri,
+        :api => server + report.uri,
+        :description => 'The attribute "' + object.title + '" is being used in report "' + report.title + '".'
     })
-    counter_error += 1
-  else
-    counter_ok += 1
+    counter_info += 1
   end
 end
 
-$result.push({:section => 'Empty datasets check', :OK => counter_ok, :INFO => 0, :ERROR => counter_error, :output => output})
+$result.push({:section => 'The object <a href="' + server + '/#s=' + development_project.uri + '|objectPage|' + object.uri + '">' + object.title + '</a> report usage.', :OK => 0, :INFO => counter_info, :ERROR => 0, :output => output})
 puts $result.to_json
 
 client.disconnect
