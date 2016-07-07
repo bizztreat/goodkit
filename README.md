@@ -185,7 +185,7 @@ Checks if there are some data from yesterday. You need to use two extra variable
 
 1. The ATTRIBUTE must to be filled by uri of some attribute like an ID (Orders) in this format: /gdc/md/projectspid/obj/1664
 
-2. The TIME -t must to be filled by with attribute from time dimension. 
+2. The TIME must to be filled by with attribute from time dimension. 
  For yestreday it's "Date (your time dimension)", for previous month it's "Month/Year (your time dimension)"
  again use the uri in this format: /gdc/md/projectspid/obj/1663
 
