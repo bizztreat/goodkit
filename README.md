@@ -181,9 +181,10 @@ This script has two parts. To switch between these two parts use parameter GENER
 To select the group of checked attributes use the parameter -a "Attribute1,Attribute2" , used as a list of attributes. 
 
 ###17-check-data-from-yesterday.rb
- Checks if there are some data from yesterday
- You need to use two extra variables ATTRIBUTE -a and TIME -t
+Checks if there are some data from yesterday. You need to use two extra variables ATTRIBUTE -a and TIME -t
+
 1. The ATTRIBUTE must to be filled by uri of some attribute like an ID (Orders) in this format: /gdc/md/projectspid/obj/1664
+
 2. The TIME -t must to be filled by with attribute from time dimension. 
  For yestreday it's "Date (your time dimension)", for previous month it's "Month/Year (your time dimension)"
  again use the uri in this format: /gdc/md/projectspid/obj/1663
