@@ -34,10 +34,10 @@ GoodData.logging_off
 client = GoodData.connect(login: username, password: password, server: server)
 
 # connect to development GoodData project
-project = client.projects(development_project)
+development_project = client.projects(development_project)
 
 # for each dashboard and tab check for the URL including GA tracking code
-project.dashboards.each do |dashboard|
+development_project.dashboards.each do |dashboard|
   dashboard.tabs.each do |tab|
 
     # check the GA tracking code
@@ -46,7 +46,7 @@ project.dashboards.each do |dashboard|
     else
       output.push(details = {
           :type => 'ERROR',
-          :url => server + '/#s=/gdc/projects/' + development_project + '|projectDashboardPage|' + dashboard.uri + '|' + tab.identifier,
+          :url => server + '/#s=' + development_project.uri + '|projectDashboardPage|' + dashboard.uri + '|' + tab.identifier,
           :api => server + dashboard.uri,
           :title => dashboard.title + ' - ' + tab.title,
           :description => 'GA script is missing.'

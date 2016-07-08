@@ -244,6 +244,8 @@ end
 
 $result.push({:section => 'Variable tags and titles errors', :OK => 0, :INFO => 0, :ERROR => counter_error, :output => output})
 
+# TODO add analyticaldashboard in future, but it's not supported by GoodData now.
+
 # reset output variables
 counter_error = 0
 output = []

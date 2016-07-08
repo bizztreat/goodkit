@@ -78,6 +78,8 @@ project.variables.each do |variable|
   csv = add_to_csv(csv, keys, variable)
 end
 
+# TODO add analyticaldashboard in future, but it's not supported by GoodData now.
+
 client.disconnect
 
 CSV.open('dictionaries/translation/tags-dictionary.csv', 'w') do |file|

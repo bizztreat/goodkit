@@ -86,7 +86,7 @@ development_project.metrics.each do |metric|
         else
           result_array.push(details = {
               :type => 'ERROR',
-              :url => server + '/#s=/gdc/projects/' + development_project.uri + '|objectPage|' + metric.uri,
+              :url => server + '/#s=' + development_project.uri + '|objectPage|' + metric.uri,
               :api => server + metric.uri,
               :title => metric.title,
               :description => 'The tag "'+ tag + '" has been added to the tag set of the metric.'

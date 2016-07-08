@@ -119,6 +119,9 @@ development_project.variables.each do |variable|
 end
 
 $result.push({:section => 'Variables without version tags', :OK => counter_ok, :INFO => 0, :ERROR => counter_error, :output => output})
+
+# TODO add analyticaldashboard in future, but it's not supported by GoodData now.
+
 puts $result.to_json
 
 client.disconnect

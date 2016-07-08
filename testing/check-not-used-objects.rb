@@ -46,10 +46,10 @@ GoodData.logging_off
 client = GoodData.connect(login: username, password: password, server: server)
 
 # connect to project context
-project = client.projects(development_project)
+development_project = client.projects(development_project)
 
 # find unused attributes
-project.attributes.each do |attribute|
+development_project.attributes.each do |attribute|
 
   # check included and excluded tags
   if tags_included.empty? || !(attribute.tag_set & tags_included).empty?
@@ -67,7 +67,7 @@ project.attributes.each do |attribute|
 
           output.push(details = {
               :type => 'INFO',
-              :url => server + '/#s=/gdc/projects/' + development_project + '|objectPage|' + attribute.uri,
+              :url => server + '/#s=' + development_project.uri + '|objectPage|' + attribute.uri,
               :api => server + attribute.uri,
               :title => attribute.title,
               :description => 'This attribute ('+ attribute.title + ') is not used by any object'
@@ -89,7 +89,7 @@ counter_ok = 0
 counter_info = 0
 
 # find unused facts
-project.facts.each do |fact|
+development_project.facts.each do |fact|
 
   # check included and excluded tags
   if tags_included.empty? || !(fact.tag_set & tags_included).empty?
@@ -106,7 +106,7 @@ project.facts.each do |fact|
 
         output.push(details = {
             :type => 'INFO',
-            :url => server + '/#s=/gdc/projects/' + development_project + '|objectPage|' + fact.uri,
+            :url => server + '/#s=' + development_project.uri + '|objectPage|' + fact.uri,
             :api => server + fact.uri,
             :title => fact.title,
             :description => 'This fact ('+ fact.title + ') is not used by any object'

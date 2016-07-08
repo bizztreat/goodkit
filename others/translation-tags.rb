@@ -76,6 +76,8 @@ project.variables.each do |variable|
   translation_tags(csv, language, variable)
 end
 
+# TODO add analyticaldashboard in future, but it's not supported by GoodData now.
+
 client.disconnect
 
 

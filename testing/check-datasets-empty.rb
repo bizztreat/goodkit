@@ -34,19 +34,19 @@ GoodData.logging_off
 client = GoodData.connect(login: username, password: password, server: server)
 
 # connect to development GoodData project
-project = client.projects(development_project)
+development_project = client.projects(development_project)
 
-blueprint = project.blueprint
+blueprint = development_project.blueprint
 blueprint.datasets.each do |dataset|
 
   # creates a metric which return number of lines in dataset
-  lines = dataset.count(project)
+  lines = dataset.count(development_project)
   if lines.to_i < 1
 
-    object_dataset = GoodData::Dataset[dataset.id, {:client => client, :project => project}] #TODO remove
+    object_dataset = GoodData::Dataset[dataset.id, {:client => client, :project => development_project}] #TODO remove
     output.push(details = {
         :type => 'ERROR',
-        :url => server + '/#s=/gdc/projects/' + development_project + '|objectPage|' + object_dataset.uri,
+        :url => server + '/#s=' + development_project.uri + '|objectPage|' + object_dataset.uri,
         :api => server + object_dataset.uri,
         :title => dataset.title,
         :description => 'Dataset it empty.'

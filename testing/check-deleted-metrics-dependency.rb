@@ -37,10 +37,10 @@ GoodData.logging_off
 client = GoodData.connect(login: username, password: password, server: server)
 
 # connect to development GoodData project
-project = client.projects(development_project)
+development_project = client.projects(development_project)
 
 # get metric expression from development project
-project.reports.each do |report|
+development_project.reports.each do |report|
 
   # check included and excluded tags
   if tags_included.empty? || !(report.tag_set & tags_included).empty?
@@ -52,14 +52,14 @@ project.reports.each do |report|
       # go through them
       objects.select { |object| object['category'] == 'metric' }.each do |object|
 
-        metric = project.metrics(object['link'])
+        metric = development_project.metrics(object['link'])
 
         # check if the metric is deleted
         if metric.deprecated
 
           output.push(details = {
               :type => 'ERROR',
-              :url => server + '/#s=/gdc/projects/' + development_project + '|objectPage|' + metric.uri,
+              :url => server + '/#s=' + development_project.uri + '|objectPage|' + metric.uri,
               :api => server + metric.uri,
               :title => metric.title,
               :description => 'This report\'s metric has been deleted.'
