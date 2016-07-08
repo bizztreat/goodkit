@@ -48,6 +48,44 @@ client = GoodData.connect(login: username, password: password, server: server)
 # connect to project context
 development_project = client.projects(development_project)
 
+# find unused reports
+development_project.reports.each do |report|
+
+  # check included and excluded tags
+  if tags_included.empty? || !(report.tag_set & tags_included).empty?
+    if (report.tag_set & tags_excluded).empty?
+
+      counter_objects = 0
+      objects = report.usedby
+
+      counter_objects += objects.select { |object| object['category'] == 'projectDashboard' }.length
+
+      # safe the result if there is ZERO project dashboards that are using the report
+      if counter_objects == 0
+
+        output.push(details = {
+            :type => 'INFO',
+            :url => server + '#s=' + development_project.uri + '|analysisPage|head|' + report.uri,
+            :api => server + report.uri,
+            :title => report.title,
+            :message => 'This report ('+ report.title + ') is not used by any project dashboard'
+        })
+        counter_info += 1
+      else
+        counter_ok += 1
+      end
+    end
+  end
+end
+
+$result.push({:section => 'Facts which have not been used in any object (metric or report).', :OK => counter_ok, :INFO => counter_info, :ERROR => 0, :output => output})
+
+
+# reset variables for counting errors
+output = []
+counter_ok = 0
+counter_info = 0
+
 # find unused attributes
 development_project.attributes.each do |attribute|
 
