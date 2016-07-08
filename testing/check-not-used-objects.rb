@@ -55,10 +55,9 @@ development_project.reports.each do |report|
   if tags_included.empty? || !(report.tag_set & tags_included).empty?
     if (report.tag_set & tags_excluded).empty?
 
-      counter_objects = 0
       objects = report.usedby
 
-      counter_objects += objects.select { |object| object['category'] == 'projectDashboard' }.length
+      counter_objects = objects.select { |object| object['category'] == 'projectDashboard' }.length
 
       # safe the result if there is ZERO project dashboards that are using the report
       if counter_objects == 0
