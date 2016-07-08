@@ -21,14 +21,9 @@ end.parse!
 username = options[:username]
 password = options[:password]
 development_project = options[:development_project]
-server = options[:server]
+server = options[:server].to_s.empty? ? 'https://secure.gooddata.com' : options[:server]
 tags_included = options[:tags_included].to_s.split(',')
 tags_excluded = options[:tags_excluded].to_s.split(',')
-
-# if whitelabel is not specified set to default domain
-if server.to_s.empty?
-  server = 'https://secure.gooddata.com'
-end
 
 # variables for script results
 output = []

@@ -21,7 +21,7 @@ end.parse!
 # get credentials and others from input parameters
 username = options[:username]
 password = options[:password]
-server = options[:server]
+server = options[:server].to_s.empty? ? 'https://secure.gooddata.com' : options[:server]
 start_project = options[:start_project]
 development_project = options[:development_project]
 tags_included = options[:tags_included].to_s.split(',')
@@ -31,11 +31,6 @@ tags_excluded = options[:tags_excluded].to_s.split(',')
 output = []
 $result = []
 counter_ok = 0
-
-# if whitelabel is not specified set to default domain
-if server.to_s.empty?
-  server = 'https://secure.gooddata.com'
-end
 
 # turn off GoodData logging
 GoodData.logging_off

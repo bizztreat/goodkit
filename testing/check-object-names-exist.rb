@@ -27,14 +27,10 @@ end.parse!
 username = options[:username]
 password = options[:password]
 devel = options[:devel]
-server = options[:server]
+server = options[:server].to_s.empty? ? 'https://secure.gooddata.com' : options[:server]
 incl = options[:incl]
 excl = options[:excl]
-generate = options[:generate]
-
-if generate.to_s.empty? then
-  generate = "false"
-end
+generate = options[:generate].to_s.empty? ? 'false' : options[:generate]
 
 # make arrays from incl and excl parameters
 if incl.to_s != ''
@@ -45,10 +41,6 @@ if excl.to_s != ''
   excl = excl.split(",")
 end
 
-# if whitelabel is not specified set to default domain
-if server.to_s.empty? then
-  server = 'https://secure.gooddata.com'
-end
 counter_ok = 0
 counter_err = 0
 err_array = []
@@ -64,7 +56,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
   # get the devel project context
   devel = client.projects(devel)
   if generate == "true" then
-  #attributes
+    #attributes
     all_attributes = []
     client.get("#{devel.md['query']}/attributes")['query']['entries'].map do |i|
       all_attributes.push(i['title'])

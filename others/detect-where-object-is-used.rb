@@ -20,14 +20,8 @@ end.parse!
 username = options[:username]
 password = options[:password]
 development_project = options[:development_project]
-server = options[:server]
+server = options[:server].to_s.empty? ? 'https://secure.gooddata.com' : options[:server]
 object_identifier = options[:object_identifier]
-
-
-# if whitelabel is not specified set to default domain
-if server.to_s.empty?
-  server = 'https://secure.gooddata.com'
-end
 
 counter_info = 0
 output = []

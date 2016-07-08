@@ -22,16 +22,11 @@ username = options[:username]
 password = options[:password]
 start_project = options[:start_project]
 development_project = options[:development_project]
-server = options[:server]
+server = options[:server].to_s.empty? ? 'https://secure.gooddata.com' : options[:server]
 
 # variables for script results
 output = []
 $result = []
-
-# if whitelabel is not specified set to default domain
-if server.to_s.empty?
-  server = 'https://secure.gooddata.com'
-end
 
 # turn off GoodData logging
 GoodData.logging_off

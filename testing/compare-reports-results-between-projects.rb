@@ -23,7 +23,7 @@ username = options[:username]
 password = options[:password]
 start_project = options[:start_project]
 development_project = options[:development_project]
-server = options[:server]
+server = options[:server].to_s.empty? ? 'https://secure.gooddata.com' : options[:server]
 tags_included = options[:tags_included].to_s.split(',')
 tags_excluded = options[:tags_excluded].to_s.split(',')
 
@@ -35,11 +35,6 @@ $result = []
 
 # turn off logging for clear output
 GoodData.logging_off
-
-# if whitelabel is not specified set to default domain
-if server.to_s.empty?
-  server = 'https://secure.gooddata.com'
-end
 
 # connect to GoodData
 client = GoodData.connect(login: username, password: password, server: server)

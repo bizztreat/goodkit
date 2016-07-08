@@ -19,15 +19,10 @@ end.parse!
 # get credentials and others from input parameters
 username = options[:username]
 password = options[:password]
-server = options[:server]
+server = options[:server].to_s.empty? ? 'https://secure.gooddata.com' : options[:server]
 project_id = options[:project_id]
 new_project_name = options[:new_project_name]
 auth_token = options[:auth_token]
-
-# if whitelabel is not specified set to default domain
-if server.to_s.empty?
-  server = 'https://secure.gooddata.com'
-end
 
 $result = []
 

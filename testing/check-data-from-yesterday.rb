@@ -29,21 +29,13 @@ end.parse!
 username = options[:username]
 password = options[:password]
 pid = options[:devel]
-server = options[:server]
+server = options[:server].to_s.empty? ? 'https://secure.gooddata.com' : options[:server]
 attribute = options[:attribute]
 time = options[:time]
 
 counter_ok = 0
 counter_err = 0
 result_array = []
-$result = []
-
-
-# if whitelabel is not specified set to default domain
-if server.to_s.empty? then
-  server = 'https://secure.gooddata.com'
-end
-
 $result = []
 
 # turn off logging for clear output

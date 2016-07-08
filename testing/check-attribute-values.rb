@@ -25,20 +25,11 @@ end.parse!
 username = options[:username]
 password = options[:password]
 development_project = options[:development_project]
-server = options[:server]
+server = options[:server].to_s.empty? ? 'https://secure.gooddata.com' : options[:server]
 attributes = options[:attributes].to_s.split(',')
-generate = options[:generate]
+generate = options[:generate].to_s.empty? ? 'false' : options[:generate]
 tags_included = options[:tags_included].to_s.split(',')
 tags_excluded = options[:tags_excluded].to_s.split(',')
-
-if generate.to_s.empty?
-  generate = 'false'
-end
-
-# if whitelabel is not specified set to default domain
-if server.to_s.empty?
-  server = 'https://secure.gooddata.com'
-end
 
 # variables for standard output
 counter_info = 0
@@ -117,11 +108,12 @@ if generate == 'false'
       missing = values - attributes[attribute.title]
       # Array list of extra values
       extra = attributes[attribute.title] - values
+
       #check if there is any inconsistency
       if missing.any? || extra.any?
         output.push(details = {
             :type => 'ERROR',
-            :url => server + '/#s=' + development_project.uri + '|objectPage|' + a.uri,
+            :url => server + '/#s=' + development_project.uri + '|objectPage|' + attribute.uri,
             :api => server + attribute.uri,
             :title => attribute.title,
             :description => 'The attribute "' + attribute.title + '" is missing these values "' + missing.to_s + '" and contains extra values "' + extra.to_s + '".'
@@ -130,7 +122,7 @@ if generate == 'false'
       else
         output.push(details = {
             :type => 'INFO',
-            :url => server + '/#s=' + development_project.uri + '|objectPage|' + a.uri,
+            :url => server + '/#s=' + development_project.uri + '|objectPage|' + attribute.uri,
             :api => server + attribute.uri,
             :title => attribute.title,
             :description => 'The attribute`s "' + attribute.title + '" values are identical.'

@@ -20,16 +20,8 @@ end.parse!
 username = options[:username]
 password = options[:password]
 project = options[:project]
-server = options[:server]
+server = options[:server].to_s.empty? ? 'https://secure.gooddata.com' : options[:server]
 allowed_domains = options[:allowed_domains].to_s.split(',')
-
-# turn off logging for clear output
-GoodData.logging_off
-
-# if whitelabel is not specified set to default domain
-if server.to_s.empty?
-  server = 'https://secure.gooddata.com'
-end
 
 # variables for standard output
 counter_info = 0
@@ -38,6 +30,9 @@ output = []
 $result = []
 domains_of_support = %w(gooddata.com clients.keboola.com)
 allowed_domains += domains_of_support
+
+# turn off logging for clear output
+GoodData.logging_off
 
 # connect to GoodData
 client = GoodData.connect(login: username, password: password, server: server)

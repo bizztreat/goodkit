@@ -129,7 +129,7 @@ end.parse!
 username = options[:username]
 password = options[:password]
 devel = options[:devel]
-server = options[:server]
+server = options[:server].to_s.empty? ? 'https://secure.gooddata.com' : options[:server]
 folders_delete = options[:folders]
 main_date_time_identifier = options[:main]
 incl = options[:incl]
@@ -142,11 +142,6 @@ end
 
 if excl.to_s != ''
   excl = excl.split(",")
-end
-
-# if whitelabel is not specified set to default domain
-if server.to_s.empty? then
-  server = 'https://secure.gooddata.com'
 end
 
 # variables for standard output

@@ -22,18 +22,13 @@ end.parse!
 username = options[:username]
 password = options[:password]
 development_project = options[:development_project]
-server = options[:server]
+server = options[:server].to_s.empty? ? 'https://secure.gooddata.com' : options[:server]
 tags_excluded = options[:tags_excluded].to_s.split(',')
 
 # variables for script results
 output = []
 $result = []
 counter_info = 0
-
-# if not specific white labeled server set to default
-if server.to_s.empty?
-  server = 'https://secure.gooddata.com'
-end
 
 # turn off GoodData logging
 GoodData.logging_off

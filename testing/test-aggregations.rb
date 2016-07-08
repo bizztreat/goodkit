@@ -21,7 +21,7 @@ username = options[:username]
 password = options[:password]
 start_project = options[:start_project]
 development_project = options[:development_project]
-server = options[:server]
+server = options[:server].to_s.empty? ? 'https://secure.gooddata.com' : options[:server]
 
 # variables for standard output
 counter_ok = 0
@@ -29,16 +29,11 @@ counter_error = 0
 output = []
 $result = []
 
-# turn off logging for clear output
-GoodData.logging_off
-
-# if whitelabel is not specified set to default domain
-if server.to_s.empty?
-  server = 'https://secure.gooddata.com'
-end
-
 # specify aggregations functions to check
 aggregations = [:sum, :avg, :median, :min, :max]
+
+# turn off logging for clear output
+GoodData.logging_off
 
 # connect to GoodData
 client = GoodData.connect(login: username, password: password, server: server)
