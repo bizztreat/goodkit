@@ -77,7 +77,7 @@ development_metrics.each_key do |uri|
         :type => 'INFO',
         :url => server + '/#s=' + development_project.uri + '|objectPage|' + uri.gsub('pid', development_project.pid),
         :api => server + uri.gsub('pid', development_project.pid),
-        :title => project.metrics(uri.gsub('pid', development_project.pid)).title,
+        :title => development_project.metrics(uri.gsub('pid', development_project.pid)).title,
         :description => 'This updated metric has been changed.'
     })
     updated_metrics.push(uri.gsub('pid', development_project.pid))
