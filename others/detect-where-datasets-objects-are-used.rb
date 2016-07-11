@@ -37,67 +37,70 @@ development_project = client.projects(development_project)
 
 development_project.datasets.each do |dataset|
 
-  dataset.facts.each do |fact|
+  if %w(CaseNotClosed Case).include? dataset.title
 
-    fact.usedby.each do |object|
+    dataset.facts.each do |fact|
 
-      if object['category'] == 'report'
-        output.push(details = {
-            :type => 'INFO',
-            :url => server + '/#s=' + development_project.uri + '|analysisPage|head|' + object['link'],
-            :api => server + object['link'],
-            :title => object['title'],
-            :description => 'The fact "' + fact.title + '" is used in this report.'
-        })
-        counter_info += 1
-        next
-      end
+      fact.usedby.each do |object|
 
-      if object['category'] == 'metric'
-        output.push(details = {
-            :type => 'INFO',
-            :url => server + '/#s=' + development_project.uri + '|objectPage|' + object['link'],
-            :api => server + object['link'],
-            :title => object['title'],
-            :description => 'The fact "' + fact.title + '" is used in this metric.'
-        })
-        counter_info += 1
-      end
-    end
-  end
+        if object['category'] == 'report'
+          output.push(details = {
+              :type => 'INFO',
+              :url => server + '/#s=' + development_project.uri + '|analysisPage|head|' + object['link'],
+              :api => server + object['link'],
+              :title => object['title'],
+              :description => 'The fact "' + fact.title + '" is used in this report.'
+          })
+          counter_info += 1
+          next
+        end
 
-  dataset.attributes.each do |attribute|
-
-    attribute.usedby.each do |object|
-      if object['category'] == 'report'
-        output.push(details = {
-            :type => 'INFO',
-            :url => server + '/#s=' + development_project.uri + '|analysisPage|head|' + object['link'],
-            :api => server + object['link'],
-            :title => object['title'],
-            :description => 'The attribute "' + attribute.title + '" is used in this report.'
-        })
-        counter_info += 1
-        next
-      end
-
-      if object['category'] == 'metric'
-        output.push(details = {
-            :type => 'INFO',
-            :url => server + '/#s=' + development_project.uri + '|objectPage|' + object['link'],
-            :api => server + object['link'],
-            :title => object['title'],
-            :description => 'The attribute "' + attribute.title + '" is used in this metric.'
-        })
-        counter_info += 1
+        if object['category'] == 'metric'
+          output.push(details = {
+              :type => 'INFO',
+              :url => server + '/#s=' + development_project.uri + '|objectPage|' + object['link'],
+              :api => server + object['link'],
+              :title => object['title'],
+              :description => 'The fact "' + fact.title + '" is used in this metric.'
+          })
+          counter_info += 1
+        end
       end
     end
+
+    dataset.attributes.each do |attribute|
+
+      attribute.usedby.each do |object|
+        if object['category'] == 'report'
+          output.push(details = {
+              :type => 'INFO',
+              :url => server + '/#s=' + development_project.uri + '|analysisPage|head|' + object['link'],
+              :api => server + object['link'],
+              :title => object['title'],
+              :description => 'The attribute "' + attribute.title + '" is used in this report.'
+          })
+          counter_info += 1
+          next
+        end
+
+        if object['category'] == 'metric'
+          output.push(details = {
+              :type => 'INFO',
+              :url => server + '/#s=' + development_project.uri + '|objectPage|' + object['link'],
+              :api => server + object['link'],
+              :title => object['title'],
+              :description => 'The attribute "' + attribute.title + '" is used in this metric.'
+          })
+          counter_info += 1
+        end
+      end
+    end
+
+    $result.push({:section => dataset.title + ' objects are used in', :OK => 0, :INFO => counter_info, :ERROR => 0, :output => output.sort_by { |row| row[:title] }})
+
+    # reset output variables
+    output = []
   end
-
-  $result.push({:section => dataset.title + ' objects are used in', :OK => 0, :INFO => counter_info, :ERROR => 0, :output => output.sort_by { |row| row[:title] }})
-
-  # reset output variables
-  output = []
 end
 
 $result.sort_by { |row| row[:section] }
