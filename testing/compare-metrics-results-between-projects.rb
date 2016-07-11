@@ -31,6 +31,7 @@ tags_excluded = options[:tags_excluded].to_s.split(',')
 output = []
 $result = []
 counter_ok = 0
+counter_error = 0
 
 # turn off GoodData logging
 GoodData.logging_off
@@ -48,31 +49,58 @@ start_project_metrics = start_project.metrics.select { |metric| (tags_included.e
 # select development project metrics and include and exclude tags
 development_project_metrics = development_project.metrics.select { |metric| (tags_included.empty? || !(metric.tag_set & tags_included).empty?) && (metric.tag_set & tags_excluded).empty? }.sort_by(&:title)
 
-# compare results
-results = start_project_metrics.zip(development_project_metrics).pmap do |metrics|
-  # compute both metrics and add the metrics at the end for being able to print a metric later
-  metrics.map(&:execute) + [metrics.last] #TODO ??
-end
+# iterate throught every metric
+start_project_metrics.peach do |metric_start|
+  development_project_metrics.peach do |metric_dev|
+    #do the metrics with the same title
 
-results.map do |result|
-  orig_result, new_result, new_metrics = result
-
-  if orig_result != new_result
-
-    output.push(details = {
+    if metric_start.title == metric_dev.title then
+      # Check if the start metric is computable
+        begin  metric_start.execute
+        rescue
+        counter_error += 1
+        output.push(details = {
         :type => 'ERROR',
-        :url => server + '#s=' + development_project.uri + '|analysisPage|head|' + new_metrics.uri,
-        :api => server + new_metrics.uri,
-        :title => new_metrics.title,
-        :description => 'Development metric result is different.'
-    })
-    counter_error += 1
-  else
-    counter_ok += 1
-  end
+        :url => server + '#s=' + development_project.uri + '|analysisPage|head|' + metric_start.uri,
+        :api => server + metric_start.uri,
+        :title => metric_start.title,
+        :description => 'Start metric is uncomputable.'
+        })
+      else
+                # Check if the development metric is computable
+                begin  metric_dev.execute
+                rescue
+                    counter_error += 1
+                    output.push(details = {
+                      :type => 'ERROR',
+                      :url => server + '#s=' + development_project.uri + '|analysisPage|head|' + metric_dev.uri,
+                      :api => server + metric_dev.uri,
+                      :title => metric_dev.title,
+                      :description => 'Development metric is uncomputable.'
+                      })
+                    else
+                            # Compare start and development metric
+                            if
+                              metric_dev.execute == metric_start.execute
+                            then
+                              counter_ok += 1
+                            else
+                              counter_error += 1
+                              output.push(details = {
+                              :type => 'ERROR',
+                              :url => server + '#s=' + development_project.uri + '|analysisPage|head|' + metric_dev.uri,
+                              :api => server + metric_dev.uri,
+                              :title => metric_dev.title,
+                              :description => 'Development metric result is different.'
+                            })
+                            end
+                   end
+                 end
+            end
+        end
 end
 
-$result.push({:section => 'Metric results between Start and Devel projects.', :OK => counter_ok, :INFO => 0, :ERROR => 0, :output => output})
+$result.push({:section => 'Metric results between Start and Devel projects.', :OK => counter_ok, :INFO => 0, :ERROR => counter_error, :output => output})
 puts $result.to_json
 
 client.disconnect
