@@ -46,26 +46,27 @@ development_project = client.projects(development_project)
 metrics = development_project.metrics.select { |metric| metric.tag_set.include?(tag) }.sort_by(&:title)
 
 metrics.each do |metric|
-  reports = metric.usedby
 
-  reports.select { |report| report['category'] == 'report' }.each do |report|
+  usedby_objects = metric.usedby
+
+  usedby_objects.select { |report| report['category'] == 'report' }.each do |report|
 
     # get only report objects and extract tags
-    object = GoodData::get(report['link'])
+    report = development_project.reports(report['identifier'])
 
     # check included and excluded tags
-    if tags_included.empty? || !(object.tag_set & tags_included).empty?
-      if (object.tag_set & tags_excluded).empty?
+    if tags_included.empty? || !(report.tag_set & tags_included).empty?
+      if (report.tag_set & tags_excluded).empty?
 
         # check whether reports include preview tag
-        unless object['report']['meta']['tags'].include? 'preview'
+        unless report.tag_set.include? 'preview'
 
           counter_error += 1
           output.push(details = {
               :type => 'ERROR',
-              :url => server + '/#s=' + development_project.uri + '|analysisPage|head|' + "#{obj['report']['meta']['uri']}",
-              :api => server + "/#{obj['report']['meta']['uri']}",
-              :title => report['title'],
+              :url => server + '/#s=' + development_project.uri + '|analysisPage|head|' + report.uri,
+              :api => server + report.uri,
+              :title => report.title,
               :description => 'Report not tagged as preview.'
           })
         end
@@ -102,7 +103,7 @@ metrics.each do |metric|
         })
         counter_error += 1
       else
-        object = GoodData::get(folders[0]) #TODO first
+        object = GoodData::get(folders.first)
         unless object['folder']['meta']['title'].include? 'ZOOM Preview'
           output.push(details = {
               :type => 'ERROR',
@@ -147,7 +148,7 @@ reports.each do |report|
         })
         counter_error += 1
       else
-        obj = GoodData::get(folders[0])
+        obj = GoodData::get(folders.first)
         unless obj['domain']['meta']['title'].include? 'ZOOM Preview'
           counter_error += 1
           output.push(details = {

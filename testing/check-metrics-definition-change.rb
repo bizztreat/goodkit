@@ -97,7 +97,7 @@ updated_metrics.each do |uri|
     report = development_project.reports(object['link'])
     output_2.push(details = {
         :type => 'INFO',
-        :url => server + '/#s=' + development_project.uri + '%7CanalysisPage%7Chead%7C' + report.uri,
+        :url => server + '/#s=' + development_project.uri + '|analysisPage|head|' + report.uri,
         :api => server + report.uri,
         :title => report.title,
         :description => 'Updated metric "' + metric.title + '" has been used in this report'

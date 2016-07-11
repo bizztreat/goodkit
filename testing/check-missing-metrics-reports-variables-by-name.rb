@@ -113,7 +113,7 @@ reports_diff.each do |report|
 
   output_1.push(details = {
       :type => 'ERROR',
-      :url => server + '#s=' + start_project.pid + '%7CanalysisPage%7Chead%7C' + report[:uri].gsub!('pid', start_project.pid),
+      :url => server + '#s=' + start_project.pid + '|analysisPage|head|' + report[:uri].gsub!('pid', start_project.pid),
       :api => server + report[:uri],
       :title => report[:title],
       :description => 'Report is missing in Devel project'
