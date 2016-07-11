@@ -10,7 +10,7 @@ OptionParser.new do |opts|
 
   opts.on('-u', '--username USER', 'Username') { |v| options[:username] = v }
   opts.on('-p', '--password PASS', 'Password') { |v| options[:password] = v }
-  opts.on('-d', '--target_project ID', 'Target Project') { |v| options[:target_project] = v }
+  opts.on('-t', '--target_project ID', 'Target Project') { |v| options[:target_project] = v }
   opts.on('-d', '--development_project ID', 'Development Project') { |v| options[:development_project] = v }
   opts.on('-h', '--hostname NAME', 'Hostname') { |v| options[:server] = v }
   opts.on('-e', '--exclude EXCLUDE', 'Tags excluded') { |v| options[:tags_excluded] = v }
