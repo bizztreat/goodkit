@@ -1,7 +1,7 @@
 # This script checks if there are some data from yesterday
 # You need to use two extra variables ATTRIBUTE -a and TIME -t
 # 1. The ATTRIBUTE must to be filled by uri of some attribute like an ID (Orders) in this format: /gdc/md/projectspid/obj/1664
-# 2. The TIME -t must to be filled by with attribute from time dimension. 
+# 2. The TIME -t must to be filled by with attribute from time dimension.
 # For yestreday it's "Date (your time dimension)", for previous month it's "Month/Year (your time dimension)"
 # again use the uri in this format: /gdc/md/projectspid/obj/1663
 require 'date'
@@ -46,6 +46,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
 metric = project.add_measure 'SELECT COUNT(['+  attribute +']) WHERE ['+  time +'] = PREVIOUS',
      title: 'Test the data'
      metric.save
+begin
 if metric.execute.to_s == '' then
   counter_err += 1
   result_array.push(error_details = {
@@ -63,6 +64,16 @@ else
       :api => server + metric.uri,
       :title => project.title,
       :description => 'There are some data from yesterday.'
+      })
+end
+rescue
+  counter_err += 1
+  result_array.push(error_details = {
+      :type => "ERROR",
+      :url => server + '/#s=/gdc/projects/' + pid + '|objectPage|' + metric.uri,
+      :api => server + metric.uri,
+      :title => project.title,
+      :description => 'There is problem with the metric. It is uncomputable.'
       })
 end
 metric.delete
