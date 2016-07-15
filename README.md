@@ -192,6 +192,6 @@ Checks if there are some data from yesterday. You need to use two extra variable
 ###18-detect-suspicious-version-tags.rb
 This script check metric's version tags in decimal format "1.1"
 
-The error is report when the development metric has lower version tag then start metric
+The error is report when the development metric has lower version tag then the start metric.
 
 
