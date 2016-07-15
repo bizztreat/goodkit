@@ -189,4 +189,9 @@ Checks if there are some data from yesterday. You need to use two extra variable
  For yestreday it's "Date (your time dimension)", for previous month it's "Month/Year (your time dimension)"
  again use the uri in this format: /gdc/md/projectspid/obj/1663
 
+###18-detect-suspicious-version-tags.rb
+This script check metric's version tags in decimal format "1.1"
+
+The error is report when the development metric has lower version tag then start metric
+
 
