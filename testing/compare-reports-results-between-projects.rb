@@ -4,7 +4,7 @@ require 'csv'
 require 'optparse'
 require 'yaml'
 
-# define options for script configuration
+# setup all parameters for user input
 options = {}
 OptionParser.new do |opts|
 
@@ -49,30 +49,56 @@ start_project_reports = start_project.reports.select { |report| (tags_included.e
 # select development project reports and include and exclude tags
 development_project_reports = development_project.reports.select { |report| (tags_included.empty? || !(report.tag_set & tags_included).empty?) && (report.tag_set & tags_excluded).empty? }.sort_by(&:title)
 
-results = start_project_reports.zip(development_project_reports).pmap do |reports|
-  # compute both reports and add the report at the end for being able to print a report later
-  reports.map(&:execute) + [reports.last] #TODO ??
-end
-
-results.map do |result|
-  orig_result, new_result, new_report = result
-
-  if orig_result != new_result
-
-    output.push(details = {
+# iterate throught every report
+start_project_reports.peach do |report_start|
+  start_project_reports.peach do |report_dev|
+    #do the reports with the same title
+    if report_start.title == report_dev.title then
+      # Check if the start report is computable
+        begin  report_start.execute
+        rescue
+        counter_error += 1
+        output.push(details = {
         :type => 'ERROR',
-        :url => server + '#s=' + development_project.uri + '|analysisPage|head|' + new_report.uri,
-        :api => server + new_report.uri,
-        :title => new_report.title,
-        :description => 'Development report result is different.'
-    })
-    counter_error += 1
-  else
-    counter_ok += 1
-  end
+        :url => server + '#s=' + development_project.uri + '|analysisPage|head|' + report_start.uri,
+        :api => server + report_start.uri,
+        :title => report_start.title,
+        :description => 'Start report is uncomputable.'
+        })
+      else
+        # Check if the development report is computable
+        begin  report_dev.execute
+        rescue
+            counter_error += 1
+            output.push(details = {
+              :type => 'ERROR',
+              :url => server + '#s=' + development_project.uri + '|analysisPage|head|' + report_dev.uri,
+              :api => server + report_dev.uri,
+              :title => report_dev.title,
+              :description => 'Development report is uncomputable.'
+              })
+            else
+              # Compare start and development report
+              if
+                report_dev.execute == report_start.execute
+              then
+                counter_ok += 1
+              else
+                counter_error += 1
+                output.push(details = {
+                :type => 'ERROR',
+                :url => server + '#s=' + development_project.uri + '|analysisPage|head|' + report_dev.uri,
+                :api => server + report_dev.uri,
+                :title => report_dev.title,
+                :description => 'Development report result is different.'
+              })
+              end
+     end
+   end
+end
+end
 end
 
 $result.push({:section => 'Compare report results', :OK => counter_ok, :INFO => 0, :ERROR => counter_error, :output => output})
 puts $result.to_json
-
 client.disconnect
