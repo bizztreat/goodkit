@@ -47,7 +47,11 @@ start_facts_results = {}
 start_project.facts.each do |fact|
   aggregations.each do |aggregation|
     metric = fact.create_metric(:title => fact.uri, :type => aggregation)
+    begin
     result = metric.execute
+    rescue
+    result = 0
+    end
     start_facts_results[fact.uri] = result
   end
 end
@@ -57,7 +61,11 @@ development_facts_results = {}
 development_project.facts.each do |fact|
   aggregations.each do |aggregation|
     metric = fact.create_metric(:title => fact.uri, :type => aggregation)
+    begin
     result = metric.execute
+    rescue
+    result = 0
+    end
     development_facts_results[fact.uri] = result
   end
 end
