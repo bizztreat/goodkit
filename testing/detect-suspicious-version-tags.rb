@@ -1,5 +1,5 @@
-#This script check metric's version tags in decimal format "1.1"
-#The error is report when the development metric has lower version tag then start metric
+#This script checks metric's version tags in decimal format "1.1"
+#The error is reported when the development metric has lower version tag then the start metric.
 require 'date'
 require 'gooddata'
 require 'csv'
