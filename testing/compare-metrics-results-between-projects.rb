@@ -49,55 +49,57 @@ start_project_metrics = start_project.metrics.select { |metric| (tags_included.e
 # select development project metrics and include and exclude tags
 development_project_metrics = development_project.metrics.select { |metric| (tags_included.empty? || !(metric.tag_set & tags_included).empty?) && (metric.tag_set & tags_excluded).empty? }.sort_by(&:title)
 
-# iterate throught every metric
 start_project_metrics.peach do |metric_start|
-  development_project_metrics.peach do |metric_dev|
-    #do the metrics with the same title
+  development_project_metrics.peach do |metric_development|
 
-    if metric_start.title == metric_dev.title then
-      # Check if the start metric is computable
-        begin  metric_start.execute
-        rescue
-        counter_error += 1
+    # do the metrics with the same title
+    if metric_start.title == metric_development.title
+
+      # check if the start metric is computable
+      begin
+        metric_start.execute
+      rescue
         output.push(details = {
-        :type => 'ERROR',
-        :url => server + '#s=' + development_project.uri + '|analysisPage|head|' + metric_start.uri,
-        :api => server + metric_start.uri,
-        :title => metric_start.title,
-        :description => 'Start metric is uncomputable.'
+            :type => 'ERROR',
+            :url => server + '#s=' + development_project.uri + '|analysisPage|head|' + metric_start.uri,
+            :api => server + metric_start.uri,
+            :title => metric_start.title,
+            :description => 'Start metric is uncomputable.'
         })
+        counter_error += 1
       else
-                # Check if the development metric is computable
-                begin  metric_dev.execute
-                rescue
-                    counter_error += 1
-                    output.push(details = {
-                      :type => 'ERROR',
-                      :url => server + '#s=' + development_project.uri + '|analysisPage|head|' + metric_dev.uri,
-                      :api => server + metric_dev.uri,
-                      :title => metric_dev.title,
-                      :description => 'Development metric is uncomputable.'
-                      })
-                    else
-                            # Compare start and development metric
-                            if
-                              metric_dev.execute == metric_start.execute
-                            then
-                              counter_ok += 1
-                            else
-                              counter_error += 1
-                              output.push(details = {
-                              :type => 'ERROR',
-                              :url => server + '#s=' + development_project.uri + '|analysisPage|head|' + metric_dev.uri,
-                              :api => server + metric_dev.uri,
-                              :title => metric_dev.title,
-                              :description => 'Development metric result is different.'
-                            })
-                            end
-                   end
-                 end
-            end
+
+        # check if the development metric is computable
+        begin
+          metric_development.execute
+        rescue
+          counter_error += 1
+          output.push(details = {
+              :type => 'ERROR',
+              :url => server + '#s=' + development_project.uri + '|analysisPage|head|' + metric_development.uri,
+              :api => server + metric_development.uri,
+              :title => metric_development.title,
+              :description => 'Development metric is uncomputable.'
+          })
+        else
+
+          # compare start and development metric
+          if metric_development.execute == metric_start.execute
+            counter_ok += 1
+          else
+            output.push(details = {
+                :type => 'ERROR',
+                :url => server + '#s=' + development_project.uri + '|analysisPage|head|' + metric_development.uri,
+                :api => server + metric_development.uri,
+                :title => metric_development.title,
+                :description => 'Development metric result is different.'
+            })
+            counter_error += 1
+          end
         end
+      end
+    end
+  end
 end
 
 $result.push({:section => 'Metric results between Start and Devel projects.', :OK => counter_ok, :INFO => 0, :ERROR => counter_error, :output => output})

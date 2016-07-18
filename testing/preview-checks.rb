@@ -285,6 +285,8 @@ counter_error = 0
 output = []
 
 
+#TODO
+
 # check metrics and reports that are in folder starting with 'ZOOM Preview - ' are also tagged 'preview'
 # prepare all folders for metrics first
 all_folders={}

@@ -48,9 +48,9 @@ start_project.facts.each do |fact|
   aggregations.each do |aggregation|
     metric = fact.create_metric(:title => fact.uri, :type => aggregation)
     begin
-    result = metric.execute
+      result = metric.execute
     rescue
-    result = 0
+      result = 0
     end
     start_facts_results[fact.uri] = result
   end
@@ -62,9 +62,9 @@ development_project.facts.each do |fact|
   aggregations.each do |aggregation|
     metric = fact.create_metric(:title => fact.uri, :type => aggregation)
     begin
-    result = metric.execute
+      result = metric.execute
     rescue
-    result = 0
+      result = 0
     end
     development_facts_results[fact.uri] = result
   end
@@ -73,7 +73,6 @@ end
 # compare results between projects
 development_facts_results.each do |key, _|
   if start_facts_results[key] != development_facts_results[key]
-
     output.push(details = {
         :type => 'ERROR',
         :url => server + '/#s=' + development_project.uri + '|objectPage|' + key.to_s,

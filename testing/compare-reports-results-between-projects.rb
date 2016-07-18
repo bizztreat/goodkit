@@ -49,54 +49,49 @@ start_project_reports = start_project.reports.select { |report| (tags_included.e
 # select development project reports and include and exclude tags
 development_project_reports = development_project.reports.select { |report| (tags_included.empty? || !(report.tag_set & tags_included).empty?) && (report.tag_set & tags_excluded).empty? }.sort_by(&:title)
 
-# iterate throught every report
 start_project_reports.peach do |report_start|
-  start_project_reports.peach do |report_dev|
-    #do the reports with the same title
-    if report_start.title == report_dev.title then
-      # Check if the start report is computable
-        begin  report_start.execute
-        rescue
-        counter_error += 1
+  development_project_reports.peach do |report_development|
+    if report_development.title = report_start.title
+      begin
+        report_start.execute
+      rescue
         output.push(details = {
-        :type => 'ERROR',
-        :url => server + '#s=' + development_project.uri + '|analysisPage|head|' + report_start.uri,
-        :api => server + report_start.uri,
-        :title => report_start.title,
-        :description => 'Start report is uncomputable.'
+            :type => 'ERROR',
+            :url => server + '#s=' + development_project.uri + '|analysisPage|head|' + report_start.uri,
+            :api => server + report_start.uri,
+            :title => report_start.title,
+            :description => 'Start report is uncomputable.'
         })
+        counter_error += 1
       else
-        # Check if the development report is computable
-        begin  report_dev.execute
+        begin
+          report_development.execute
         rescue
-            counter_error += 1
-            output.push(details = {
+          counter_error += 1
+          output.push(details = {
               :type => 'ERROR',
-              :url => server + '#s=' + development_project.uri + '|analysisPage|head|' + report_dev.uri,
-              :api => server + report_dev.uri,
-              :title => report_dev.title,
+              :url => server + '#s=' + development_project.uri + '|analysisPage|head|' + report_development.uri,
+              :api => server + report_development.uri,
+              :title => report_development.title,
               :description => 'Development report is uncomputable.'
-              })
-            else
-              # Compare start and development report
-              if
-                report_dev.execute == report_start.execute
-              then
-                counter_ok += 1
-              else
-                counter_error += 1
-                output.push(details = {
+          })
+        else
+          if report_development.execute == report_start.execute
+            counter_ok += 1
+          else
+            output.push(details = {
                 :type => 'ERROR',
-                :url => server + '#s=' + development_project.uri + '|analysisPage|head|' + report_dev.uri,
-                :api => server + report_dev.uri,
-                :title => report_dev.title,
+                :url => server + '#s=' + development_project.uri + '|analysisPage|head|' + report_development.uri,
+                :api => server + report_development.uri,
+                :title => report_development.title,
                 :description => 'Development report result is different.'
-              })
-              end
-     end
-   end
-end
-end
+            })
+            counter_error += 1
+          end
+        end
+      end
+    end
+  end
 end
 
 $result.push({:section => 'Compare report results', :OK => counter_ok, :INFO => 0, :ERROR => counter_error, :output => output})
