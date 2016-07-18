@@ -43,7 +43,8 @@ GoodData.logging_off
 GoodData.with_connection(login: username, password: password, server: server) do |client|
   # connect to project
   GoodData.with_project(pid) do |project|
-    metric = project.add_measure 'SELECT COUNT(['+ attribute +']) WHERE ['+ time +'] = PREVIOUS', title: 'Test the data'
+    metric = project.add_measure 'SELECT COUNT(['+ attribute +']) WHERE ['+ time +'] = PREVIOUS',
+                                 title: 'Test the data'
     metric.save
     begin
       if metric.execute.to_s == ''
@@ -54,7 +55,6 @@ GoodData.with_connection(login: username, password: password, server: server) do
             :title => project.title,
             :description => 'There are no data from yesterday.'
         })
-        counter_err += 1
       else
         result_array.push(error_details = {
             :type => 'INFO',
