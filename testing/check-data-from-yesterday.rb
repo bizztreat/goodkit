@@ -18,7 +18,7 @@ OptionParser.new do |opts|
 
   opts.on('-u', '--username USER', 'Username') { |v| options[:username] = v }
   opts.on('-p', '--password PASS', 'Password') { |v| options[:password] = v }
-  opts.on('-d', '--develproject NAME', 'Development Project') { |v| options[:devel] = v }
+  opts.on('-d', '--development_project ID', 'Development Project') { |v| options[:development_project] = v }
   opts.on('-h', '--hostname NAME', 'Hostname') { |v| options[:server] = v }
   opts.on('-a', '--attribute ATTRIBUTE', 'Attribute') { |v| options[:attribute] = v }
   opts.on('-t', '--time TIME', 'Time') { |v| options[:time] = v }
@@ -28,7 +28,7 @@ end.parse!
 # get credentials from user parameters
 username = options[:username]
 password = options[:password]
-pid = options[:devel]
+development_project = options[:development_project]
 server = options[:server].to_s.empty? ? 'https://secure.gooddata.com' : options[:server]
 attribute = options[:attribute]
 time = options[:time]
@@ -42,14 +42,14 @@ $result = []
 GoodData.logging_off
 GoodData.with_connection(login: username, password: password, server: server) do |client|
   # connect to project
-  GoodData.with_project(pid) do |project|
+  GoodData.with_project(development_project) do |project|
     metric = project.add_measure 'SELECT COUNT(['+ attribute +']) WHERE ['+ time +'] = PREVIOUS', title: 'Test the data'
     metric.save
     begin
       if metric.execute.to_s == ''
         result_array.push(error_details = {
             :type => 'ERROR',
-            :url => server + '/#s=/gdc/projects/' + pid + '|objectPage|' + metric.uri,
+            :url => server + '/#s=/gdc/projects/' + development_project + '|objectPage|' + metric.uri,
             :api => server + metric.uri,
             :title => project.title,
             :description => 'There are no data from yesterday.'
@@ -58,7 +58,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
       else
         result_array.push(error_details = {
             :type => 'INFO',
-            :url => server + '/#s=/gdc/projects/' + pid + '|objectPage|' + metric.uri,
+            :url => server + '/#s=/gdc/projects/' + development_project + '|objectPage|' + metric.uri,
             :api => server + metric.uri,
             :title => project.title,
             :description => 'There are some data from yesterday.'
@@ -68,7 +68,7 @@ GoodData.with_connection(login: username, password: password, server: server) do
     rescue
       result_array.push(error_details = {
           :type => 'ERROR',
-          :url => server + '/#s=/gdc/projects/' + pid + '|objectPage|' + metric.uri,
+          :url => server + '/#s=/gdc/projects/' + development_project + '|objectPage|' + metric.uri,
           :api => server + metric.uri,
           :title => project.title,
           :description => 'There is problem with the metric. It is uncomputable.'
