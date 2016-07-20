@@ -194,7 +194,9 @@ This script checks metric's version tags in decimal format "1.1"
 
 The error is reported when the development metric has lower version tag then the start metric.
 
-###18-check-percentage-based-metrics.rb
+###19-check-percentage-based-metrics.rb
 The script checks if the percentage based metric is computable first and then if the metric's result is in the right range.
+
+Extra input parameter '-t', '--title TITLE' format:  "%,Percentage,Ratio" (it's a list of strings to check if they are in metric title, delimiter is comma)
 
 
