@@ -134,7 +134,7 @@ end
 
 # TODO add analyticaldashboard in future, but it's not supported by GoodData now.
 
-$result.push({:section => 'Check if metric depends on not preview variable.', :OK => counter_ok, :INFO => 0, :ERROR => counter_error, :output => output})
+$result.push({:section => 'Check objects which are not created or modified by user ZOOM Performance Analytics.', :OK => counter_ok, :INFO => 0, :ERROR => counter_error, :output => output})
 puts $result.to_json
 
 client.disconnect
