@@ -15,6 +15,7 @@ OptionParser.new do |opts|
   opts.on('-i', '--include INCLUDE', 'Tag included') { |v| options[:tags_included] = v }
   opts.on('-e', '--exclude EXCLUDE', 'Tag excluded') { |v| options[:tags_excluded] = v }
   opts.on('-t', '--exclude EXCLUDE', 'Checked tag') { |v| options[:tag] = v }
+
 end.parse!
 
 # get credentials and others from input parameters
@@ -24,7 +25,7 @@ development_project = options[:development_project]
 server = options[:server].to_s.empty? ? 'https://secure.gooddata.com' : options[:server]
 tags_included = options[:tags_included].to_s.split(',')
 tags_excluded = options[:tags_excluded].to_s.split(',')
-tag = options[:tag].to_s.empty? ? 'cisco' : options[:tag]
+tag = options[:tag].to_s.empty? ? 'demo' : options[:tag]
 
 # variables for script results
 result_array = []
@@ -42,24 +43,20 @@ client = GoodData.connect(login: username, password: password, server: server)
 # connect to development GoodData project
 development_project = client.projects(development_project)
 
-development_project.metrics.each do |metric|
+development_project.metrics.peach do |metric|
 
   # check included and excluded tags
   if tags_included.empty? || !(metric.tag_set & tags_included).empty?
     if (metric.tag_set & tags_excluded).empty?
 
-      tag_set = metric.tags.to_s.split(' ')
-
-      # go through metrics
       objects = metric.using
       objects.select { |object| object['category'] == 'metric' }.each do |object|
         object = development_project.metrics(object['link'])
-        unless object.tags.to_s.split(' ').include?(tag)
+        unless object.tags.to_s.split(' ').include? tag
           stop = 1
         end
       end
 
-      # go through attributes
       objects = metric.using
       objects.select { |object| object['category'] == 'attribute' }.each do |object|
         object = development_project.attributes(object['link'])
@@ -68,13 +65,13 @@ development_project.metrics.each do |metric|
         end
       end
 
-      # if all objects include the tag, set the tag for metric as well
       if stop == 0
+
         metric.add_tag(tag)
         metric.save
 
         # push the result to result_array
-        if tag_set.include?(tag)
+        if metric.tags.to_s.split(' ').include? tag
           result_array.push(details = {
               :type => 'OK',
               :url => server + '/#s=' + development_project.uri + '|objectPage|' + metric.uri,
@@ -106,16 +103,12 @@ counter_ok = 0
 counter_error = 0
 stop = 0
 
-development_project.reports.each do |report|
+development_project.reports.peach do |report|
 
   # check included and excluded tags
-  if tags_included.empty? || !(variable.tag_set & tags_included).empty?
-    if (variable.tag_set & tags_excluded).empty?
+  if tags_included.empty? || !(report.tag_set & tags_included).empty?
+    if (report.tag_set & tags_excluded).empty?
 
-      # tag set of original report
-      tag_set = report.tags.to_s.split(' ')
-
-      #go through report's metrics
       objects = report.using
       objects.select { |object| object['category'] == 'metric' }.each do |object|
         object = development_project.metrics(object['link'])
@@ -124,7 +117,6 @@ development_project.reports.each do |report|
         end
       end
 
-      #go through report's attributes
       objects = report.using
       objects.select { |object| object['category'] == 'attribute' }.each do |object|
         object = development_project.attributes(object['link'])
@@ -139,7 +131,7 @@ development_project.reports.each do |report|
         report.save
 
         # push the result to result_array
-        if tag_set.include?(tag)
+        if report.tags.to_s.split(' ').include?(tag)
           result_array.push(details = {
               :type => 'OK',
               :url => server + '/#s=' + development_project.uri + '|objectPage|' + report.uri,

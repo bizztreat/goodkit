@@ -68,9 +68,6 @@ tags_included = options[:tags_included].to_s.split(',')
 tags_excluded = options[:tags_excluded].to_s.split(',')
 
 # variables for standard output
-counter_ok = 0
-counter_error = 0
-output = []
 $result = []
 
 # turn off logging for clear output
@@ -233,5 +230,4 @@ development_project.datasets.each do |dataset|
 end
 
 puts $result.to_json
-
 client.disconnect
