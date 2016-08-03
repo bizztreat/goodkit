@@ -56,7 +56,7 @@ development_project.metrics.peach do |metric|
           # check whether reports include preview tag
           unless report.tag_set.include? 'preview'
             output.push(details = {
-                :type => 'ERROR',
+                :type => 'INFO',
                 :url => server + '/#s=' + development_project.uri + '|analysisPage|head|' + report.uri,
                 :api => server + report.uri,
                 :title => report.title,
@@ -91,7 +91,7 @@ development_project.metrics.peach do |metric|
         # check for the correct folder or if folder is not set print the metric
         if folders.nil?
           output.push(details = {
-              :type => 'ERROR',
+              :type => 'INFO',
               :url => server + '/#s=' + development_project.uri + '|objectPage|' + metric.uri,
               :api => server + metric.uri,
               :title => metric.title,
@@ -102,7 +102,7 @@ development_project.metrics.peach do |metric|
           object = GoodData::get(folders.first)
           unless object['folder']['meta']['title'].downcase.include? 'preview'
             output.push(details = {
-                :type => 'ERROR',
+                :type => 'INFO',
                 :url => server + '/#s=' + development_project.uri + '|objectPage|' + metric.uri,
                 :api => server + metric.uri,
                 :title => metric.title,
@@ -187,7 +187,7 @@ development_project.reports.peach do |report|
         # check if report is in preview folder/domain
         if folders.nil?
           output.push(details = {
-              :type => 'ERROR',
+              :type => 'INFO',
               :url => server + '/#s=' + development_project.uri + '|analysisPage|' + report.uri,
               :api => server + report.uri,
               :title => report.title,
