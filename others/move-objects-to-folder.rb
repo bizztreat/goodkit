@@ -79,155 +79,144 @@ client = GoodData.connect(login: username, password: password, server: server)
 # connect to development GoodData project
 development_project = client.projects(development_project)
 
-# let's cache folders with attributes to speed things up
-folder_uris = development_project.attributes.map { |attribute| attribute.content['dimension'] }.uniq.compact
-folder_cache = folder_uris.reduce({}) { |a, e| a[e] = development_project.objects(e); a }
-
-# let's cache all the folders in project to check if the new folder is needed
-all_folders={}
-client.get("#{development_project.md['query']}/facts")['query']['entries'].map do |folder|
-  all_folders.[]=(folder['title'], folder['link'])
-end
-
-all_folders.values.uniq
-
 development_project.datasets.each do |dataset|
 
-  # check included and excluded tags
-  if tags_included.empty? || !(dataset.tag_set & tags_included).empty?
-    if (dataset.tag_set & tags_excluded).empty?
+  if dataset.attributes.count > 0
 
-      # reset variables
-      output = []
-      counter_ok = 0
-      counter_error = 0
+    # check included and excluded tags
+    if tags_included.empty? || !(dataset.tag_set & tags_included).empty?
+      if (dataset.tag_set & tags_excluded).empty?
 
-      dataset.attributes.each do |attribute|
+        # reset variables
+        output = []
+        counter_ok = 0
+        counter_info = 0
 
-        folder_uri = attribute.content['dimension']
-        # Pull folder from cache and compare the titles
-        if folder_cache.key?(folder_uri) && folder_cache[folder_uri].title == dataset.title && !folder_cache[folder_uri].deprecated
-          #push info detail to result array
-          output.push(error_details = {
-              :type => 'INFO',
-              :url => server + '#s=' + development_project.uri + '|objectPage|' + attribute.uri,
-              :api => server + attribute.uri,
-              :description => 'The attribute "' + attribute.title + '" is already in folder "' + dataset.title + '".'
-          })
-          counter_ok += 1
+        dataset_folder = client.get(development_project.md['query'] + '/dimensions')['query']['entries'].select { |folder| folder['title'] == dataset.title }
+
+        if dataset_folder.empty?
+          dataset_folder = create_attributes_folder(development_project, dataset.title)
         else
-          #push info detail to result array
-          output.push(error_details = {
-              :type => 'ERROR',
-              :url => server + '#s=' + development_project.uri + '|objectPage|' + attribute.uri,
-              :api => server + attribute.uri,
-              :description => 'The attribute "' + attribute.title + '" has been moved to "' + dataset.title + '".'
-          })
-          # count objects
-          counter_error += 1
-          if all_folders.key?(dataset.title)
-            attribute.content['dimension'] = all_folders[dataset.title]
+          dataset_folder = development_project.objects(dataset_folder.first['link'])
+        end
+
+        dataset.attributes.peach do |attribute|
+
+          if attribute.content['dimension'].nil?
+
+            output.push(details = {
+                :type => 'INFO',
+                :url => server + '#s=' + development_project.uri + '|objectPage|' + attribute.uri,
+                :api => server + attribute.uri,
+                :description => 'The attribute "' + attribute.title + '" has been moved to "' + dataset.title + '".'
+            })
+            counter_info += 1
+
+            attribute.content['dimension'] = dataset_folder.uri
             attribute.save
-            # "we have it so we just need to assign it"
           else
-            # we have to create it first
-            folder = create_attributes_folder(development_project, dataset.title)
-            folder_cache[folder.uri] = folder
-            #refresh folders
-            client.get("#{development_project.md['query']}/dimensions")['query']['entries'].map do |dimension|
-              all_folders.[]=(dimension['title'], dimension['link'])
+            attribute_folder = development_project.objects(attribute.content['dimension'])
+
+            if attribute_folder.title == dataset.title && !attribute_folder.deprecated
+              output.push(details = {
+                  :type => 'OK',
+                  :url => server + '#s=' + development_project.uri + '|objectPage|' + attribute.uri,
+                  :api => server + attribute.uri,
+                  :description => 'The attribute "' + attribute.title + '" is already in folder "' + dataset.title + '".'
+              })
+              counter_ok += 1
+            else
+
+              output.push(details = {
+                  :type => 'INFO',
+                  :url => server + '#s=' + development_project.uri + '|objectPage|' + attribute.uri,
+                  :api => server + attribute.uri,
+                  :description => 'The attribute "' + attribute.title + '" has been moved to "' + dataset.title + '".'
+              })
+              counter_info += 1
+
+              attribute.content['dimension'] = dataset_folder.uri
+              attribute.save
             end
-            all_folders.values.uniq
-            # Now assign
-            attribute.content['dimension'] = folder.uri
-            attribute.save
           end
         end
-      end
-      count = (counter_ok + counter_error).to_s #TODO ??
-      if count != '0'
-        $result.push({:section => 'The dataset "' + dataset.title + '" has ' + count + ' attributes.', :OK => counter_ok, :INFO => 0, :ERROR => counter_error, :output => output})
+
+        $result.push({:section => 'The dataset "' + dataset.title + '" has ' + (counter_ok + counter_info).to_s + ' attributes.', :OK => counter_ok, :INFO => counter_info, :ERROR => 0, :output => output})
       end
     end
   end
 end
 
-# let's cache the folders with facts to speed things up
-folder_cache = client.get(development_project.md['query'] + '/folders?type=fact')['query']['entries'].reduce({}) do |a, e|
-  a[e['link']] = project.objects(e['link'])
-  a
-end
-
-# Let's cache all the folders in project to check if the needed folder already exists
-all_folders_facts={}
-client.get(development_project.md['query'] + '/folders?type=fact')['query']['entries'].map do |folder|
-  all_folders_facts.[]=(folder['title'], folder['link'])
-end
-all_folders_facts.values.uniq
-
 development_project.datasets.each do |dataset|
 
-  # check included and excluded tags
-  if tags_included.empty? || !(dataset.tag_set & tags_included).empty?
-    if (dataset.tag_set & tags_excluded).empty?
+  if dataset.facts.count > 0
 
-      # reset variables
-      output = []
-      counter_ok = 0
-      counter_error = 0
+    # check included and excluded tags
+    if tags_included.empty? || !(dataset.tag_set & tags_included).empty?
+      if (dataset.tag_set & tags_excluded).empty?
 
-      dataset.facts.each do |fact|
-        # Pull folder from cache and compare the titles
-        if fact.content.key?('folders') && folder_cache[fact.content['folders'].first].title == dataset.title && !folder_cache[fact.content['folders'].first].deprecated
 
-          #push info detail to result array
-          output.push(error_details = {
-              :type => 'INFO',
-              :url => server + '#s=' + development_project.uri + '|objectPage|' + fact.uri,
-              :api => server + fact.uri,
-              :description => 'The fact "' + fact.title + '" is already in folder "' + dataset.title + '".'
-          })
-          counter_ok += 1
+        # reset variables
+        output = []
+        counter_ok = 0
+        counter_info = 0
+
+        dataset_folder = client.get(development_project.md['query'] + '/folders?type=fact')['query']['entries'].select { |folder| folder['title'] == dataset.title }
+
+        if dataset_folder.empty?
+          dataset_folder = create_facts_folder(development_project, dataset.title)
         else
-          #push error detail to result array
-          output.push(error_details = {
-              :type => 'ERROR',
-              :url => server + '#s=' + development_project.uri + '|objectPage|' + fact.uri,
-              :api => server + fact.uri,
-              :description => 'The fact "' + fact.title + '" has been moved to (' + dataset.title + ').'
-          })
-          counter_error += 1
-          # Check folder if exists
-          if all_folders_facts.key?(dataset.title)
-            # "we have it so we just need to assign it"
-            fact.content['folders'] = [all_folders_facts[dataset.title]]
+          dataset_folder = development_project.objects(dataset_folder.first['link'])
+        end
+
+        dataset.facts.peach do |fact|
+
+          if fact.content['folders'].nil?
+
+            output.push(details = {
+                :type => 'INFO',
+                :url => server + '#s=' + development_project.uri + '|objectPage|' + fact.uri,
+                :api => server + fact.uri,
+                :description => 'The fact "' + fact.title + '" has been moved to "' + fact.title + '".'
+            })
+            counter_info += 1
+
+            fact.content['folders'] = [dataset_folder.uri]
             fact.save
           else
-            # we have to create a folder first
-            folder = create_facts_folder(development_project, dataset.title)
-            folder_cache[folder.uri] = folder
-            # refresh folder_cache
-            all_folders_facts={}
-            client.get(project.md['query'] + '/folders?type=fact')['query']['entries'].map do |i|
-              all_folders_facts.[]=(i['title'], i['link'])
+            fact_folder = development_project.objects(fact.content['folders'].first)
+
+            if fact_folder.title == dataset.title && !fact_folder.deprecated
+              output.push(details = {
+                  :type => 'OK',
+                  :url => server + '#s=' + development_project.uri + '|objectPage|' + fact.uri,
+                  :api => server + fact.uri,
+                  :description => 'The fact "' + fact.title + '" is already in folder "' + dataset.title + '".'
+              })
+              counter_ok += 1
+            else
+
+              output.push(details = {
+                  :type => 'INFO',
+                  :url => server + '#s=' + development_project.uri + '|objectPage|' + fact.uri,
+                  :api => server + fact.uri,
+                  :description => 'The fact "' + fact.title + '" has been moved to "' + dataset.title + '".'
+              })
+              counter_info += 1
+
+              fact.content['folders'] = [dataset_folder.uri]
+              fact.save
             end
-            all_folders_facts.values.uniq
-
           end
-
-          fact.content['folders'] = [all_folders_facts[dataset.title]]
-          fact.save
         end
-      end
 
-      # save info about dataset into the result variable
-      count = (counter_ok + counter_error).to_s
-      if count != '0'
-        $result.push({:section => 'The dataset "' + dataset.title + '" has ' + count + ' facts.', :OK => counter_ok, :INFO => 0, :ERROR => counter_error, :output => output})
+        $result.push({:section => 'The dataset "' + dataset.title + '" has ' + (counter_ok + counter_info).to_s + ' facts.', :OK => counter_ok, :INFO => counter_info, :ERROR => 0, :output => output})
       end
     end
   end
 end
+
+#TODO remove empty folders
 
 puts $result.to_json
 client.disconnect
