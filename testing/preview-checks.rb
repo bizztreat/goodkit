@@ -124,7 +124,7 @@ counter_info = 0
 output = []
 
 # check if metric depend on not preview variable
-development_project.metrics.each do |metric|
+development_project.metrics.peach do |metric|
 
   error = 0
 
