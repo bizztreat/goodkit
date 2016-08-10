@@ -1,8 +1,5 @@
-require 'date'
 require 'gooddata'
-require 'csv'
 require 'optparse'
-require 'yaml'
 
 # define options for script configuration
 options = {}
@@ -37,8 +34,8 @@ client = GoodData.connect(login: username, password: password, server: server)
 development_project = client.projects(development_project)
 
 # for each dashboard and tab check for the URL including GA tracking code
-development_project.dashboards.each do |dashboard|
-  dashboard.tabs.each do |tab|
+development_project.dashboards.peach do |dashboard|
+  dashboard.tabs.peach do |tab|
 
     # check the GA tracking code
     if tab.items.to_s.include? 'https://demo.zoomint.com/stat/%CURRENT_DASHBOARD_URI%/%CURRENT_DASHBOARD_TAB_URI%'

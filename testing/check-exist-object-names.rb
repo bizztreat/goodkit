@@ -41,12 +41,9 @@ if excl.to_s != ''
   excl = excl.split(",")
 end
 
-counter_ok = 0
 counter_err = 0
 err_array = []
 $result = []
-hash = {}
-hash_final = {}
 
 # turn off logging for clear output
 GoodData.logging_off
