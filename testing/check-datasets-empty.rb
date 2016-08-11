@@ -34,7 +34,7 @@ client = GoodData.connect(login: username, password: password, server: server)
 development_project = client.projects(development_project)
 
 blueprint = development_project.blueprint
-blueprint.datasets.each do |dataset|
+blueprint.datasets.peach do |dataset|
 
   # creates a metric which return number of lines in dataset
   lines = dataset.count(development_project)
