@@ -1,8 +1,5 @@
-require 'date'
 require 'gooddata'
-require 'csv'
 require 'optparse'
-require 'yaml'
 require 'spellchecker' #https://dbader.org/blog/spell-checking-latex-documents-with-aspell
 
 

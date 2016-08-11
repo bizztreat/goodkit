@@ -1,8 +1,5 @@
-require 'date'
 require 'gooddata'
-require 'csv'
 require 'optparse'
-require 'yaml'
 
 def isDateOrTimeAttribute(attribute)
 

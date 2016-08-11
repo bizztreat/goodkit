@@ -1,9 +1,5 @@
-require 'date'
 require 'gooddata'
-require 'csv'
 require 'optparse'
-require 'yaml'
-require 'json'
 
 # define options for script configuration
 options = {}

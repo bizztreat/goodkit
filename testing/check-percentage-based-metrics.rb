@@ -1,9 +1,6 @@
 # The script checks if the percentage based metric is computable first and then if the metric's result is in the right range.
-require 'date'
 require 'gooddata'
-require 'csv'
 require 'optparse'
-require 'yaml'
 
 options = {}
 OptionParser.new do |opts|
