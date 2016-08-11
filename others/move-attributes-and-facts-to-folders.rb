@@ -1,8 +1,5 @@
-require 'date'
 require 'gooddata'
-require 'csv'
 require 'optparse'
-require 'yaml'
 
 # more info http://stackoverflow.com/questions/35447652/is-it-possible-change-attribute-folder-in-gooddata-project-by-ruby
 
@@ -217,7 +214,6 @@ development_project.datasets.each do |dataset|
 end
 
 #TODO remove empty folders
-
 
 puts $result.to_json
 client.disconnect
