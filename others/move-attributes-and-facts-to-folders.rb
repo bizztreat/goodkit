@@ -89,12 +89,12 @@ development_project.datasets.each do |dataset|
         counter_ok = 0
         counter_info = 0
 
-        dataset_folder = client.get(development_project.md['query'] + '/dimensions')['query']['entries'].select { |folder| folder['title'] == dataset.title }
+        dataset_folder = development_project.dimensions.select { |folder| folder.title == dataset.title }
 
         if dataset_folder.empty?
           dataset_folder = create_attributes_folder(development_project, dataset.title)
         else
-          dataset_folder = development_project.objects(dataset_folder.first['link'])
+          dataset_folder = dataset_folder.first
         end
 
         dataset.attributes.peach do |attribute|
@@ -144,6 +144,12 @@ development_project.datasets.each do |dataset|
   end
 end
 
+development_project.dimensions.each do |folder|
+  if folder.attributes.count == 0
+    folder.delete
+  end
+end
+
 development_project.datasets.each do |dataset|
 
   if dataset.facts.count > 0
@@ -152,18 +158,17 @@ development_project.datasets.each do |dataset|
     if tags_included.empty? || !(dataset.tag_set & tags_included).empty?
       if (dataset.tag_set & tags_excluded).empty?
 
-
         # reset variables
         output = []
         counter_ok = 0
         counter_info = 0
 
-        dataset_folder = client.get(development_project.md['query'] + '/folders?type=fact')['query']['entries'].select { |folder| folder['title'] == dataset.title }
+        dataset_folder = client.get(development_project.md['query'] + '/folders?type=fact')['query']['entries'].select { |folder| folder['title'] == dataset.title } # TODO development_project.folders in next gem release
 
         if dataset_folder.empty?
           dataset_folder = create_facts_folder(development_project, dataset.title)
         else
-          dataset_folder = development_project.objects(dataset_folder.first['link'])
+          dataset_folder = dataset_folder.first
         end
 
         dataset.facts.peach do |fact|
@@ -213,7 +218,13 @@ development_project.datasets.each do |dataset|
   end
 end
 
-#TODO remove empty folders
+# TODO development_project.folders in next gem release
+# development_project.folders in next gem release
+# development_project.folders.each do |folder|
+#  if folder.entries.count == 0
+#    folder.delete
+#  end
+# end
 
 puts $result.to_json
 client.disconnect

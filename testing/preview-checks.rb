@@ -333,7 +333,7 @@ output = []
 
 # check metrics and reports that are in folder starting with 'ZOOM Preview - ' are also tagged 'preview'
 folders={}
-client.get("#{development_project.md['query']}/folders")['query']['entries'].map do |folder|
+client.get("#{development_project.md['query']}/folders")['query']['entries'].map do |folder| # TODO development_project.folders in next gem release
   folders[folder['link']] = folder['title']
 end
 
