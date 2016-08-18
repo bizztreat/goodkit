@@ -58,7 +58,7 @@ start_project_metrics.peach do |metric_start|
       rescue
         output.push(details = {
             :type => 'ERROR',
-            :url => server + '#s=' + development_project.uri + '|analysisPage|head|' + metric_start.uri,
+            :url => server + '#s=' + development_project.uri + '|objectPage|' + metric_start.uri,
             :api => server + metric_start.uri,
             :title => metric_start.title,
             :description => 'Start metric is uncomputable.'
@@ -73,7 +73,7 @@ start_project_metrics.peach do |metric_start|
           counter_error += 1
           output.push(details = {
               :type => 'ERROR',
-              :url => server + '#s=' + development_project.uri + '|analysisPage|head|' + metric_development.uri,
+              :url => server + '#s=' + development_project.uri + '|objectPage|' + metric_development.uri,
               :api => server + metric_development.uri,
               :title => metric_development.title,
               :description => 'Development metric is uncomputable.'
@@ -86,7 +86,7 @@ start_project_metrics.peach do |metric_start|
           else
             output.push(details = {
                 :type => 'ERROR',
-                :url => server + '#s=' + development_project.uri + '|analysisPage|head|' + metric_development.uri,
+                :url => server + '#s=' + development_project.uri + '|objectPage|' + metric_development.uri,
                 :api => server + metric_development.uri,
                 :title => metric_development.title,
                 :description => 'Development metric result is different.'
