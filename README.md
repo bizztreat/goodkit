@@ -199,4 +199,9 @@ The script checks if the percentage based metric is computable first and then if
 
 Extra input parameter '-t', '--title TITLE' format:  "%,Percentage,Ratio" (it's a list of strings to check if they are in metric title, delimiter is comma)
 
+###20-remove_tags_from_objects.rb
+This script allows you to delete tags from objects in your GD project. 
+
+'-r',  'Tags to remove' you can define the list of tags which should be removed from your object. example: -r tag1,tag2,tag3
+
 
