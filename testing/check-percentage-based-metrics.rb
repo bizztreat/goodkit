@@ -54,7 +54,7 @@ development_project_metrics = development_project.metrics.select { |metric| (tag
         counter_error += 1
         output.push(details = {
         :type => 'ERROR',
-        :url => server + '#s=' + development_project.uri + '|analysisPage|head|' + metric.uri,
+        :url => server + '#s=' + development_project.uri + '|objectPage|' + metric.uri,
         :api => server + metric.uri,
         :title => metric.title,
         :description => 'The result of the metric is out of the range.'
@@ -64,7 +64,7 @@ development_project_metrics = development_project.metrics.select { |metric| (tag
         counter_error += 1
         output.push(details = {
         :type => 'ERROR',
-        :url => server + '#s=' + development_project.uri + '|analysisPage|head|' + metric.uri,
+        :url => server + '#s=' + development_project.uri + '|objectPage|' + metric.uri,
         :api => server + metric.uri,
         :title => metric.title,
         :description => 'The metric is uncomputable.'
