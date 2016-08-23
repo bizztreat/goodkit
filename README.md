@@ -204,4 +204,7 @@ This script allows you to delete tags from objects in your GD project.
 
 '-r',  'Tags to remove' you can define the list of tags which should be removed from your object. example: -r tag1,tag2,tag3
 
+###21-check-metrics-formatting.rb
+The script allows you to check metric's formatting. 
 
+The parameter '-t', '--patterns PATTERNS' contains list of allowed formats for metrics. Example: -t  "#,##0";"#,##0.00";"#,##0%"
