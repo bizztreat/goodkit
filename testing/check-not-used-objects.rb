@@ -64,7 +64,7 @@ development_project.reports.each do |report|
             :url => server + '#s=' + development_project.uri + '|analysisPage|head|' + report.uri,
             :api => server + report.uri,
             :title => report.title,
-            :message => 'This report ('+ report.title + ') is not used by any project dashboard'
+            :description => 'This report ('+ report.title + ') is not used by any project dashboard'
         })
         counter_info += 1
       else
