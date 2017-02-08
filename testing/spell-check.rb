@@ -1,6 +1,6 @@
 require 'gooddata'
 require 'optparse'
-require 'spellchecker' #https://dbader.org/blog/spell-checking-latex-documents-with-aspell
+require 'spellchecker'
 
 
 def check_misspelled(spell_checker_result)

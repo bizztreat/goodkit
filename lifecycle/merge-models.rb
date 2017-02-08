@@ -8,7 +8,7 @@ OptionParser.new do |opts|
   opts.on('-u', '--username USER', 'Username') { |v| options[:username] = v }
   opts.on('-p', '--password PASS', 'Password') { |v| options[:password] = v }
   opts.on('-d', '--development_project ID', 'Development Project') { |v| options[:development_project] = v }
-  opts.on('-f', '--file FILE', 'Projects File') { |v| options[:file] = v }
+  opts.on('-u', '--project_to_update', 'Project to Update') { |v| options[:project_to_update] = v }
   opts.on('-h', '--hostname NAME', 'Hostname') { |v| options[:server] = v }
 
 end.parse!
@@ -17,6 +17,7 @@ end.parse!
 username = options[:username]
 password = options[:password]
 development_project = options[:development_project]
+project_to_update = options[:project_to_update]
 server = options[:server].to_s.empty? ? 'https://secure.gooddata.com' : options[:server]
 
 # variables for standard output
@@ -28,10 +29,6 @@ $result = []
 # turn off logging for clear output
 GoodData.logging_off
 
-# read all project ids we will be pushing changes to
-csv = CSV.read(options[:file], :headers => true)
-target_projects = csv['project-id']
-
 # connect to GoodData
 client = GoodData.connect(login: username, password: password, server: server)
 
@@ -42,26 +39,23 @@ development_project = client.projects(development_project)
 development_project_model = development_project.blueprint
 
 # for each customer/child project merge models
-target_projects.each do |project|
-  counter_ok += 1
+GoodData.with_project(project_to_update) do |child|
 
-  GoodData.with_project(project) do |child|
-
-    begin
-      child_model = child.blueprint
-      new_model = child_model.merge(development_project_model)
-    rescue Exception => message
-      output.push(details = {
-          :type => 'ERROR',
-          :url => '#',
-          :api => '#',
-          :title => message.to_s,
-          :description => 'Merging two models is not possible.',
-      })
-      counter_errors += 1
-    else
-      child.update_from_blueprint(new_model)
-    end
+  begin
+    child_model = child.blueprint
+    new_model = child_model.merge(development_project_model)
+    counter_ok += 1
+  rescue Exception => message
+    output.push(details = {
+        :type => 'ERROR',
+        :url => '#',
+        :api => '#',
+        :title => message.to_s,
+        :description => 'Merging two models is not possible.',
+    })
+    counter_errors += 1
+  else
+    child.update_from_blueprint(new_model)
   end
 end
 
