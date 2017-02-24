@@ -35,7 +35,7 @@ development_project = client.projects(development_project)
 
 # for each dashboard and tab check for the URL including GA tracking code
 development_project.dashboards.peach do |dashboard|
-  dashboard.tabs.peach do |tab|
+  dashboard.tabs.each do |tab|
 
     # check the GA tracking code
     if tab.items.to_s.include? 'https://demo.zoomint.com/stat/%CURRENT_DASHBOARD_URI%/%CURRENT_DASHBOARD_TAB_URI%'
